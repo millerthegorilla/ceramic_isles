@@ -1,0 +1,19 @@
+body {
+  background-color: #36854D;
+}
+
+.navbar-inner { 
+    background-color: #AFE1AF; 
+} 
+
+.navbar-custom { 
+    background-color: #242A4D; 
+}
+
+.custom-select {
+	width: 100px;
+}
+
+table {
+	width:100%;
+}

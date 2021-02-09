@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang='en'>
+    <head>
+        {% load static %}
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta charset='utf-8'>
+        <title>{% block title %}My Awesome Site{% endblock title %}</title>
+        <!-- CSS
+        –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+         <link href="{% static 'django_forum_app/css/styles.css' %}" rel="stylesheet">
+        {% block extra_css %}
+        {% endblock extra_css %}
+        <!-- JAVASCRIPT
+        –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+        {% block extra_js %}
+        {% endblock extra_js %}
+        {% block form_media %}
+        {% endblock form_media %}
+    </head>
+    <body>
+        <div class="container-fluid p-0">
+          <header class="mb-3">
+            <div class="navbar-inner collapse" id="navbarHeader">
+              <div class="container">
+                <div class="row">
+                  <div class="col-sm-8 col-md-7 py-4">
+                    <h4 class="text-white">Ceramic Islands</h4>
+                    <p class="text-muted">Welcome to Ceramic Islands, a site where ceramic artists local to the Channel Islands are able to meet, chat, and show off their work.  If you are a ceramic artist local to one of the Channel Islands, consider registering as a user to be able to access the forum, and to be able present images of your work here, on this page.</p>
+                  </div>
+                  <div class="col-sm-4 offset-md-1 py-4">
+                    <h4 class="text-white">Things to do :</h4>
+                    <ul class="list-unstyled">
+                      {% if user.is_authenticated %}
+                      <li><a href="{% url 'forum_post_list_view' %}" class="text-primary">Forum Posts</a></li>
+                      <li><a href="{% url 'forum_post_create_view' %}" class="text-white">Create Post</a></li>
+                      <li><a href="{% url 'forum_profile_update_view' %}" class="text-success">Profile</a></li>
+                      <li><a href="{% url 'logout' %}" class="text-danger">Logout</a></li>
+                      {% else %}
+                      <li><a href="{% url 'login' %}" class="text-success">Login</a></li>
+                      <li><a href="{% url 'register' %}" class="text-primary">Register</a></li>
+                      {% endif %}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="navbar navbar-dark navbar-custom shadow-sm">
+              <div class="container">
+                <a href="#" class="navbar-brand d-flex align-items-center">
+                  <img src="{% static 'django_forum_app/images/vase.svg' %}" style="height:40px" alt="Vase-Logo">
+                  <strong>Ceramic Islands</strong>
+                </a>
+                <button class="navbar-toggler collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#navbarHeader" aria-controls="navbarHeader" aria-expanded="false" aria-label="Toggle navigation">
+                  <span class="navbar-toggler-icon"></span>
+                </button>
+              </div>
+            </div>
+          </header>
+        </div>
+        {% block content %}
+        {% endblock content %}
+        {% block body_imports %}
+            <script
+              src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+              integrity="sha256-4+XzXVhsDmqanXGHaHvgh1gMQKX40OUvDEBTu8JcmNs="
+              crossorigin="anonymous"></script>
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
+        {% endblock body_imports %}
+        {% block body_js %}
+        {% endblock body_js %}
+    </body>
+</html>

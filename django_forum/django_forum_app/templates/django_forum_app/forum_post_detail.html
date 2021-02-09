@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load crispy_forms_tags %}
+{% load thumbnail %}
+<div class="container" style="height:70vh">
+	<div class="row h-75 my-auto">
+		<div id='post_text' class="col-12 col-sm-11 col-md-10 col-lg-8 mx-auto my-auto">
+			<div class="row align-items-end text-white">
+				<div class="col-auto">
+				    <h3>{{ post.title|safe }}</h3>
+			    </div>
+			    <div class="col-auto">
+			    	<h4>{{ post.user_profile.profile_user.username }}</h4>
+			    </div>
+			    <div class="col-auto">
+			    	<h6>{{ post.date_created }}</h6>
+			    </div>
+			</div>
+			<div class="row">
+			    <div class="col-auto">
+		            {{ post.text|safe }}
+		        </div>
+		    </div>
+		    <h6>Comments...</h6>
+		    {% for comment in post.comments.all %}
+		        <div class="row">
+			        <div class="comments col-auto" style="padding: 10px;">
+		                <div class="row">
+		                	<div class="col-auto">
+		                        {{ comment.text|linebreaks|safe }}
+                            </div>
+                        </div>
+                        <div class="row">
+                        	<div class="col-auto">
+		                	    {% thumbnail comment.user_profile.avatar.image_file "100x100" padding=True padding_color='#36854D' as im %}
+                                    <img src="{{ im.url }}" height="{{ im.height }}" width="{{ im.width }}" class="rounded-circle" id="image-{{ comment.user_profile.profile_user.username }}_avatar-image" />
+                                {% endthumbnail %}
+                            </div>
+                            <div class="col-auto">
+                                <span class=" text-white font-weight-normal">
+		                            <h6>{{ comment.user_profile.profile_user.username}}</h6>
+		                            <h6>{{ comment.date_created }}</h6>
+		                        </span>
+		                    </div>
+		                </div>
+			        </div>
+        	    <div>
+            {% endfor %}
+            <div class="card-body">
+                <form method="post" style="margin-top: 1.3em;">
+                  {% crispy comment_form %}
+                  {% csrf_token %}
+                </form>
+            </div>
+		</div>
+	</div>
+</div>
+{% endblock %}
+{% block body_js %}
+<script>
+$("#id_text").keyup(function(){
+	console.log($(this).val().length)
+  $("#count").text("...characters left: " + (500 - $(this).val().length));
+});
+</script>
+{% endblock body_js %}

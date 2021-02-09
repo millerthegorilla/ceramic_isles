@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block extra_js %}
+{% endblock extra_js %}
+{% load static %}
+{% block form_media %}
+{{ form.media }}
+{% endblock form_media %}
+{% load crispy_forms_tags %}
+{% if user.is_authenticated %}
+	{% block content %}
+        <div class="container"> 
+			<div class="row vh-100">
+				<form method="post" class="col-10 col-sm-10 col-md-8 mx-auto">{% csrf_token %}
+				    {% crispy form %}
+				</form>
+			</div>
+		</div>
+	{% endblock %}
+{% endif %}
+{% block body_js %}
+<script>
+</script>
+{% endblock body_js %}

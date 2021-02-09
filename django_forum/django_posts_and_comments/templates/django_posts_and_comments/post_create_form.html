@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block extra_js %}
+{% endblock extra_js %}
+{% load static %}
+{% block form_media %}
+{{ form.media }}
+{% endblock form_media %}
+{% load crispy_forms_tags %}
+{% if user.is_authenticated %}
+	{% block content %}
+        <div class="container"> 
+			<div class="row vh-100">
+				<form method="post" class="col-10 col-sm-10 col-md-8 mx-auto">{% csrf_token %}
+				    {% crispy form %}
+				</form>
+			</div>
+		</div>
+	{% endblock %}
+{% endif %}
+{% block body_js %}
+<script>
+tinymce.init({
+	menubar: False,
+	min-height: "500px",
+	browser_spellcheck: True,
+	contextmenu: False,
+	plugins: "advlist autolink lists link image charmap print preview anchor searchreplace fullscreen insertdatetime media table paste code help wordcount spellchecker",
+	toolbar: "undo redo | bold italic underline strikethrough | fontselect fontsizeselect formatselect | alignleft aligncenter alignright alignjustify | outdent indent |  numlist bullist checklist | forecolor backcolor casechange permanentpen formatpainter removeformat | pagebreak | charmap emoticons | fullscreen  preview save print | insertfile image media template link anchor | a11ycheck ltr rtl | showcomments addcomment table",
+	custom_undo_redo_levels: 10,
+	selector: 'textarea',
+	init_instance_callback: function (editor) {
+        $(editor.getContainer()).find('button.tox-statusbar__wordcount').click();
+   },
+});
+</script>
+{% endblock body_js %}

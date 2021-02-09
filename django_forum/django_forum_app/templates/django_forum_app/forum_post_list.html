@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load thumbnail %}
+    {% if forumpost_list %}
+        <div class="container-fluid h-75">
+            <h2>Posts...</h2>
+            <p>Search the posts for content, author, category or date.</p>  
+            <input class="form-control" id="myInput" type="text" placeholder="Search..">
+            <br>
+            <table>
+                <tr>
+                    <th></th>
+                    <th>Title</th>
+                    <th>Post Leader</th>
+                    <th>Category</th>
+                    <th>Date</th>
+                </tr>
+                <tbody id="post-table">
+                {% for post in forumpost_list %}
+                    <tr >
+                            <td>
+                                {% thumbnail post.user_profile.avatar.image_file "50x50" padding=True padding_color='#36854D' as im %}
+                                    <img src="{{ im.url }}" height="{{ im.height }}" width="{{ im.width }}" class="rounded-circle" id="image-{{ post.user_profile.profile_user.username }}_avatar-image" />
+                                {% endthumbnail %}
+                            </td>
+                            <td>
+                                <a href="{{ post.get_absolute_url|safe }}" class="text-white">{{ post.title }}</a>
+                            </td>
+                            <td>
+                                {{ post.text|striptags|safe|slice:":40" }}...
+                            </td>
+                            <td>
+                                {{ post.get_category_display|safe }}
+                            </td>
+                            <td>
+                                {{ post.date_created|date }}
+                            </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p>There are no posts in the forum.</p>
+    {% endif %} 
+{% endblock %}
+{% block body_js %}
+<script>
+$(document).ready(function(){
+  $("#myInput").on("keyup", function() {
+    var value = $(this).val().toLowerCase();
+    $("#post-table tr").filter(function() {
+      $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+    });
+  });
+});
+</script>
+{% endblock body_js %}

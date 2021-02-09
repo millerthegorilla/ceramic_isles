@@ -1,0 +1,10 @@
+<!--django_users_app/templates/django_users_app/register.html-->
+
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+	<div class="container">
+		{% csrf_token %}
+		{% crispy form %}
+	</div>
+{% endblock %}

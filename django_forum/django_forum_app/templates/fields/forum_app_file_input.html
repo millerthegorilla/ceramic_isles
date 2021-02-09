@@ -1,0 +1,11 @@
+{% load crispy_forms_field %}
+<div class="input-group mb-3 has-validation">
+    <input type="file" name="image_file" class="form-control form-control-lg" id="file">
+    <div class="invalid-feedback">
+	    {% if field.errors %}
+		    {% for error in field.errors %}
+		        <span id="error_{{ forloop.counter }}_{{ field.auto_id }}"><strong>{{ error }}</strong></span>
+		    {% endfor %}
+		{% endif %}
+    </div>
+</div>

@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-xs-12 col-sm-10 col-md-8 col-lg-5 mx-auto">
+            {% include './image_list.html' %}
+            <div class="row">
+                {{ message }}
+                <form method="post" action="{% url 'forum_image_update' %}" enctype="multipart/form-data" class="col-12">
+                    {% csrf_token %}
+                    {% crispy form %}
+                <div class="row justify-content-between">
+                    <input type="submit" value="Upload Files" class="btn btn-primary col-auto">
+                    <a href="{% url 'forum_profile_update_view' %}" class="col-auto btn btn-primary">Cancel</a>
+                </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
