@@ -2,11 +2,13 @@ from django.forms import ModelForm
 from django.contrib.auth.models import User
 from django.db import IntegrityError
 from django.contrib import messages
+from django.conf import settings
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, Row, Column, Field, Fieldset, Div
 from .fields import FloatingField
-from .models import Profile
-from django.forms.models import model_to_dict, fields_for_model
+from .models import Profile, ProfileImage
+from safe_filefield.forms import SafeImageField    ## TODO: need to setup clamav.conf properly
+
 
 class ProfileUserForm(ModelForm):
     def clean_username(self):
@@ -73,25 +75,77 @@ class ProfileDetailForm(ModelForm):
         super().__init__(*args, **kwargs) 
 
 
-from django.forms.models import model_to_dict, fields_for_model
+MAX_NUMBER_OF_IMAGES = settings.MAX_USER_IMAGES
 
 
-# class UserDetailsForm(ModelForm):
-#     def __init__(self, instance=None, *args, **kwargs):
-#         _fields = ('first_name', 'last_name', 'email',)
-#         _initial = model_to_dict(instance.user, _fields) if instance is not None else {}
-#         super(UserDetailsForm, self).__init__(initial=initial, instance=instance, *args, **kwargs)
-#         self.fields.update(fields_for_model(User, _fields))
+class ProfileImageForm(ModelForm):
+    image_file = SafeImageField(allowed_extensions=('jpg','png'), 
+                               check_content_type=True, 
+                               scan_viruses=True, 
+                               media_integrity=True,
+                               max_size_limit=2621440)
+    class Meta:
+        model = ProfileImage
+        fields = ['image_file']
 
-#     class Meta:
-#         model = UserDetails
-#         exclude = ('user',)
+    def __init__(self, instance=None, user=None, *args, **kwargs):
+        self.user = user
+        super().__init__(*args, **kwargs)
+        self.fields['image_file'].validators.append(self.restrict_amount)
 
-#     def save(self, *args, **kwargs):
-#         u = self.instance.user
-#         u.first_name = self.cleaned_data['first_name']
-#         u.last_name = self.cleaned_data['last_name']
-#         u.email = self.cleaned_data['email']
-#         u.save()
-#         profile = super(UserDetailsForm, self).save(*args,**kwargs)
-#         return profile
+        self.helper = FormHelper()
+        self.helper.form_tag = False
+        self.helper.layout = Layout(
+            Fieldset(
+                '',
+                FileInput('image_file', name="image_file"),),
+        )
+        self.helper.form_id = 'id-upload-form'
+        self.helper.form_method = 'post'
+        self.helper.form_class = 'col-auto col-xs-3'
+
+
+    def restrict_amount(self, value):
+        if self.user is not None:
+            if ProfileImage.objects.filter(user_profile=self.user.profile.forumprofile).count() >= MAX_NUMBER_OF_IMAGES:
+                raise ValidationError('User already has {} images'.format(MAX_NUMBER_OF_IMAGES))
+
+
+# handle deletion
+class ProfileImages(ModelForm):
+    image_file = SafeImageField(allowed_extensions=('jpg','png'), 
+                               check_content_type=True, 
+                               scan_viruses=True, 
+                               media_integrity=True,
+                               max_size_limit=2621440)
+    class Meta:
+        model = ProfileImage
+        fields = ['image_file']
+    
+    def __init__(self, user=None, *args, **kwargs):
+        self.user = user
+        super().__init__(*args, **kwargs)
+        self.fields['image_file'].validators.append(self.restrict_amount)
+
+        self.helper = FormHelper()
+        self.helper.layout = Layout(
+            Fieldset(
+                '',
+                FileInput('image_file', css_class="col-auto"),),        
+        )
+        self.helper.form_id = 'id-upload-form'
+        self.helper.form_method = 'post'
+        self.helper.form_class = 'col-12'
+
+
+    def restrict_amount(self, value):
+        if self.user is not None:
+            if ProfileImage.objects.filter(user_profile=self.user.profile.forumprofile).count() >= MAX_NUMBER_OF_IMAGES:
+                raise ValidationError(_('User already has {0} images'.format(MAX_NUMBER_OF_IMAGES)),
+                                      code='max_image_limit',
+                                      params={'value':'3'})
+
+    def clean(self, *args, **kwargs):
+        cleaned_data = super().clean()
+
+

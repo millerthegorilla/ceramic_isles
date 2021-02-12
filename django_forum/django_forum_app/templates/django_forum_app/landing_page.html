@@ -1,41 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
-{% load static %}
-{% load thumbnail %}
-<div class="container-fluid p-0">
-  <div id="carouselExampleCaptions" class="carousel slide carousel-fade" data-interval="3000" data-bs-ride="carousel">
-    <ol class="carousel-indicators mx-auto">
-      <li data-bs-target="#carouselExampleCaptions" data-bs-slide-to="0" class="active"></li>
-      {% for image in images|slice:":{{ images.count|add:'-1' }}" %}
-      <li data-bs-target="#carouselExampleCaptions" data-bs-slide-to="{{ forloop.counter }}"></li>
-      {% endfor %}
-    </ol>
-    <div class="carousel-inner">
-      {% for image in images %}
-      {% if forloop.counter == 1 %}
-        <div id="image-{{ forloop.counter }}" class="carousel-item active">
-      {% else %}
-        <div id="image-{{ forloop.counter }}-carousel" class="carousel-item">
-      {% endif %}
-           {% thumbnail image.image_file "1024x768" padding=True padding_color='#36854D' as im %}
-                <img src="{{ im.url }}" style="object-fit:cover" class="vh-100 w-100" id="image-{{ forloop.counter }}-image" />
-            {% endthumbnail %}
-        <div class="carousel-caption col-sm-6 col-md-4 col-lg-3 d-md-block text-white" style="background-color: rgba(54, 133, 77, 0.6);">
-          <h5>{{ image.image_title }}</h5>
-          <p>{{ image.image_text }}</p>
-          <p>You can buy this at <a href="{{ image.image_shop_link }}" class="text-danger">{{ image.image_shop_link_title }}</a></p>
-        </div>
-      </div>
-      {% endfor %}
-    </div>
-    <a class="carousel-control-prev" href="#carouselExampleCaptions" role="button" data-bs-slide="prev">
-      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-      <span class="visually-hidden">Previous</span>
-    </a>
-    <a class="carousel-control-next" href="#carouselExampleCaptions" role="button" data-bs-slide="next">
-      <span class="carousel-control-next-icon" aria-hidden="true"></span>
-      <span class="visually-hidden">Next</span>
-    </a>
-  </div>
+<div class="container-fluid landing-page">
+  {% include './carousel.html' %}
 </div>
 {% endblock content %}

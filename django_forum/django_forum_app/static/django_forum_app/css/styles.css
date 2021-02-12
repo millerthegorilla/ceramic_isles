@@ -1,5 +1,27 @@
-body {
-  background-color: #36854D;
+/*font-family: 'Lobster Two', cursive;
+font-family: 'Ubuntu', sans-serif;*/
+
+.main-container {
+  padding: 0;
+  height: 100vh;
+  margin-right: 0;
+  margin-left: 0;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background: rgb(9,121,113);
+  background: linear-gradient(0deg, rgba(2,0,36,1) 6%, rgba(9,121,113,1) 54%, rgba(0,212,255,1) 100%);
+}
+
+.main-container-post {
+  /*height: 100vh;*/
+}
+
+/* NAVBAR */
+.header-navbar {
+  position: relative;
+  margin:0;
+  padding:0;
+  z-index: 1000;
 }
 
 .navbar-inner { 
@@ -7,13 +29,81 @@ body {
 } 
 
 .navbar-custom { 
-    background-color: #242A4D; 
+    background-color: #173E43; 
 }
 
+.navbar-brand {
+  font-family: 'Lobster Two', cursive;
+  font-size: 1.8rem;
+}
+
+/* LANDINGPAGE */
+.landing-page {
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding: 0;
+  height: 100vh;
+}
+
+/*.landing-img-link {
+  z-index: 1000;
+}*/
+
+#carousel-large-background {
+  margin-top: 10vh;
+  height: 100vh;
+}
+
+.carousel-inner {
+  height: 100vh;
+}
+
+.carousel-control-next {
+  opacity: 0;
+}
+
+.carousel-control-prev {
+  opacity: 0;
+}
+
+.carousel-caption {
+  font-family: 'Ubuntu', sans-serif;
+  background-color: rgba(23, 62, 67, 0.75);
+}
+
+.carousel-image {
+  position: relative;
+  object-fit: scale-down;
+  top: 2vh;
+  height: 87vh;
+  width:100vw;
+  margin: auto;
+}
+
+/* POSTS */
 .custom-select {
-	width: 100px;
+  width: 100px;
 }
 
 table {
-	width:100%;
+  width:100%;
 }
+
+/* IMAGE UPLOAD PAGE */
+.image-card {
+  /* Add shadows to create the "card" effect */
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+  transition: 0.3s;
+}
+
+/* On mouse-over, add a deeper shadow */
+.image-card:hover {
+  box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+}
+
+/* Add some padding inside the card container */
+.image-card-container {
+  padding: 2px 16px;
+}
+

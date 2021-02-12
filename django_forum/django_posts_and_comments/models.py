@@ -17,14 +17,13 @@ class Post(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
 
     def get_absolute_url(self):
-        return reverse_lazy('post_view', args=(self.id, self.slug,))
+        return reverse_lazy('django_posts_and_comments:post_view', args=(self.id, self.slug,))
 
 
 class Comment(models.Model):
     """
         a post can have many comments
     """
-    user_profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="comments")
     text = models.TextField(max_length=500)
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="comments")
     date_created = models.DateTimeField(auto_now_add=True)

@@ -24,10 +24,15 @@ from django.conf.urls.static import static
 from django.urls import re_path
 from django.contrib.staticfiles import views
 
+admin.site.site_header = 'Ceramic Islands admin'
+admin.site.site_title = 'Ceramic Islands admin'
+admin.site.site_url = 'http://127.0.0.1/'
+admin.site.index_title = 'Ceramic Islands administration'
+admin.empty_value_display = '**Empty**'
 
 urlpatterns = [
     path('', include(forum_app_urls)),
-    #path('forum/', include('django_posts_and_comments.urls')),
+    path('forum/', include('django_posts_and_comments.urls')),
     path('users/', include(users_app_urls)),
     path('email/', include(mail_urls)),
     path('admin/', admin.site.urls),

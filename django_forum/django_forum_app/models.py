@@ -1,5 +1,6 @@
 import os
 import uuid
+from django.db.models import Max
 from random import randint
 from django.core.files import File
 from django.core.exceptions import ObjectDoesNotExist, FieldError
@@ -12,9 +13,10 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import fields
 from django.utils.translation import gettext_lazy as _
 from django.template.defaultfilters import slugify
+from django.urls import reverse_lazy
 from django.conf import settings
 from django_profile.models import Profile
-from django_posts_and_comments.models import Post
+from django_posts_and_comments.models import Post, Comment
 from safe_filefield.models import SafeImageField
 from sorl.thumbnail.fields import ImageField
 from sorl.thumbnail import delete
@@ -35,7 +37,7 @@ def default_avatar(num):
 ### START AVATARS
 
 class Avatar(models.Model):
-    image_file = SafeImageField(upload_to=user_directory_path_avatar)
+    image_file = models.ImageField(upload_to=user_directory_path_avatar)
     
 ### END AVATARS    image_file = models.ImageField(upload_to=user_directory_path, null=True)
 
@@ -82,16 +84,25 @@ def save_user_forum_profile(sender, instance, **kwargs):
 
 # TODO: validate image_shop_link properly 
 # TODO: set a default of 
-class ProfileImage(models.Model):
+class ForumProfileImage(models.Model):
     image_file = models.ImageField(upload_to=user_directory_path)
     image_text = models.CharField(max_length=400, default='')
     image_title = models.CharField(max_length=30, default='')
     image_shop_link = models.CharField(max_length=50, default='#')
     image_shop_link_title = models.CharField(max_length=30, default='')
-    user_profile = models.ForeignKey(ForumProfile, on_delete=models.CASCADE, related_name="images")
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    active = models.BooleanField(default=False)
+    user_profile = models.ForeignKey(ForumProfile, on_delete=models.CASCADE, related_name="forum_images")
+    image_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    id = models.PositiveIntegerField(default=0, editable=False)
 
-@receiver(post_delete, sender=ProfileImage)
+    @classmethod
+    def get_next(cls):
+        with transaction.atomic():
+            cls.objects.update(id=models.F('id') + 1)
+            return cls.objects.values_list('id', flat=True)[0]
+
+
+@receiver(post_delete, sender=ForumProfileImage)
 def auto_delete_file_on_delete(sender, instance, **kwargs):
     """
     Deletes file from filesystem
@@ -102,7 +113,7 @@ def auto_delete_file_on_delete(sender, instance, **kwargs):
         if os.path.isfile(instance.image_file.path):
             os.remove(instance.image_file.path)
 
-@receiver(pre_save, sender=ProfileImage)
+@receiver(pre_save, sender=ForumProfileImage)
 def auto_delete_file_on_change(sender, instance, **kwargs):
     """
     Deletes old file from filesystem
@@ -113,8 +124,8 @@ def auto_delete_file_on_change(sender, instance, **kwargs):
         return False
 
     try:
-        old_image_field = ProfileImage.objects.get(pk=instance.pk)
-    except ProfileImage.DoesNotExist:
+        old_image_field = ForumProfileImage.objects.get(pk=instance.pk)
+    except ForumProfileImage.DoesNotExist:
         return False
 
     new_file = instance.image_file
@@ -129,6 +140,8 @@ def auto_delete_file_on_change(sender, instance, **kwargs):
 ### START POST AND COMMENTS
 class ForumPost(Post):
     user_profile = models.ForeignKey(ForumProfile, on_delete=models.CASCADE, related_name="posts")
+    def author(self):
+        return self.user_profile.profile_user
 
     class Category(models.TextChoices):
         EVENT = 'EV', _('Event')
@@ -143,4 +156,13 @@ class ForumPost(Post):
         default=Category.GENERAL,
     )
 
-### END POST
+    def get_absolute_url(self):
+        return reverse_lazy('django_forum_app:post_view', args=(self.id, self.slug,))
+
+
+class ForumComment(Comment):
+    user_profile = models.ForeignKey(ForumProfile, on_delete=models.CASCADE, related_name="comments")
+    def author(self):
+        return self.user_profile.profile_user
+        
+### END POSTS AND COMMENTS

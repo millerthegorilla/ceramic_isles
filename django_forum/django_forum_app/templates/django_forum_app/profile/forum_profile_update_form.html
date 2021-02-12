@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% if user.is_authenticated %}
+    {% load thumbnail %}
+    {% block extra_css %}
+    <style>
+     body {
+        {% thumbnail back_image.image_file "1024x768" as im %}
+            background-image: url("{{ im.url }}");
+        {% endthumbnail %}
+     }
+    </style>
+    {% endblock extra_css %}
+    {% block content %}
+        <div class="row my-auto">
+            <div class="col-12 col-sm-8 col-md-5 col-lg-4 mb-3 mx-auto">
+                <form method="post" action="{% url 'django_forum_app:profile_update_view' %}" class="col-auto">
+                    {% csrf_token %}
+                    <fieldset legend="profile">
+                    {% crispy user_form %}
+                    {% crispy form %}
+                    </fieldset>
+                    <div class="row justify-content-between">
+                        <a href="{% url 'django_forum_app:post_list_view' %}" class="col-auto text-white">Return to Forum</a>
+                        <a href="{% url 'django_forum_app:image_update' %}" class="col-auto btn btn-primary" role="button">Update Images</a>
+                        <button type="submit" class="btn btn-primary col-auto">Update Profile</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    {% endblock %}
+{% endif %}

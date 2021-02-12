@@ -7,7 +7,9 @@ from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.template.defaultfilters import slugify
 from django.utils.safestring import mark_safe
+from django.utils import timezone
 from django.conf import settings
+from django.db import IntegrityError
 from .models import Post
 from .forms import PostCreateForm
 
@@ -27,20 +29,28 @@ class PostListView(ListView):
 class PostCreateView(CreateView):
     model = Post
     template_name_suffix = '_create_form'
+    template_name = 'django_posts_and_comments/post_create_form.html'
     form_class = PostCreateForm
 
-    def form_valid(self, form, post=None, **kwargs):
-        if post is None:
-            post = form.save(commit=False)
+    def form_valid(self, form, **kwargs):
+        breakpoint()
+        post = form.save(commit=False)
+        post.text = PostCreateView.sanitize_post_text(post.text)
+        post.slug = slugify(post.title + '-' + str(timezone.now()))
+        try:
+            post.save()
+        except IntegrityError as e:
+            post.slug = slugify(post.title + '-' + str(timezone.now()))
+            post.save()
+        return redirect(self.success_url(post))
 
-        post.text = mark_safe(bleach.clean(html.unescape(post.text), 
+    def get_success_url(self, post, *args, **kwargs):
+        return reverse_lazy('django_posts_and_comments:post_view', args=(post.id, post.slug,))
+
+    @staticmethod
+    def sanitize_post_text(text):
+        return mark_safe(bleach.clean(html.unescape(text), 
                                            tags=settings.ALLOWED_TAGS, 
                                            attributes=settings.ATTRIBUTES, 
                                            styles=settings.STYLES, 
                                            strip=True, strip_comments=True))
-        post.slug = slugify(post.title) + str(uuid4())
-        post.save()
-        return super().form_valid(form)
-
-    def get_success_url(self):
-        return reverse_lazy('post_view', args=(self.object.id, self.object.slug,))

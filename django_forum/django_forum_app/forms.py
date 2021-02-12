@@ -7,16 +7,14 @@ from crispy_forms.layout import Layout, Submit, Row, Column, Field, Fieldset, HT
 from tinymce.widgets import TinyMCE
 
 from django_profile.forms import ProfileUserForm, ProfileDetailForm
-from django_posts_and_comments.forms import PostCreateForm
-from .models import ForumProfile, ForumPost, ProfileImage
+from django_posts_and_comments.forms import PostCreateForm, CommentForm
+from .models import ForumProfile, ForumProfileImage, ForumPost, ForumComment
 from .fields import FloatingField, FileInput
 
 from safe_filefield.forms import SafeImageField    ## TODO: need to setup clamav.conf properly
 
 ### START FORUMPROFILE
 
-
-MAX_NUMBER_OF_IMAGES = settings.MAX_USER_IMAGES
 
 class ForumProfileUserForm(ProfileUserForm):
     # class Meta(ProfileUserForm.Meta):
@@ -59,24 +57,18 @@ class ForumProfileDetailForm(ProfileDetailForm):
         self.helper.form_method = 'post'
         self.helper.form_class = 'col-auto'
 
-    # def clean_personal_statement(self, *args, **kwargs):
-    #     breakpoint()
-    #     pass
 
-    # def clean(self):
-    #     breakpoint()
-    #     cleaned_data = super().clean()
-    #     return cleaned_data
+MAX_NUMBER_OF_IMAGES = settings.MAX_USER_IMAGES
 
 
-class ProfileImageForm(forms.ModelForm):
+class ForumProfileImageForm(forms.ModelForm):
     image_file = SafeImageField(allowed_extensions=('jpg','png'), 
                                check_content_type=True, 
                                scan_viruses=True, 
                                media_integrity=True,
                                max_size_limit=2621440)
     class Meta:
-        model = ProfileImage
+        model = ForumProfileImage
         fields = ['image_file', 'image_title', 'image_text', 'image_shop_link', 'image_shop_link_title']
 
     def __init__(self, instance=None, user=None, *args, **kwargs):
@@ -102,19 +94,19 @@ class ProfileImageForm(forms.ModelForm):
 
     def restrict_amount(self, value):
         if self.user is not None:
-            if ProfileImage.objects.filter(user_profile=self.user.profile.forumprofile).count() >= MAX_NUMBER_OF_IMAGES:
+            if ForumProfileImage.objects.filter(user_profile=self.user.profile.forumprofile).count() >= MAX_NUMBER_OF_IMAGES:
                 raise ValidationError('User already has {} images'.format(MAX_NUMBER_OF_IMAGES))
 
 
 # handle deletion
-class ProfileImages(forms.ModelForm):
+class ForumProfileImages(forms.ModelForm):
     image_file = SafeImageField(allowed_extensions=('jpg','png'), 
                                check_content_type=True, 
                                scan_viruses=True, 
                                media_integrity=True,
                                max_size_limit=2621440)
     class Meta:
-        model = ProfileImage
+        model = ForumProfileImage
         fields = ['image_file', 'image_text', 'image_shop_link']
     
     def __init__(self, user=None, *args, **kwargs):
@@ -137,8 +129,10 @@ class ProfileImages(forms.ModelForm):
 
     def restrict_amount(self, value):
         if self.user is not None:
-            if ProfileImage.objects.filter(user_profile=self.user.profile.forumprofile).count() >= MAX_NUMBER_OF_IMAGES:
-                raise ValidationError('User already has {} images'.format(MAX_NUMBER_OF_IMAGES))
+            if ForumProfileImage.objects.filter(user_profile=self.user.profile.forumprofile).count() >= MAX_NUMBER_OF_IMAGES:
+                raise ValidationError(_('User already has {0} images'.format(MAX_NUMBER_OF_IMAGES)),
+                                      code='max_image_limit',
+                                      params={'value':'3'})
 
     def clean(self, *args, **kwargs):
         cleaned_data = super().clean()
@@ -167,3 +161,13 @@ class ForumPostCreateForm(PostCreateForm):
                 Submit('save', 'Publish Post', css_class="col-3 mt-3"),
             )
         )
+
+
+class ForumCommentForm(CommentForm):
+    class Meta:
+        model = ForumComment
+        fields = CommentForm.Meta.fields
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper.form_action = 'django_forum_app:post_create_view'

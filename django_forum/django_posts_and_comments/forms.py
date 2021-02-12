@@ -31,7 +31,7 @@ class PostCreateForm(ModelForm):
         self.helper.form_id = 'id-post-create-form'
         self.helper.form_method = 'post'
         self.helper.form_class = 'col-auto'
-        self.helper.form_action = 'post_create_view'
+        self.helper.form_action = 'django_posts_and_comments:post_create_view'
 
 
 class CommentForm(ModelForm):
@@ -51,11 +51,11 @@ class CommentForm(ModelForm):
                         Div(HTML('<span>...characters left: 500</span>'), 
                             id="count", css_class="ms-auto"),
                                css_class="d-flex flex-column"),
-                        css_class="d-flex flex-row"),
-                Submit('save', 'comment', css_class="col-3 mt-3"),
+                        css_class="d-flex flex-row align-items-end"),
+                Submit('save', 'comment', css_class="col-auto mt-3"),
             )
         )
         self.helper.form_id = 'id-post-create-form'
         self.helper.form_method = 'post'
         self.helper.form_class = 'col-auto'
-        self.helper.form_action = 'post_create_view'
+        self.helper.form_action = 'django_posts_and_comments:post_create_view'

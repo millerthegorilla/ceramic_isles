@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load thumbnail %}
+    {% if forumpost_list %}
+        <div class="container-fluid main-container-post">
+            <h2>Posts...</h2>
+            <p>Search the posts for content, author, category or date.</p>  
+            <input class="form-control" id="myInput" type="text" placeholder="Search..">
+            <br>
+            <div class="mb-3" style="overflow-x:auto;">
+            <table>
+                <tr>
+                    <th></th>
+                    <th>Title</th>
+                    <th>Post Leader</th>
+                    <th>Category</th>
+                    <th>Date</th>
+                </tr>
+                <tbody id="post-table">
+                {% for post in forumpost_list %}
+                    <tr >
+                            <td>
+                                {% thumbnail post.user_profile.avatar.image_file "50x50" padding=True padding_color='#36854D' as im %}
+                                    <img src="{{ im.url }}" height="{{ im.height }}" width="{{ im.width }}" class="rounded-circle" id="image-{{ post.user_profile.profile_user.username }}_avatar-image" />
+                                {% endthumbnail %}
+                            </td>
+                            <td>
+                                <a href="{{ post.get_absolute_url|safe }}" class="text-white">{{ post.title }}</a>
+                            </td>
+                            <td>
+                                {{ post.text|striptags|safe|slice:":40" }}...
+                            </td>
+                            <td>
+                                {{ post.get_category_display|safe }}
+                            </td>
+                            <td>
+                                {{ post.date_created|date }}
+                            </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+            </table>
+        </div>
+        <div class="row">
+            <div class="col-3 mx-auto">
+                <div class="pagination">
+                    <span class="d-flex step-links justify-content-around flex-fill">
+                        {% if page_obj.has_previous %}
+                            <a class="text-white" href="?page=1">&laquo; first</a>
+                            <a class="text-white" href="?page={{ page_obj.previous_page_number }}">...previous</a>
+                        {% endif %}
+
+                        <span class="current text-white">
+                            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                        </span>
+
+                        {% if page_obj.has_next %}
+                            <a class="text-white" href="?page={{ page_obj.next_page_number }}">next...</a>
+                            <a class="text-white" href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+        </div>
+    {% else %}
+        <div class="row">
+            <div class="col-auto mx-auto mt-5">
+                <p><h3>There are currently no posts in the forum.  Why not <a href="{% url 'django_forum_app:post_create_view' %}" class="text-white">add</a> one...?</h3></p>
+            </div>
+        </div>
+    {% endif %} 
+{% endblock %}
+{% block body_js %}
+<script>
+$(document).ready(function(){
+  $("#myInput").on("keyup", function() {
+    var value = $(this).val().toLowerCase();
+    $("#post-table tr").filter(function() {
+      $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+    });
+  });
+});
+</script>
+{% endblock body_js %}
