@@ -1,4 +1,4 @@
-from django.forms import ModelForm, CharField
+from django.forms import ModelForm, CharField, Form
 from .models import Post, Comment
 from tinymce.widgets import TinyMCE
 from crispy_forms.layout import Layout, Submit, Row, Column, Field, Fieldset, HTML, Div
@@ -49,13 +49,13 @@ class CommentForm(ModelForm):
                     Column(
                         Field('text', style="max-height:15vh"),
                         Div(HTML('<span>...characters left: 500</span>'), 
-                            id="count", css_class="ms-auto"),
+                            id="count", css_class="ms-auto text-white"),
                                css_class="d-flex flex-column"),
                         css_class="d-flex flex-row align-items-end"),
-                Submit('save', 'comment', css_class="col-auto mt-3"),
+                Submit('save', 'comment', css_class="col-auto mt-3"), css_class="text-white"
             )
         )
         self.helper.form_id = 'id-post-create-form'
         self.helper.form_method = 'post'
-        self.helper.form_class = 'col-auto'
+        self.helper.form_class = 'col-auto mx-auto'
         self.helper.form_action = 'django_posts_and_comments:post_create_view'

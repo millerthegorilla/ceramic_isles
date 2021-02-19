@@ -6,6 +6,8 @@ from django.views.generic.edit import FormView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import get_user_model
 from django.urls import reverse_lazy
+from django.views.decorators.cache import never_cache
+
 from django_profile.views import ProfileUpdateView
 from django.forms.models import model_to_dict
 from django.conf import settings 
@@ -61,7 +63,8 @@ class ForumProfileUploadView(LoginRequiredMixin, FormView):
     form_class = ForumProfileImageForm
     template_name = 'django_forum_app/profile/images/image_update.html'
     success_url = reverse_lazy('forum_profile_upload_view')
-
+    
+    @never_cache
     def get(self, request, *args, **kwargs):
         form = self.form_class()
         message = 'Choose a file and add some accompanying text and a shop link if you have one'

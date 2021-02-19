@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.conf import settings
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Submit, Row, Column, Field, Fieldset, HTML
+from crispy_forms.layout import Layout, Submit, Row, Column, Field, Fieldset, HTML, Div
 from tinymce.widgets import TinyMCE
 
 from django_profile.forms import ProfileUserForm, ProfileDetailForm
@@ -32,7 +32,7 @@ class ForumProfileDetailForm(ProfileDetailForm):
         model = ForumProfile
         fields = ProfileDetailForm.Meta.fields + ['first_name', \
                                                   'last_name', \
-                                                  'personal_statement', \
+                                                  'bio', \
                                                   'shop_web_address', \
                                                   'outlets']
         exclude = ['user_slug', 'profile_user']
@@ -49,7 +49,7 @@ class ForumProfileDetailForm(ProfileDetailForm):
         self.helper.layout = Layout(
                 FloatingField('first_name'),
                 FloatingField('last_name'),
-                FloatingField('personal_statement'),
+                FloatingField('bio'),
                 FloatingField('shop_web_address'),
                 FloatingField('outlets'),
         )
@@ -156,18 +156,50 @@ class ForumPostCreateForm(PostCreateForm):
                 'Create your post...',
                 FloatingField('title'),
                 Field('text', css_class="mb-3", style="min-height:60vh"),
-                HTML("<div class='font-italic mb-3'>Maximum of 2000 characters.  Click on word count to see how many characters you have used...</div>"),
-                Field('category'),
-                Submit('save', 'Publish Post', css_class="col-3 mt-3"),
+                HTML("<div class='font-italic mb-3 text-white'>Maximum of 2000 characters.  Click on word count to see how many characters you have used...</div>"),
+                Div(Field('category'), css_class="text-white"),
+                Submit('save', 'Publish Post', css_class="col-3 mt-3 mb-3"),
             )
         )
+        self.helper.form_action = 'django_forum_app:post_create_view'
 
 
 class ForumCommentForm(CommentForm):
     class Meta:
         model = ForumComment
-        fields = CommentForm.Meta.fields
+        fields = CommentForm.Meta.fields + []
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.helper.form_action = 'django_forum_app:post_create_view'
+        self.helper.layout = Layout(
+            Fieldset(
+                'Comment away...!',
+                Row(
+                    Column(
+                        Field('text', style="max-height:15vh"),
+                        Div(HTML('<span>...characters left: 500</span>'), 
+                            id="count", css_class="ms-auto text-white"),
+                               css_class="d-flex flex-column"),
+                        css_class="d-flex flex-row align-items-end"),
+                Submit('save', 'comment', css_class="col-auto mt-3"),
+            css_class="text-white")
+        )
+        self.helper.form_id = 'id-post-create-form'
+        self.helper.form_method = 'post'
+        self.helper.form_class = 'col-auto'
+        self.helper.form_action = 'django_forum_app:post_view'
+
+
+class ForumPostListSearch(forms.Form):
+    PUBLISHED_ANY = ''
+    PUBLISHED_TODAY = '1'
+    PUBLISHED_WEEK = '7'
+
+    PUBLISHED_CHOICES = (
+        (PUBLISHED_ANY, 'Any'),
+        (PUBLISHED_TODAY, 'Today'),
+        (PUBLISHED_WEEK, 'This week'),
+    )
+
+    q = forms.CharField(label='Search Query')
+    published = forms.ChoiceField(choices=PUBLISHED_CHOICES, required=False, initial=PUBLISHED_ANY)

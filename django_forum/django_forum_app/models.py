@@ -1,21 +1,23 @@
 import os
 import uuid
-from django.db.models import Max
 from random import randint
+
+from django.db.models import Max
 from django.core.files import File
 from django.core.exceptions import ObjectDoesNotExist, FieldError
 from django.db import models
 from django.dispatch import receiver
 from django.db.models.signals import pre_init, post_save, pre_save, post_delete
 from django.contrib.auth.models import User
-from django_profile.models import create_user_profile, save_user_profile
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import fields
 from django.utils.translation import gettext_lazy as _
 from django.template.defaultfilters import slugify
 from django.urls import reverse_lazy
 from django.conf import settings
+
 from django_profile.models import Profile
+from django_profile.models import create_user_profile, save_user_profile
 from django_posts_and_comments.models import Post, Comment
 from safe_filefield.models import SafeImageField
 from sorl.thumbnail.fields import ImageField
@@ -43,7 +45,7 @@ class Avatar(models.Model):
 
 
 class ForumProfile(Profile):
-    personal_statement = models.TextField(max_length=400, blank=True, default='')
+    bio = models.TextField(max_length=500, blank=True, default='')
     address_line_1 = models.CharField(max_length=30, blank=True, default='')
     address_line_2 = models.CharField(max_length=30, blank=True, default='')
     parish = models.CharField(max_length=30, blank=True, default='')
@@ -95,6 +97,15 @@ class ForumProfileImage(models.Model):
     image_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     id = models.PositiveIntegerField(default=0, editable=False)
 
+    # def __str__(self):
+    #     return f"Profile_image:user={self.user_profile.profile_user.username},active={self.active}"
+
+    """
+         because I made the primary key a uuid field, I need a way of returning the next logical
+         post, as django doesn't allow auto-incrementing integers.  The below method uses transaction.atomic
+         with F strings to return a record in a way that won't go wrong even if the database fails.
+         https://stackoverflow.com/a/54148942
+    """
     @classmethod
     def get_next(cls):
         with transaction.atomic():
@@ -140,8 +151,17 @@ def auto_delete_file_on_change(sender, instance, **kwargs):
 ### START POST AND COMMENTS
 class ForumPost(Post):
     user_profile = models.ForeignKey(ForumProfile, on_delete=models.CASCADE, related_name="posts")
-    def author(self):
-        return self.user_profile.profile_user
+    author = models.CharField(default='', max_length=40)
+    active = models.BooleanField(default='True')
+    moderation = models.BooleanField(default='False')
+    
+    class Meta:
+        ordering = ['-date_created']
+    
+    def post_author(self):
+        if self.user_profile is not None:
+            return self.user_profile.profile_user.username
+
 
     class Category(models.TextChoices):
         EVENT = 'EV', _('Event')
@@ -159,10 +179,35 @@ class ForumPost(Post):
     def get_absolute_url(self):
         return reverse_lazy('django_forum_app:post_view', args=(self.id, self.slug,))
 
+    def __str__(self):
+        return f"Post by {self.author}"
+
+@receiver(post_save, sender=ForumPost)
+def save_author_on_post_creation(sender, instance, created, **kwargs):
+    if created:
+        instance.author = instance.post_author()
+        instance.save()
 
 class ForumComment(Comment):
-    user_profile = models.ForeignKey(ForumProfile, on_delete=models.CASCADE, related_name="comments")
-    def author(self):
-        return self.user_profile.profile_user
+    user_profile = models.ForeignKey(ForumProfile, on_delete=models.CASCADE, related_name="forum_comments")
+    author = models.CharField(default='', max_length=40)
+    forum_post = models.ForeignKey(ForumPost, on_delete=models.CASCADE, related_name="forum_comments")
+    active = models.BooleanField(default='True')
+    moderation = models.BooleanField(default='False')
+
+    def save(self, **kwargs):
+        super().save(post=self.forum_post, **kwargs)
+
+    class Meta:
+        ordering = ['date_created']
+        
+    def comment_author(self):
+        return self.user_profile.profile_user.username
+
+@receiver(post_save, sender=ForumComment)
+def save_author_on_comment_creation(sender, instance, created, **kwargs):
+    if created:
+        instance.author = instance.comment_author()
+        instance.save()
         
 ### END POSTS AND COMMENTS
