@@ -21,19 +21,37 @@
 			    	<h6>{{ post.date_created }}</h6>
 			    </div>
 			</div>
-			<div class="row">
+			<div class="row ms-auto">
+				{% if not post.moderation %}
 			    <div id="textarea" class="col-auto">{{ post.text|safe }}</div>
+			    {% else %}
+			    <div>This post has been reported and is awaiting moderation.</div>
+			    {% endif %}
 			    {% if post.post_author == user.username %}
-	    		    <form method="post">
-	    		    	{% csrf_token %}
-	    		    	<div id="post-edit-div">
-	    		    		<input type="textarea" name="update-post" class="update-form-text"></input>
-			    		    <input type="hidden" name="type" value="update">
-		                    <button id="editor-cancel-btn" type="button" class="ms-auto col-auto btn btn-primary">Cancel</button>
-		                    <button id="editor-submit-btn" type="submit" class="me-auto col-auto btn btn-primary">
-		                    Save Post</button>
-		                </div>
-	                </form>
+				    <div class="ms-auto">
+		    		    <form method="post">
+		    		    	{% csrf_token %}
+		    		    	<div id="post-edit-div">
+		    		    		<input type="textarea" name="update-post" class="update-form-text"></input>
+				    		    <input type="hidden" name="type" value="update">
+			                    <button id="editor-cancel-btn" type="button" class="ms-auto col-auto btn btn-primary">Cancel</button>
+			                    <button id="editor-submit-btn" type="submit" class="me-auto col-auto btn btn-primary">
+			                    Save Post</button>
+			                </div>
+		                </form>
+		            </div>
+                {% else %}
+	                {% if not post.moderation %}
+	                <div class="ms-auto">
+	                    <form method="post" id="form-report-post">
+	                    	{% csrf_token %}
+	                    	<div class="text-white">
+	                            <input type="hidden" name="type" value="post-report">
+	                            <a class="report-post text-warning" href="#">Report Post for Moderation</a>
+	                    	</div>
+	                    </form>
+	                </div>
+	                {% endif %}
                 {% endif %}
 		    </div>
 		    <div class="row justify-content-end">
@@ -67,6 +85,7 @@
 		      </div>
 		    </div>
 		</div>
+		<!-- COMMENTS -->
 		<div class="col-10 col-lg-8  mx-auto">
 		    <h5 class="text-white mt-3">Comments...</h5>
 		    {% load thumbnail %}
@@ -74,9 +93,13 @@
 		        <div class="row mx-auto">
 			        <div class="comments ps-4">
 		                <div class="row mx-auto">
-		                	<div id="comment-text-{{ forloop.counter }}" class="col-auto">
-		                        {{ comment.text|linebreaks|safe }}
-                            </div>
+		                	{% if not comment.moderation %}
+			                	<div id="comment-text-{{ forloop.counter }}" class="col-auto">
+			                        {{ comment.text|linebreaks|safe }}
+	                            </div>
+                            {% else %}
+                                <div>This comment has been reported and is awaiting moderation</div>
+                            {% endif%}
                             {% if comment.comment_author == user.username %}
                             <div id="comment-form-buttons-{{ forloop.counter }}" class="comment-form-buttons">
                             	<form method="post" id="comment-update-form">
@@ -96,6 +119,17 @@
                                     </div>
                               	</form>
                             </div>
+                            {% else %}
+                            <div class="ms-auto">
+			                    <form method="post" id="form-report-comment">
+			                    	{% csrf_token %}
+			                    	<div class="text-white">
+			                            <input type="hidden" name="type" value="comment-report">
+			                            <input type="hidden" name="id" value="{{ comment.id }}">
+			                            <a class="report-comment text-warning" href="#">Report Comment for Moderation</a>
+			                    	</div>
+			                    </form>
+			                </div>
                             {% endif %}
                         </div>
                         <div class="row justify-content-between mb-3">
@@ -206,10 +240,17 @@ $(document).ready(function () {
 	$('#editor-btn').click(function(){
         showEditor()
 	});
-
 	$('.comment-save').on("click", function( event ) {
   		event.preventDefault();
-  		$( "#comment-update-form" ).submit();
+  		event.currentTarget.closest("#comment-update-form").submit();
+  	});	
+  	$('.report-post').on("click", function( event ) {
+  		event.preventDefault();
+  		event.currentTarget.closest("#form-report-post").submit();
+  	});
+  	$('.report-comment').on("click", function( event ) {
+  		event.preventDefault();
+  		event.currentTarget.closest("#form-report-comment").submit();
   	});
 	$('.comment-edit').on("click", function( event ) {
   		event.preventDefault();

@@ -8,12 +8,13 @@
         {% else %}
           <div id="image-{{ forloop.counter }}-carousel" class="carousel-item">
         {% endif %}
-             {% thumbnail image.image_file "1024x768" as im %}
+             {% thumbnail image.image_file image_size as im %}
                 <img src="{{ im.url }}" class="carousel-image" id="image-{{ forloop.counter }}-image" />
               {% endthumbnail %}
             <div class="carousel-caption col-sm-6 col-md-4 col-lg-3 d-md-block text-white">
               <h5>{{ image.image_title }}</h5>
               <p>{{ image.image_text }}</p>
+              <p>Made by <a href='people/{{image.user_profile.profile_user.username}}'>{{image.user_profile.profile_user.username}}</a>
               <p>You can buy this at <a href="{{ image.image_shop_link }}" class="landing-img-link text-warning">{{ image.image_shop_link_title }}</a></p>
             </div>
           </div>

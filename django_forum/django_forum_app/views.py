@@ -5,6 +5,7 @@ from elasticsearch_dsl import Q
 
 from django.shortcuts import render, redirect
 from django.views.generic.base import TemplateView
+from django.views.generic.detail import DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.template.defaultfilters import slugify
@@ -13,6 +14,7 @@ from django.forms.models import model_to_dict
 from django.core.paginator import Paginator
 from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
+from django.contrib.auth import get_user_model
 
 # Create your views here.
 from django_posts_and_comments.models import Post
@@ -32,6 +34,8 @@ class LandingPageView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['images'] = ForumProfileImage.objects.filter(active=True).order_by('?')
+        context['image_size'] = "1024x768"
+        context['username'] = self.request.user.username
         return context
 
 ### END LANDING PAGE
@@ -77,10 +81,19 @@ class ForumPostView(LoginRequiredMixin, PostView):
             try:
                 comment = ForumComment.objects.get(id=self.request.POST['id'])
                 comment.text = bleach.clean(html.unescape(self.request.POST['comment-update']), strip=True)
-                comment.save(update_fields=["text"])
+                comment.save(update_fields=['text'])
                 return redirect(post)
             except ObjectDoesNotExist as e:
                 pass  ### TODO: log errors here.
+        elif self.request.POST['type'] == 'post-report':
+            post.moderation = timezone.now()
+            post.save(update_fields=['moderation'])
+            return redirect(post)
+        elif self.request.POST['type'] == 'comment-report':
+            comment = ForumComment.objects.get(id=self.request.POST['id'])
+            comment.moderation = timezone.now()
+            comment.save(update_fields=['moderation'])
+            return redirect(post)
         else:
             return HttpResponseServerError()
 
@@ -132,7 +145,36 @@ class ForumPostListView(LoginRequiredMixin, PostListView):
         page_obj = paginator.get_page(page_number)
         context = { 'page_obj': page_obj, 'search': search, 'is_a_search': is_a_search}
         return render(request, self.template_name, context)
-    
+   
+
+class PersonalPageView(DetailView):
+    model = ForumProfile
+    slug_url_kwarg = 'name_slug'
+    slug_field = 'user_slug'
+    template_name = 'django_forum_app/personal_page.html'
+    # def get(self, *args, **kwargs):
+    #     breakpoint()
+    #     pass
+    def get_queryset(self):
+        user = get_user_model().objects.get(username=self.request.resolver_match.kwargs['name_slug'])
+        return ForumProfile.objects.filter(profile_user=user)
+        # return ForumProfileImage.objects.filter(user_profile=userprofile)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['images'] = ForumProfileImage.objects.filter(
+                                user_profile=self.object).filter(active=True).order_by('?')
+        u_p = self.get_queryset().first()
+        context['profile_image_file'] = u_p.image_file
+        context['name'] = u_p.first_name + " " + u_p.last_name
+        if context['name'] == ' ':
+            del context['name']
+        context['bio'] = u_p.bio
+        context['image_size'] = "1024x768"
+        context['username'] = self.request.user.username
+        context['shop_link'] = u_p.shop_web_address
+        context['outlets'] = u_p.outlets
+        return context
 
 # def posts_search(request):
 #     form = ForumPostListSearch(request.GET)

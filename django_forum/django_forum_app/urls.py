@@ -5,7 +5,8 @@ from .profile_views import ForumProfileUpdateView, \
 from .views import LandingPageView, \
                    ForumPostListView, \
                    ForumPostView, \
-                   ForumPostCreateView \
+                   ForumPostCreateView, \
+                   PersonalPageView
                    #posts_search, autocomplete
 from .forms import ForumPostCreateForm
 from .models import ForumPost
@@ -21,6 +22,7 @@ urlpatterns = [
     path('forum/posts/', ForumPostListView.as_view(), name='post_list_view'),
     path('forum/<int:pk>/<slug:post_slug>/', ForumPostView.as_view(), name='post_view'),
     path('', LandingPageView.as_view(), name='landing_page'),
+    path('people/<slug:name_slug>/', PersonalPageView.as_view(), name='personal_page_view')
     # path('posts_search/', posts_search, name='custom-search'),
     # path('autocomplete/', autocomplete, name='autocomplete')
 ]

@@ -1,6 +1,6 @@
 /*font-family: 'Lobster Two', cursive;
-font-family: 'Ubuntu', sans-serif;*/
-
+font-family: 'Ubuntu', sans-serif;
+font-family: 'Akaya Kanadaka', cursive;*/
 .main-container {
   padding: 0;
   height: 100vh;
@@ -47,9 +47,25 @@ font-family: 'Ubuntu', sans-serif;*/
   height: 100vh;
 }
 
-/*.landing-img-link {
-  z-index: 1000;
-}*/
+/* PROFILE */
+#div_id_image_file {
+  color: white;
+}
+
+.custom-file-label {
+  display: none;
+}
+
+.form-control.custom-file > .custom-file-input {
+  line-height: 1rem;
+}
+
+/* PERSONAL PAGE */
+.profile-names {
+  font-size: 2.2rem;
+  font-family: 'Akaya Kanadaka', cursive;
+}
+/* CAROUSEL */
 
 #carousel-large-background {
   margin-top: 10vh;

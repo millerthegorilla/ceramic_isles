@@ -26,7 +26,10 @@ from sorl.thumbnail import delete
 ### helper functions
 
 def user_directory_path(instance, filename):
-    return 'uploads/users/{0}/{1}'.format(instance.user_profile.profile_user, filename)
+    if type(instance) is ForumProfile:
+        return 'uploads/users/{0}/{1}'.format(instance.profile_user, filename)
+    else:
+        return 'uploads/users/{0}/{1}'.format(instance.user_profile.profile_user, filename)
 
 def user_directory_path_avatar(instance, filename):
     return 'uploads/users/{0}/avatar/{1}'.format(instance.user_profile.profile_user, filename)
@@ -45,16 +48,18 @@ class Avatar(models.Model):
 
 
 class ForumProfile(Profile):
-    bio = models.TextField(max_length=500, blank=True, default='')
-    address_line_1 = models.CharField(max_length=30, blank=True, default='')
-    address_line_2 = models.CharField(max_length=30, blank=True, default='')
-    parish = models.CharField(max_length=30, blank=True, default='')
-    first_name = models.CharField(max_length=30, blank=True, default='')
-    last_name = models.CharField(max_length=30, blank=True, default='')
-    shop_web_address = models.CharField(max_length=50, blank=True, default='')
-    outlets = models.CharField(max_length=400, blank=True, default='')
+    bio = models.TextField('biographical information, max 500 chars', max_length=500, blank=True, default='')
+    address_line_1 = models.CharField('address line 1', max_length=30, blank=True, default='')
+    address_line_2 = models.CharField('address line 2', max_length=30, blank=True, default='')
+    parish = models.CharField('parish', max_length=30, blank=True, default='')
+    postcode = models.CharField('postcode', max_length=6, blank=True, default='')
+    first_name = models.CharField('first name', max_length=30, blank=True, default='')
+    last_name = models.CharField('last name', max_length=30, blank=True, default='')
+    shop_web_address = models.CharField('shop link', max_length=50, blank=True, default='')
+    outlets = models.CharField('places that sell my stuff, comma separated', max_length=400, blank=True, default='')
     avatar = models.OneToOneField(Avatar, on_delete=models.CASCADE, 
                                           related_name='user_profile')
+    image_file = models.ImageField('A single image for your personal page', upload_to=user_directory_path, null=True)
 
 """
     disconnect dummy profile
@@ -90,7 +95,7 @@ class ForumProfileImage(models.Model):
     image_file = models.ImageField(upload_to=user_directory_path)
     image_text = models.CharField(max_length=400, default='')
     image_title = models.CharField(max_length=30, default='')
-    image_shop_link = models.CharField(max_length=50, default='#')
+    image_shop_link = models.CharField(max_length=50, default='')
     image_shop_link_title = models.CharField(max_length=30, default='')
     active = models.BooleanField(default=False)
     user_profile = models.ForeignKey(ForumProfile, on_delete=models.CASCADE, related_name="forum_images")
@@ -152,8 +157,8 @@ def auto_delete_file_on_change(sender, instance, **kwargs):
 class ForumPost(Post):
     user_profile = models.ForeignKey(ForumProfile, on_delete=models.CASCADE, related_name="posts")
     author = models.CharField(default='', max_length=40)
-    active = models.BooleanField(default='True')
-    moderation = models.BooleanField(default='False')
+    active = models.BooleanField(default=True)
+    moderation = models.DateField(null=True, default=None, blank=True)
     
     class Meta:
         ordering = ['-date_created']
@@ -193,7 +198,7 @@ class ForumComment(Comment):
     author = models.CharField(default='', max_length=40)
     forum_post = models.ForeignKey(ForumPost, on_delete=models.CASCADE, related_name="forum_comments")
     active = models.BooleanField(default='True')
-    moderation = models.BooleanField(default='False')
+    moderation = models.DateField(null=True, default=None, blank=True)
 
     def save(self, **kwargs):
         super().save(post=self.forum_post, **kwargs)

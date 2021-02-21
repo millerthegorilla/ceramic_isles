@@ -33,7 +33,7 @@ SECRET_KEY = 'xt==^l@8&77h0lyorjl&21va$6@fr0k7wb3@shw!h#%ch8(=_#'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1']
+ALLOWED_HOSTS = ['127.0.0.1', '192.168.1.8']
 
 # Application definition
 
@@ -54,7 +54,7 @@ INSTALLED_APPS = [
     'tinymce',
     'debug_toolbar',
     'sorl.thumbnail',
-    'haystack',
+    'django_elasticsearch_dsl',
 ]
 
 MIDDLEWARE = [
@@ -190,7 +190,7 @@ FILE_UPLOAD_PERMISSIONS = 0o644
 
 LOGIN_REDIRECT_URL = reverse_lazy('django_forum_app:post_list_view')
 LOGOUT_REDIRECT_URL = reverse_lazy('django_forum_app:landing_page')
-LOGIN_URL = reverse_lazy('django_users_app:login')
+LOGIN_URL = reverse_lazy('login')
 
 THUMBNAIL_SIZE = (120,120)
 THUMBNAIL_DEBUG = True
@@ -282,15 +282,26 @@ CRISPY_TEMPLATE_PACK = "bootstrap4"
 CLAMAV_SOCKET = 'tcp://127.0.0.1:3310'
 
 
-# haystack - elastic search
+# elastic search
 
-HAYSTACK_CONNECTIONS = {
+ELASTICSEARCH_DSL={
     'default': {
-        'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
-        'URL': 'http://127.0.0.1:9200/',
-        'INDEX_NAME': 'haystack',
+        'hosts': 'localhost:9200'
     },
 }
 
-# Update Search index in realtime (using models.db.signals)
-HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
+# # Name of the Elasticsearch index
+# ELASTICSEARCH_INDEX_NAMES = {
+#     'search_indexes.documents.address': 'address',
+# }
+
+# Name of the Elasticsearch index   -  testings
+ELASTICSEARCH_INDEX_NAMES = {
+    'search_indexes.documents.address': 'test_address',
+}
+
+
+# Name of the Elasticsearch index   -  production
+# ELASTICSEARCH_INDEX_NAMES = {
+#     'search_indexes.documents.address': 'prod_address',
+# }

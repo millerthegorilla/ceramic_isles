@@ -14,7 +14,7 @@
     {% block content %}
         <div class="row my-auto">
             <div class="col-11 col-sm-9 col-md-7 col-lg-5 mb-3 mx-auto">
-                <form method="post" action="{% url 'django_forum_app:profile_update_view' %}" class="col-auto">
+                <form method="post" action="{% url 'django_forum_app:profile_update_view' %}" class="col-auto" enctype="multipart/form-data">
                     {% csrf_token %}
                     <fieldset legend="profile">
                     {% crispy user_form %}
@@ -22,7 +22,7 @@
                     </fieldset>
                     <div class="row justify-content-between">
                         <a href="{% url 'django_forum_app:post_list_view' %}" class="col-auto text-white">Return to Forum</a>
-                        <a href="{% url 'django_forum_app:image_update' %}" class="col-auto btn btn-primary" role="button">Update Images</a>
+                        <a href="{% url 'django_forum_app:image_update' %}" class="col-auto btn btn-success" role="button">Update display images</a>
                         <button type="submit" class="btn btn-primary col-auto">Update Profile</button>
                     </div>
                 </form>

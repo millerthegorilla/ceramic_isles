@@ -28,30 +28,49 @@ class ForumProfileUserForm(ProfileUserForm):
 
 
 class ForumProfileDetailForm(ProfileDetailForm):
+    image_file = SafeImageField(allowed_extensions=('jpg','png'), 
+                               check_content_type=True, 
+                               scan_viruses=True, 
+                               media_integrity=True,
+                               max_size_limit=2621440)
     class Meta(ProfileDetailForm.Meta):
         model = ForumProfile
         fields = ProfileDetailForm.Meta.fields + ['first_name', \
                                                   'last_name', \
+                                                  'address_line_1', \
+                                                  'address_line_2', \
+                                                  'parish', \
+                                                  'postcode', \
                                                   'bio', \
                                                   'shop_web_address', \
-                                                  'outlets']
+                                                  'outlets', \
+                                                  'image_file'
+                                                 ]
         exclude = ['user_slug', 'profile_user']
+        labels = { 'image_file': 'A single image for your personal page'}
 
     def __init__(self, *args, **kwargs):
-        # breakpoint()
-        # _user_fields = ('username', 'email',)
-        # _initial = model_to_dict(instance.user, _user_fields) if instance is not None else {}
-        # super(UserDetailsForm, self).__init__(initial=initial, instance=instance, *args, **kwargs)
-        # self.fields.update(fields_for_model(, _user_fields))
         super().__init__(*args, **kwargs)
+        self.fields['image_file'].required = False
+        self.fields['image_file'].label = 'A single image for your personal page'
         self.helper = FormHelper()
         self.helper.form_tag = False
         self.helper.layout = Layout(
                 FloatingField('first_name'),
                 FloatingField('last_name'),
+                HTML('<a class="btn btn-primary mb-3" data-bs-toggle="collapse" \
+                     href="#collapseAddress" role="button" aria-expanded="false" \
+                     aria-controls="collapseAddress">Address details</a>'),
+                Div(
+                FloatingField('address_line_1'),
+                FloatingField('address_line_2'),
+                FloatingField('parish'),
+                FloatingField('postcode'),
+                css_class="collapse", id="collapseAddress"),
                 FloatingField('bio'),
                 FloatingField('shop_web_address'),
                 FloatingField('outlets'),
+                Field('image_file', css_class="text-white")
         )
         self.helper.form_id = 'id-profile-form'
         self.helper.form_method = 'post'

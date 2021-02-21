@@ -26,11 +26,17 @@ class ForumProfileUpdateView(LoginRequiredMixin, ProfileUpdateView):
 
     def form_valid(self, form):
         if form.has_changed():
-            if form.is_valid():
-                for change in form.changed_data:
-                    setattr(self.request.user.profile.forumprofile, change, form[change].value())
-                self.request.user.profile.forumprofile.save()
-        return super().form_valid(form)
+                obj = form.save()
+            # if form.is_valid():
+            #     for change in form.changed_data:
+            #         setattr(self.request.user.profile.forumprofile, change, form[change].value())
+            #     self.request.user.profile.forumprofile.save()
+                url = str(settings.BASE_DIR) + obj.image_file.url
+                img = Image.open(url)
+                img = ImageOps.expand(img, border=10, fill='white')
+                img.save(url)
+        super().form_valid(form)
+        return redirect(self.success_url)
 
     def get_context_data(self, **args):
         context = super().get_context_data(**args)
