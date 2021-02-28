@@ -40,10 +40,12 @@
                       <li><a href="{% url 'django_forum_app:post_list_view' %}" class="text-primary">Forum Posts</a></li>
                       <li><a href="{% url 'django_forum_app:post_create_view' %}" class="text-white">Create Post</a></li>
                       <li><a href="{% url 'django_forum_app:profile_update_view' %}" class="text-success">Profile</a></li>
+                      <li><a href="{% url 'django_forum_app:personal_page_view' user.username %}" class="text-info">Personal Page</a></li>
                       <li><a href="{% url 'logout' %}" class="text-danger">Logout</a></li>
                       {% else %}
                       <li><a href="{% url 'login' %}" class="text-success">Login</a></li>
                       <li><a href="{% url 'register' %}" class="text-primary">Register</a></li>
+                      <li><a href="{% url 'password_reset' %}" class="text-muted">Password reset</a></li>
                       {% endif %}
                     </ul>
                   </div>

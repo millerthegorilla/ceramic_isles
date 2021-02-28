@@ -11,7 +11,8 @@
 		<div class="row h-75 align-items-center">
 			<div class="col-auto mx-auto">
 				{% if success %} 
-					<h2>Congratulations {{ user.username }}...<br>your account is confirmed!</h2><br>
+					<h2>Congratulations <span class="text-white">{{ user.username }}...</span><br>
+						<span class="ps-5">your account is confirmed!</span></h2><br>
 					<span><h4><a class="text-white" href="{% url 'logout' %}?next={% url 'login' %}">Login</a></h4></span>
 					<div class="balloon"></div>
 					<div class="balloon"></div>
@@ -19,7 +20,9 @@
 					<div class="balloon"></div>
 					<div class="balloon"></div>
 				{% else %}
-					<h2>Error!<br> You tried to register with an invalid token!</h2>
+					<div class="text-white">
+					<h2>Error!</h2><br>
+					<h3>You tried to register with an invalid token!</h3>
 					<h3>If you think this is a mistake then please get in touch...</h3>
 				{% endif %}
 			</div>

@@ -17,6 +17,22 @@ font-family: 'Akaya Kanadaka', cursive;*/
   /*height: 100vh;*/
 }
 
+.headline-text {
+  color: #CAF0F8;
+}
+
+.sub-headline-text {
+  color: #F4A261;
+}
+
+#div_id_new_password1 {
+  margin-bottom: 0.5rem;
+}
+
+#id_old_password {
+  margin-bottom: 0.8rem;
+}
+
 /* NAVBAR */
 .header-navbar {
   position: relative;
@@ -63,7 +79,7 @@ font-family: 'Akaya Kanadaka', cursive;*/
 /* PERSONAL PAGE */
 .profile-names {
   font-size: 2.2rem;
-  font-family: 'Akaya Kanadaka', cursive;
+  font-family: 'Lobster Two', cursive;
 }
 /* CAROUSEL */
 
@@ -125,6 +141,10 @@ table {
 
 .comment-textarea {
   height: 18vh;
+}
+
+.comment-text > p > a {
+  color:yellow;
 }
 
 .comment-form-buttons {

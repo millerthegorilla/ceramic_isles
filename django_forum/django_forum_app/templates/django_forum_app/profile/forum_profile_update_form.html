@@ -3,30 +3,52 @@
 {% if user.is_authenticated %}
     {% load thumbnail %}
     {% block extra_css %}
-    <style>
-     body {
-        {% thumbnail back_image.image_file "1024x768" as im %}
-            background-image: url("{{ im.url }}");
-        {% endthumbnail %}
-     }
-    </style>
     {% endblock extra_css %}
     {% block content %}
-        <div class="row my-auto">
-            <div class="col-11 col-sm-9 col-md-7 col-lg-5 mb-3 mx-auto">
+        <div class="row my-auto ms-3">
+            <div class="col-auto">
+                <form method="post" class="avatarform mb-3" id="avatarform" action="{% url 'django_forum_app:profile_update_view' %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input type="hidden" name="type" value="update-avatar">
+                    {% thumbnail avatar.image_file "80x80" crop="center" as im %}
+                        <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}" class="btTxt img-thumbnail" role="button" id="avatarImage" title="Click me to change avatar!" />
+                    {% endthumbnail %}
+                    <input id="avatarUpload" class="d-none" type="file" name="avatar">
+                </form>
+            </div>
+            <div class="col-11 col-sm-9 col-md-7 col-lg-5 mb-3">
                 <form method="post" action="{% url 'django_forum_app:profile_update_view' %}" class="col-auto" enctype="multipart/form-data">
                     {% csrf_token %}
+                    <input type="hidden" name="type" value="update-profile">
                     <fieldset legend="profile">
                     {% crispy user_form %}
                     {% crispy form %}
                     </fieldset>
                     <div class="row justify-content-between">
-                        <a href="{% url 'django_forum_app:post_list_view' %}" class="col-auto text-white">Return to Forum</a>
-                        <a href="{% url 'django_forum_app:image_update' %}" class="col-auto btn btn-success" role="button">Update display images</a>
-                        <button type="submit" class="btn btn-primary col-auto">Update Profile</button>
+                        <a href="{% url 'django_forum_app:post_list_view' %}" class="col-auto text-white mb-3">Return to Forum</a>
+                        <a href="{% url 'django_forum_app:image_update' %}" class="col-auto btn btn-success mb-3" role="button">Update your gallery images</a>
+                        <button type="submit" class="btn btn-primary col-auto mb-3">Update Profile</button>
                     </div>
                 </form>
             </div>
+            {% if page_obj.object_list.count %}
+            <div class="col-12 col-lg-5 mx-auto">
+                <h3 class="text-center headline-text">My Posts</h3>
+                {% include '../post_list.html' %}
+            </div>
+            {% endif %}
         </div>
-    {% endblock %}
+    {% endblock content %}
+{% block body_js %}
+<script>
+$(document).ready(function () {
+    $("#avatarImage").click(function(e) {
+        $("#avatarUpload").click();
+    });
+    $('#avatarUpload').on("change", function( event ) {
+        $("#avatarform").submit();
+    });
+}); 
+</script>
+{% endblock body_js %}
 {% endif %}

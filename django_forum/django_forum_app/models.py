@@ -12,6 +12,7 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import fields
 from django.utils.translation import gettext_lazy as _
+from django.utils import dateformat
 from django.template.defaultfilters import slugify
 from django.urls import reverse_lazy
 from django.conf import settings
@@ -199,6 +200,7 @@ class ForumComment(Comment):
     forum_post = models.ForeignKey(ForumPost, on_delete=models.CASCADE, related_name="forum_comments")
     active = models.BooleanField(default='True')
     moderation = models.DateField(null=True, default=None, blank=True)
+    title = models.SlugField()
 
     def save(self, **kwargs):
         super().save(post=self.forum_post, **kwargs)
@@ -209,10 +211,17 @@ class ForumComment(Comment):
     def comment_author(self):
         return self.user_profile.profile_user.username
 
+    def get_absolute_url(self):
+        return self.forum_post.get_absolute_url() + '#' + self.title
+
+    def get_category_display(self):
+        return 'Comment'
+
 @receiver(post_save, sender=ForumComment)
 def save_author_on_comment_creation(sender, instance, created, **kwargs):
     if created:
         instance.author = instance.comment_author()
+        instance.title = slugify(instance.text[:10] + str(dateformat.format(instance.date_created, 'Y-m-d H:i:s')))
         instance.save()
         
 ### END POSTS AND COMMENTS

@@ -42,11 +42,11 @@ class PostCreateView(CreateView):
         breakpoint()
         post = form.save(commit=False)
         post.text = PostCreateView.sanitize_post_text(post.text)
-        post.slug = slugify(post.title + '-' + str(timezone.now()))
+        post.slug = slugify(post.title + '-' + str(dateformat.format(timezone.now(), 'Y-m-d H:i:s')))
         try:
             post.save()
         except IntegrityError as e:
-            post.slug = slugify(post.title + '-' + str(timezone.now()))
+            post.slug = slugify(post.title + '-' + str(dateformat.format(timezone.now(), 'Y-m-d H:i:s')))
             post.save()
         return redirect(self.success_url(post))
 

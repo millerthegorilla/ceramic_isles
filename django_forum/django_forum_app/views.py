@@ -13,18 +13,20 @@ from django.http import JsonResponse, HttpResponseServerError
 from django.forms.models import model_to_dict
 from django.core.paginator import Paginator
 from django.utils import timezone
+from django.utils import dateformat
+from django.utils.decorators import method_decorator
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth import get_user_model
+from django.views.decorators.cache import never_cache
 
 # Create your views here.
 from django_posts_and_comments.models import Post
 from django_posts_and_comments.views import PostCreateView, PostListView, PostView
 from django_profile.views import ProfileUpdateView
 
-from .documents import ForumPostDocument
+from .documents import ForumPostDocument, ForumCommentDocument
 from .models import ForumProfileImage, ForumProfile, ForumPost, ForumComment
 from .forms import  ForumPostCreateForm, ForumPostListSearch, ForumCommentForm
-
 ### START LANDING PAGE
 
 class LandingPageView(TemplateView):
@@ -43,7 +45,8 @@ class LandingPageView(TemplateView):
 
 
 ### START POSTS AND COMMENTS
-
+@method_decorator(never_cache, name='dispatch')
+@method_decorator(never_cache, name='get')
 class ForumPostView(LoginRequiredMixin, PostView):
     model = ForumPost
     slug_url_kwarg = 'post_slug'
@@ -97,7 +100,6 @@ class ForumPostView(LoginRequiredMixin, PostView):
         else:
             return HttpResponseServerError()
 
-    
     def get(self, *args, **kwargs):
         post = ForumPost.objects.get(pk=kwargs['pk'])
         new_comment_form = self.form_class()
@@ -107,13 +109,15 @@ class ForumPostView(LoginRequiredMixin, PostView):
                                                          'comment_form': new_comment_form})
 
 
+@method_decorator(never_cache, name='dispatch')
 class ForumPostListView(LoginRequiredMixin, PostListView):
     model = ForumPost
     template_name = 'django_forum_app/posts_and_comments/forum_post_list.html'
     paginate_by = 6
-
+ 
     def get(self, request, search_slug=None):
         search = 0
+        p_c = None
         is_a_search = False
         if search_slug == 'search':
             is_a_search = True
@@ -125,22 +129,24 @@ class ForumPostListView(LoginRequiredMixin, PostListView):
                 else:
                     t = 'term'
                     terms = terms[0]
-                queryset = ForumPostDocument.search().query(Q('nested', 
-                    path='forum_comments', 
-                    query=Q(t, 
-                        forum_comments__text=terms))|
+                queryset_p = ForumPostDocument.search().query(
                             Q(t, text=terms)|
                             Q(t, author=terms)|
-                            Q(t, title=terms)).to_queryset()
-                search = queryset.count()
+                            Q(t, title=terms) |
+                            Q(t, category=terms)).to_queryset()
+                queryset_c = ForumCommentDocument.search().query(Q(t, text=terms)|Q(t, author=terms)).to_queryset()
+                p_c = list(queryset_p) + list(queryset_c)
+                search = len(p_c)
                 if search == 0: 
                     queryset = ForumPost.objects.all()
             else:
                 return render(request, self.template_name, {'form':form})  ## TODO: show forum errors
         else:
             queryset = ForumPost.objects.all()
-        
-        paginator = Paginator(queryset, 6)
+        if search:
+            paginator = Paginator(p_c, 6)
+        else:
+            paginator = Paginator(queryset, 6)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
         context = { 'page_obj': page_obj, 'search': search, 'is_a_search': is_a_search}
@@ -155,7 +161,7 @@ class PersonalPageView(DetailView):
     # def get(self, *args, **kwargs):
     #     breakpoint()
     #     pass
-    def get_queryset(self):
+    def get_queryset(self):  #TODO: try/except clause
         user = get_user_model().objects.get(username=self.request.resolver_match.kwargs['name_slug'])
         return ForumProfile.objects.filter(profile_user=user)
         # return ForumProfileImage.objects.filter(user_profile=userprofile)
@@ -166,12 +172,14 @@ class PersonalPageView(DetailView):
                                 user_profile=self.object).filter(active=True).order_by('?')
         u_p = self.get_queryset().first()
         context['profile_image_file'] = u_p.image_file
+        if context['profile_image_file'].name == '':
+            context['profile_image_file'] = None
         context['name'] = u_p.first_name + " " + u_p.last_name
         if context['name'] == ' ':
-            del context['name']
+            context['name'] = None
+        context['username'] = u_p.profile_user.username
         context['bio'] = u_p.bio
         context['image_size'] = "1024x768"
-        context['username'] = self.request.user.username
         context['shop_link'] = u_p.shop_web_address
         context['outlets'] = u_p.outlets
         return context
@@ -222,7 +230,7 @@ class ForumPostCreateView(LoginRequiredMixin, PostCreateView):
         post = form.save(commit=False)
         post.user_profile = self.request.user.profile.forumprofile
         post.text = PostCreateView.sanitize_post_text(post.text)
-        post.slug = slugify(post.title + '-' + str(timezone.now()))
+        post.slug = slugify(post.title + '-' + str(dateformat.format(timezone.now(), 'Y-m-d H:i:s')))
         post.save()
         return redirect(self.get_success_url(post))
  

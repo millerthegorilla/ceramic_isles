@@ -94,8 +94,9 @@
 			        <div class="comments ps-4">
 		                <div class="row mx-auto">
 		                	{% if not comment.moderation %}
-			                	<div id="comment-text-{{ forloop.counter }}" class="col-auto">
-			                        {{ comment.text|linebreaks|safe }}
+		                	    <a class="col-1" href="{{request.path}}#{{comment.title}}" id="{{ comment.title }}"><h2 class="text-warning">#</h2></a>
+			                	<div id="comment-text-{{ forloop.counter }}" class="comment-text col-11">
+			                        {{ comment.text|linebreaks|urlize|safe }}
 	                            </div>
                             {% else %}
                                 <div>This comment has been reported and is awaiting moderation</div>
@@ -119,7 +120,7 @@
                                     </div>
                               	</form>
                             </div>
-                            {% else %}
+                            {% elif not comment.moderation %}
                             <div class="ms-auto">
 			                    <form method="post" id="form-report-comment">
 			                    	{% csrf_token %}
@@ -134,8 +135,8 @@
                         </div>
                         <div class="row justify-content-between mb-3">
                         	<div class="col-auto">
-		                	    {% thumbnail comment.user_profile.forumprofile.avatar.image_file "40x40" padding=True padding_color='#36854D' as im %}
-                                    <img src="{{ im.url }}" height="{{ im.height }}" width="{{ im.width }}" class="rounded-circle" value="image-{{ forloop.counter }}"></img>
+		                	    <a href="/people/{{comment.author}}/">{% thumbnail comment.user_profile.forumprofile.avatar.image_file "40x40" crop="center" as im %}
+                                    <img src="{{ im.url }}" height="{{ im.height }}" width="{{ im.width }}" class="rounded-circle" value="image-{{ forloop.counter }}"></img></a>
                                 {% endthumbnail %}
 	                            <span class="text-white fs-6 font-weight-normal">
 		                            {{ comment.author }}
@@ -212,7 +213,7 @@ function showEditor() {
 
 function showUpdateComment(id) {
 	//$("textarea[id='#comment-textarea-" + id + "']").val($('#comment-text-' + id).html().trim())
-	$("#comment-textarea-" + id).val($('#comment-text-' + id).html().trim())
+	$("#comment-textarea-" + id).val($('#comment-text-' + id).text().trim())
 	$('#comment-textarea-' + id).show()
 	$('#comment-text-' + id).hide()
 	$('#comment-form-buttons-' + id).show()

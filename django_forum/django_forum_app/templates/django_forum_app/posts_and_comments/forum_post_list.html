@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 {% block title %}Ceramic Isles - Forum{% endblock title %}
 {% block content %}
-{% load thumbnail %}
     {% if page_obj.object_list.count == 0 and is_a_search is False %}
         <div class="row">
             <div class="col-auto mx-auto mt-5">
@@ -10,80 +9,25 @@
         </div>
     {% else %}
         <div class="container-fluid main-container-post">
-            <h2>Posts...</h2>
-            <p>Search the posts for content, author or category.</p>  
-            <form action="{% url 'django_forum_app:post_list_view' 'search' %}" class="form-autocomplete">
-                <label for="q">Search</label>
-                <input id="q" name="q" type="text" list="datalistOptions" class="autocomplete" autocomplete="on">
-                <input type="submit" value="Search!">
-            </form>
-            {% if is_a_search is True %}
-                {% if search > 0 %}
-                    <h5>Search Results</h5>
-                {% else %}
-                    <h5>There are no search results</h5>
-                    <h5>so here are the Posts...</h5>
-                {% endif %}
-            {% endif %}
-            <div class="mb-3" style="overflow-x:auto;">
-                <table>
-                    <tr>
-                        <th></th>
-                        <th>Title (try clicking one)</th>
-                        <th>Post Leader</th>
-                        <th>Category</th>
-                        <th class="text-center"># Comments</th>
-                        <th>Date</th>
-                    </tr>
-                    <tbody id="post-table" class="text-white">
-                        {% for post in page_obj.object_list %}
-                            <tr >
-                                    <td>
-                                        {% thumbnail post.user_profile.avatar.image_file "50x50" padding=True padding_color='#36854D' as im %}
-                                            <img src="{{ im.url }}" height="{{ im.height }}" width="{{ im.width }}" class="rounded-circle" id="image-{{ post.user_profile.profile_user.username }}_avatar-image" />
-                                        {% endthumbnail %}
-                                    </td>
-                                    <td>
-                                        <a href="{{ post.get_absolute_url|safe }}" class="text-white">{{ post.title }}</a>
-                                    </td>
-                                    <td>
-                                        {{ post.text|striptags|safe|slice:":40" }}...
-                                    </td>
-                                    <td>
-                                        {{ post.get_category_display|safe }}
-                                    </td>
-                                    <td class="text-center">
-                                        {{ post.comments.count }}
-                                    </td>
-                                    <td>
-                                        {{ post.date_created|date }}
-                                    </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
             <div class="row">
-                <div class="col-3 mx-auto">
-                    <div class="pagination">
-                        <span class="d-flex step-links justify-content-around flex-fill">
-                            {% if page_obj.has_previous %}
-                                <a class="text-white" href="?page=1">&laquo; first</a>
-                                <a class="text-white" href="?page={{ page_obj.previous_page_number }}">...previous</a>
-                            {% endif %}
-
-                            <span class="current text-white">
-                                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
-                            </span>
-
-                            {% if page_obj.has_next %}
-                                <a class="text-white" href="?page={{ page_obj.next_page_number }}">next...</a>
-                                <a class="text-white" href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
-                            {% endif %}
-                        </span>
-                    </div>
+                <div class="col-auto mx-auto headline-text">
+                    <h2>Forum Posts...</h2>
+                    <p>Search the posts for content, author or category.</p>  
+                    <form class="mb-2" action="{% url 'django_forum_app:post_list_view' 'search' %}" class="form-autocomplete">
+                        <input class="me-2" id="q" name="q" type="text" list="datalistOptions" class="autocomplete" autocomplete="on">
+                        <input type="submit" value="Search!">
+                    </form>
+                    {% if is_a_search is True %}
+                        {% if search > 0 %}
+                            <h5>Search Results</h5>
+                        {% else %}
+                            <h5>There are no search results</h5>
+                            <h5>so here are the Posts...</h5>
+                        {% endif %}
+                    {% endif %}
                 </div>
             </div>
+            {% include '../post_list.html' %}
             {% if is_a_search is True and search > 0 %}
                 <a href='{% url "django_forum_app:post_list_view" %}' class="btn btn-primary">Clear Search Results</a>
             {% endif %}
