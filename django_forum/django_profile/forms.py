@@ -30,6 +30,8 @@ class ProfileUserForm(ModelForm):
         self.helper.layout = Layout(
                 FloatingField('username'),
                 FloatingField('email'),
+                FloatingField('first_name'),
+                FloatingField('last_name'),
         )
 
     def clean_username(self, *args, **kwargs):
@@ -62,14 +64,14 @@ class ProfileUserForm(ModelForm):
 
     class Meta:
         model = User
-        fields = ['username', 'email']
+        fields = ['username', 'email', 'first_name', 'last_name']
     
 
 
 class ProfileDetailForm(ModelForm):
     class Meta:
         model = Profile
-        fields = ['user_slug', 'profile_user',]
+        fields = ['profile_user', 'display_name']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs) 

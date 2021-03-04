@@ -1,0 +1,11 @@
+
+<h3 class="text-warning">Member List.  Click on a name to go to that person's personal page</h3>
+{% for displayname in dnames %}
+	{% if displayname %}
+  	    <div class="row mx-auto">
+  	    	<div class="col-auto mx-auto">
+	    		<a class="{{ colours|random }} mb-3" href="{% url 'django_forum_app:personal_page_view' displayname %}"><h3>{{ displayname }}</h3></a>
+	    	</div>
+  		</div>
+  	{% endif %}
+{% endfor %}

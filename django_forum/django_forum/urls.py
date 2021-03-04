@@ -24,10 +24,10 @@ from django.conf.urls.static import static
 from django.urls import re_path
 from django.contrib.staticfiles import views
 
-admin.site.site_header = 'Ceramic Islands admin'
-admin.site.site_title = 'Ceramic Islands admin'
-admin.site.site_url = 'http://127.0.0.1/'
-admin.site.index_title = 'Ceramic Islands administration'
+admin.site.site_header = 'Ceramic Isles admin'
+admin.site.site_title = 'Ceramic Isles admin'
+admin.site.site_url = 'http://127.0.0.1/'      ### TODO:  change this in production
+admin.site.index_title = 'Ceramic Isles administration'
 admin.empty_value_display = '**Empty**'
 
 urlpatterns = [

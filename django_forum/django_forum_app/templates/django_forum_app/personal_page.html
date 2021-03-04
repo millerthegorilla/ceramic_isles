@@ -4,7 +4,7 @@
 <div class="container-fluid people-page">
 	{% if name is None and bio == "" and profile_image_file is None and images.count == 0 and outlets == '' and shop_link == '' %}
 	<div class="col-12 col-sm-10 col-md-8 col-lg-5 mx-auto mt-5 text-white">
-		<span><h3>{{ username }}...</h3><h4>has yet to upload any details or images or their work.</h4></span>
+		<span><h3>{{ display_name }}...</h3><h4>has yet to upload any details or images or their work.</h4></span>
 	</div>
 	{% else %}
 		<div class="row mb-3">

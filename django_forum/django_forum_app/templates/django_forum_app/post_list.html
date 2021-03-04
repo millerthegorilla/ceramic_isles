@@ -14,7 +14,7 @@
                             <tr >
                                     <td>
                                         {% thumbnail post.user_profile.avatar.image_file "50x50" crop="center" as im %}
-                                            <a href="/people/{{post.user_profile.profile_user.username}}"><img src="{{ im.url }}" height="{{ im.height }}" width="{{ im.width }}" class="rounded-circle" id="image-{{ post.user_profile.profile_user.username }}_avatar-image" title="{{post.user_profile.profile_user.username}}" /></a>
+                                            <a href="/people/{{post.user_profile.display_name}}"><img src="{{ im.url }}" height="{{ im.height }}" width="{{ im.width }}" class="rounded-circle" id="image-{{ post.user_profile.display_name }}_avatar-image" title="{{post.user_profile.display_name}}" /></a>
                                         {% endthumbnail %}
                                     </td>
                                     <td>

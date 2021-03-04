@@ -1,3 +1,5 @@
+import uuid # used as custom salt 
+
 from django.shortcuts import render, redirect
 from django.views.generic.base import TemplateView
 from django.contrib.auth.models import User
@@ -5,9 +7,11 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.edit import CreateView, UpdateView
 from django.views.generic.list import ListView
 from django.urls import reverse_lazy
+from django.template.defaultfilters import slugify
+from django.conf import settings
+
 from django_email_verification import send_email
-import uuid # used as custom salt 
-# custom form imports
+
 from .forms import CustomUserCreationForm
 
 
@@ -30,8 +34,13 @@ class RegisterView(CreateView):
     success_url = reverse_lazy("password_reset_done")
     model = User
     
-    def form_valid(self, form):
-      retval = super().form_valid(form)
-      user = form.save()
-      send_email(user, custom_salt=uuid.uuid4())
-      return retval
+    def form_valid(self, form, user=None):
+        if user is None:
+            user = form.save()
+        super().form_valid(form)
+        send_email(user, custom_salt=uuid.uuid4())
+        return redirect('password_reset_done')
+
+class RulesPageView(TemplateView):
+    template_name = 'django_users_app/rules.html'
+    extra_context = { 'app_name': settings.APP_NAME }

@@ -9,6 +9,7 @@ from django.urls import reverse_lazy
 from django.views.decorators.cache import never_cache
 from django.utils.decorators import method_decorator
 from django.core.paginator import Paginator
+from django.template.defaultfilters import slugify
 
 from django_profile.views import ProfileUpdateView
 from django.forms.models import model_to_dict
@@ -29,15 +30,14 @@ class ForumProfileUpdateView(LoginRequiredMixin, ProfileUpdateView):
     def form_valid(self, form, **kwargs):
         if self.request.POST['type'] == 'update-profile':
             if form.has_changed():
-                    obj = form.save()
-                # if form.is_valid():
-                #     for change in form.changed_data:
-                #         setattr(self.request.user.profile.forumprofile, change, form[change].value())
-                #     self.request.user.profile.forumprofile.save()
-                    url = str(settings.BASE_DIR) + obj.image_file.url
-                    img = Image.open(url)
-                    img = ImageOps.expand(img, border=10, fill='white')
-                    img.save(url)
+                    obj = form.save(commit=False)
+                    obj.display_name = slugify(obj.display_name)
+                    obj.save()
+                    if obj.image_file:
+                        url = str(settings.BASE_DIR) + obj.image_file.url
+                        img = Image.open(url)
+                        img = ImageOps.expand(img, border=10, fill='white')
+                        img.save(url)
             super().form_valid(form)
             return redirect(self.success_url)
         elif self.request.POST['type'] == 'update-avatar':

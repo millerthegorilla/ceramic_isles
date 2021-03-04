@@ -24,12 +24,10 @@ class PostView(DetailView):
 
 class PostListView(ListView):
     model = Post
-    """
-       testing this 'interfer with pagination?'
-    """
+
     def get_queryset(self):
-            """Return the last five published questions."""
-            return self.model.objects.order_by('date_created')[:5]
+            """Return all published posts."""
+            return self.model.objects.order_by('date_created')
 
 
 class PostCreateView(CreateView):

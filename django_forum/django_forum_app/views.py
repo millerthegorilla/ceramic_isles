@@ -6,6 +6,8 @@ from elasticsearch_dsl import Q
 from django.shortcuts import render, redirect
 from django.views.generic.base import TemplateView
 from django.views.generic.detail import DetailView
+from django.views.generic.list import ListView
+from django.views.generic.edit import CreateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.template.defaultfilters import slugify
@@ -18,15 +20,18 @@ from django.utils.decorators import method_decorator
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth import get_user_model
 from django.views.decorators.cache import never_cache
+from django.conf import settings
 
 # Create your views here.
 from django_posts_and_comments.models import Post
 from django_posts_and_comments.views import PostCreateView, PostListView, PostView
 from django_profile.views import ProfileUpdateView
+from django_users_app.views import RegisterView
 
 from .documents import ForumPostDocument, ForumCommentDocument
-from .models import ForumProfileImage, ForumProfile, ForumPost, ForumComment
+from .models import ForumProfileImage, ForumProfile, ForumPost, ForumComment, Event
 from .forms import  ForumPostCreateForm, ForumPostListSearch, ForumCommentForm
+from .custom_forms import CustomUserCreationForm
 ### START LANDING PAGE
 
 class LandingPageView(TemplateView):
@@ -140,7 +145,7 @@ class ForumPostListView(LoginRequiredMixin, PostListView):
                 if search == 0: 
                     queryset = ForumPost.objects.all()
             else:
-                return render(request, self.template_name, {'form':form})  ## TODO: show forum errors
+                return render(request, self.template_name, {'form':form})  ## TODO: show form errors?
         else:
             queryset = ForumPost.objects.all()
         if search:
@@ -156,15 +161,11 @@ class ForumPostListView(LoginRequiredMixin, PostListView):
 class PersonalPageView(DetailView):
     model = ForumProfile
     slug_url_kwarg = 'name_slug'
-    slug_field = 'user_slug'
+    slug_field = 'display_name'
     template_name = 'django_forum_app/personal_page.html'
-    # def get(self, *args, **kwargs):
-    #     breakpoint()
-    #     pass
+
     def get_queryset(self):  #TODO: try/except clause
-        user = get_user_model().objects.get(username=self.request.resolver_match.kwargs['name_slug'])
-        return ForumProfile.objects.filter(profile_user=user)
-        # return ForumProfileImage.objects.filter(user_profile=userprofile)
+        return ForumProfile.objects.filter(display_name=self.request.resolver_match.kwargs['name_slug'])
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -174,10 +175,10 @@ class PersonalPageView(DetailView):
         context['profile_image_file'] = u_p.image_file
         if context['profile_image_file'].name == '':
             context['profile_image_file'] = None
-        context['name'] = u_p.first_name + " " + u_p.last_name
+        context['name'] = u_p.profile_user.first_name + " " + u_p.profile_user.last_name
         if context['name'] == ' ':
             context['name'] = None
-        context['username'] = u_p.profile_user.username
+        context['display_name'] = u_p.display_name
         context['bio'] = u_p.bio
         context['image_size'] = "1024x768"
         context['shop_link'] = u_p.shop_web_address
@@ -239,10 +240,50 @@ class ForumPostCreateView(LoginRequiredMixin, PostCreateView):
 
 ## END POSTS AND COMMENTS
 
-# res = search.query(
-# Q(
-# 'nested',
-# path='forum_comments',
-# query=Q('match', forum_comments__author="bobholnes"),
-# )
-# )
+class AboutPageView(ListView):
+    model = Event
+    template_name = 'django_forum_app/about.html'
+    
+    def get_context_data(self):
+        data = super().get_context_data()
+        data['about_text'] = settings.ABOUT_US_SPIEL
+        qs = ForumProfile.objects.all().exclude(profile_user__is_superuser=True) \
+                                       .values_list('display_name', flat=True)
+        data['dnames'] = qs
+        data['colours'] = ['text-white', 'text-purple', 'text-warning', 'text-lightgreen', 'text-danger', 'headline-text', 'sub-headline-text']
+        return data
+
+    def get_queryset(self):
+            """Return all published posts."""
+             # filter objects created today
+            qs_bydate = self.model.objects.filter(time__gt=timezone.now().replace(hour=0, minute=0, second=0, microsecond=0))
+            qs_repeating = self.model.objects.filter(repeating=True)
+            return qs_bydate | qs_repeating
+
+
+# class PeopleDirectoryView(TemplateView):
+#     template_name = 'django_forum_app/people.html'
+
+#     def get_context_data(self):
+#         """ couldn't get the values() to pass back an appropriate queryset, and since
+#              this view does not require loginrequiredmixin, perhaps a list of names is 
+#              safer? """
+#         uname_list = []
+#         data = {}
+#         qs = ForumProfile.objects.all().exclude(profile_user__is_superuser=True) \
+#                                        .values_list('display_name', flat=True)
+#         data['dnames'] = qs
+#         data['colours'] = ['text-white', 'text-purple', 'text-warning', 'text-lightgreen', 'text-danger', 'headline-text', 'sub-headline-text']
+#         return data
+
+class CustomRegisterView(RegisterView):
+    form_class = CustomUserCreationForm
+    
+    def form_valid(self, form):
+        user = form.save()
+        user.profile.display_name = slugify(form['display_name'].value())
+        user.profile.rules_agreed = form['rules'].value()
+        user.profile.save(update_fields=['display_name','rules_agreed'])
+        super().form_valid(form, user)
+        #send_email(user, custom_salt=uuid.uuid4())
+        return redirect('password_reset_done')

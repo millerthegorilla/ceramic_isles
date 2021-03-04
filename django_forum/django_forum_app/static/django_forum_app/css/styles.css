@@ -21,8 +21,46 @@ font-family: 'Akaya Kanadaka', cursive;*/
   color: #CAF0F8;
 }
 
+.headline-text:hover {
+  color: #CAF0F8;
+}
+
 .sub-headline-text {
   color: #F4A261;
+}
+
+.sub-headline-text:hover {
+  color: #F4A261;
+}
+
+.text-purple {
+  color: #871F78;
+}
+
+.text-purple:hover {
+  color: #871F78;
+}
+
+.text-lightgreen {
+  color: #93C54B;
+}
+
+.text-lightgreen:hover {
+  color: #93C54B;
+}
+
+/* ABOUT PAGE */
+.spiel-headline {
+  font-size: 2.2rem;
+  font-family: 'Lobster Two', cursive;
+}
+
+.spiel-normal {
+  font-size: 1.8rem;
+}
+
+.card-bg {
+  background-color: rgba(202,240,248,1)
 }
 
 #div_id_new_password1 {

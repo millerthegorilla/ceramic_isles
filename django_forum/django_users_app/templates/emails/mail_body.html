@@ -2,12 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <style>
-        h1{ color: blue; }
-    </style>
+    <title>Email Confirmation</title>
 </head>
-    <body>
-        <h1>You are almost there!</h1><br>
-        <h2>Please click <a href="{{ link }}">here</a> to confirm your account</h2>
-    </body>
+<body>
+<h1>You are almost there, {{ user.username }}!</h1><br>
+<h2>Please click <a href="{{ link }}">here</a> to confirm your account</h2>
+<h2>This token is valid for one hour and expires at {{ expiry|time:"TIME_FORMAT" }}</h2>
+</body>
 </html>

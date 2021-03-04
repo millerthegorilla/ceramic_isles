@@ -27,7 +27,7 @@
 			    {% else %}
 			    <div>This post has been reported and is awaiting moderation.</div>
 			    {% endif %}
-			    {% if post.post_author == user.username %}
+			    {% if post.post_author == user.user_profile.dispay_name %}
 				    <div class="ms-auto">
 		    		    <form method="post">
 		    		    	{% csrf_token %}
@@ -55,7 +55,7 @@
                 {% endif %}
 		    </div>
 		    <div class="row justify-content-end">
-	    		{% if post.post_author == user.username %}
+	    		{% if post.post_author == user.profile.display_name %}
 	    		    <div id="modify-post-btns">
 			    		<button id="delete-btn" type="button" class="btn btn-secondary col-auto me-2" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">Delete Post</button>
 		    		    <button id="editor-btn" class="me-auto col-auto btn btn-primary">Edit Post</button>
@@ -101,7 +101,7 @@
                             {% else %}
                                 <div>This comment has been reported and is awaiting moderation</div>
                             {% endif%}
-                            {% if comment.comment_author == user.username %}
+                            {% if comment.comment_author == user.user_profile.display_name %}
                             <div id="comment-form-buttons-{{ forloop.counter }}" class="comment-form-buttons">
                             	<form method="post" id="comment-update-form">
                             	{% csrf_token %}
@@ -143,7 +143,7 @@
 		                            {{ comment.date_created }}
 		                        </span>
 		                    </div>
-			                {% if comment.comment_author == user.username %}
+			                {% if comment.comment_author == user.user_profile.display_name %}
 		                    <div id="comment-modify-btns-{{ forloop.counter }}" class="col-auto">
 			                	<a href="#" class="text-white" data-bs-toggle="modal" data-bs-target="#commentModal" data-bs-whatever="{{comment.id}}">Delete Comment</a>
 			                	<a id="{{ forloop.counter }}" class="comment-edit text-white" href="#">Edit Comment</a>

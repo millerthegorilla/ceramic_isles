@@ -54,14 +54,16 @@ class ForumProfile(Profile):
     address_line_2 = models.CharField('address line 2', max_length=30, blank=True, default='')
     parish = models.CharField('parish', max_length=30, blank=True, default='')
     postcode = models.CharField('postcode', max_length=6, blank=True, default='')
-    first_name = models.CharField('first name', max_length=30, blank=True, default='')
-    last_name = models.CharField('last name', max_length=30, blank=True, default='')
+    #first_name = models.CharField('first name', max_length=30, blank=True, default='')
+    #last_name = models.CharField('last name', max_length=30, blank=True, default='')
     shop_web_address = models.CharField('shop link', max_length=50, blank=True, default='')
     outlets = models.CharField('places that sell my stuff, comma separated', max_length=400, blank=True, default='')
     avatar = models.OneToOneField(Avatar, on_delete=models.CASCADE, 
                                           related_name='user_profile')
     image_file = models.ImageField('A single image for your personal page', upload_to=user_directory_path, null=True)
 
+    def username(self):
+        return self.profile_user.username
 """
     disconnect dummy profile
 """
@@ -75,14 +77,13 @@ def create_user_forum_profile(sender, instance, created, **kwargs):
     if created:
         ForumProfile.objects.create(profile_user=instance, 
                                     avatar=Avatar.objects.create(
-                                        image_file=default_avatar(randint(1,4))))
-        instance.profile.user_slug = slugify(instance.username)
+                                    image_file=default_avatar(randint(1,4))))
     instance.profile.save()
 
 @receiver(post_save, sender=User)
 def save_user_forum_profile(sender, instance, **kwargs):
     try:
-        instance.profile.forumprofile.save()
+        instance.profile.save()
     except (ObjectDoesNotExist, FieldError):
         pass
         ## TODO: log error to log file.
@@ -94,10 +95,10 @@ def save_user_forum_profile(sender, instance, **kwargs):
 # TODO: set a default of 
 class ForumProfileImage(models.Model):
     image_file = models.ImageField(upload_to=user_directory_path)
-    image_text = models.CharField(max_length=400, default='')
-    image_title = models.CharField(max_length=30, default='')
-    image_shop_link = models.CharField(max_length=50, default='')
-    image_shop_link_title = models.CharField(max_length=30, default='')
+    image_text = models.CharField(max_length=400, default='', blank=True)
+    image_title = models.CharField(max_length=30, default='', blank=True)
+    image_shop_link = models.CharField(max_length=50, default='', blank=True)
+    image_shop_link_title = models.CharField(max_length=30, default='', blank=True)
     active = models.BooleanField(default=False)
     user_profile = models.ForeignKey(ForumProfile, on_delete=models.CASCADE, related_name="forum_images")
     image_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -165,8 +166,7 @@ class ForumPost(Post):
         ordering = ['-date_created']
     
     def post_author(self):
-        if self.user_profile is not None:
-            return self.user_profile.profile_user.username
+        return self.user_profile.display_name
 
 
     class Category(models.TextChoices):
@@ -209,7 +209,7 @@ class ForumComment(Comment):
         ordering = ['date_created']
         
     def comment_author(self):
-        return self.user_profile.profile_user.username
+        return self.user_profile.display_name
 
     def get_absolute_url(self):
         return self.forum_post.get_absolute_url() + '#' + self.title
@@ -225,3 +225,14 @@ def save_author_on_comment_creation(sender, instance, created, **kwargs):
         instance.save()
         
 ### END POSTS AND COMMENTS
+
+### ABOUT PAGE ###
+
+class Event(models.Model):
+    title = models.CharField(max_length=50)
+    text = models.CharField(max_length=400)
+    time = models.TimeField(auto_now_add=False)
+    every = models.CharField(max_length=40, blank=True, null=True)
+    date = models.DateField(auto_now_add=False, blank=True, null=True)
+    repeating = models.BooleanField(default=False)
+    active = models.BooleanField(default=True)

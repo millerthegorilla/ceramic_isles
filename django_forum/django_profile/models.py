@@ -14,7 +14,8 @@ class Profile(models.Model):
         user profile
     """
     profile_user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
-    user_slug = models.SlugField()
+    display_name = models.CharField(max_length=30, blank=True)
+    rules_agreed = models.BooleanField(default='False')
 
     def __str__(self):
         return str(self._meta.get_fields(include_hidden=True))
@@ -27,7 +28,6 @@ class Profile(models.Model):
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
         Profile.objects.create(profile_user=instance)
-        instance.profile.user_slug = slugify(instance.username)
     instance.profile.save()
 
 @receiver(post_save, sender=User)
@@ -47,7 +47,12 @@ class ProfileImage(models.Model):
     user_profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="images")
     image_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     id = models.PositiveIntegerField(default=0, editable=False)
-
+    """
+         because I made the primary key a uuid field, I need a way of returning the next logical
+         post, as django doesn't allow auto-incrementing integers.  The below method uses transaction.atomic
+         with F strings to return a record in a way that won't go wrong even if the database transaction fails.
+         https://stackoverflow.com/a/54148942
+    """
     @classmethod
     def get_next(cls):
         with transaction.atomic():

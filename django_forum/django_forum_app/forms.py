@@ -26,7 +26,6 @@ class ForumProfileUserForm(ProfileUserForm):
         self.helper.form_tag = False
 
 
-
 class ForumProfileDetailForm(ProfileDetailForm):
     image_file = SafeImageField(allowed_extensions=('jpg','png'), 
                                check_content_type=True, 
@@ -35,8 +34,7 @@ class ForumProfileDetailForm(ProfileDetailForm):
                                max_size_limit=2621440)
     class Meta(ProfileDetailForm.Meta):
         model = ForumProfile
-        fields = ProfileDetailForm.Meta.fields + ['first_name', \
-                                                  'last_name', \
+        fields = ProfileDetailForm.Meta.fields + [
                                                   'address_line_1', \
                                                   'address_line_2', \
                                                   'parish', \
@@ -46,29 +44,36 @@ class ForumProfileDetailForm(ProfileDetailForm):
                                                   'outlets', \
                                                   'image_file'
                                                  ]
-        exclude = ['user_slug', 'profile_user']
-        labels = { 'image_file': 'A single image for your personal page'}
+        exclude = ['profile_user']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['image_file'].required = False
-        self.fields['image_file'].label = 'A single image for your personal page'
+        self.fields['image_file'].label = 'A single image for your personal page, click Update Profile to upload it...'
         self.helper = FormHelper()
         self.helper.form_tag = False
         self.helper.layout = Layout(
-                FloatingField('first_name'),
-                FloatingField('last_name'),
+                HTML('<span class="text-white">Your display name is used in the forum, and to make \
+                        your personal page address.  Try your first name and last name, \
+                        or use your business name.  It *must* be different to your username.  It will be \
+                        converted to an internet friendly name when you save it.</span>'),
+                FloatingField('display_name'),
+                HTML('<span class="text-white">Address details are only necessary if there is mail for users</span>'),
                 HTML('<a class="btn btn-primary mb-3" data-bs-toggle="collapse" \
                      href="#collapseAddress" role="button" aria-expanded="false" \
-                     aria-controls="collapseAddress">Address details</a>'),
+                     aria-controls="collapseAddress">Address details</a><br>'),
                 Div(
                 FloatingField('address_line_1'),
                 FloatingField('address_line_2'),
                 FloatingField('parish'),
                 FloatingField('postcode'),
-                css_class="collapse", id="collapseAddress"),
+                css_class="collapse ps-3", id="collapseAddress"),
+                HTML('<span class="text-white">Biographical detail is a maximum 500 character space to display \
+                         on your personal page.</span>'),
                 FloatingField('bio'),
+                HTML('<span class="text-white">Your shop web address to be displayed on your personal page</span>'),
                 FloatingField('shop_web_address'),
+                HTML('<span class="text-white">A comma separated list of outlets that sell your stuff, for your personal page.</span>'),
                 FloatingField('outlets'),
                 Field('image_file', css_class="text-white")
         )

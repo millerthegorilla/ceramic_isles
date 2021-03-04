@@ -10,6 +10,9 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
+
+## TODO: clearsessions cron job
+
 from pathlib import Path
 import sys, os
 from django.urls import reverse_lazy
@@ -55,6 +58,8 @@ INSTALLED_APPS = [
     'debug_toolbar',
     'sorl.thumbnail',
     'django_elasticsearch_dsl',
+    'django_password_validators',
+    'django_password_validators.password_history',
 ]
 
 MIDDLEWARE = [
@@ -70,6 +75,8 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django_users_app.middleware.ReauthenticateMiddleware',
 ]
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
 
 ROOT_URLCONF = 'django_forum.urls'
 TEMPLATE_DIR = os.path.join(BASE_DIR, '/django_forum/django_forum/templates')
@@ -104,17 +111,27 @@ if 'pytest' in sys.modules:
     }
 }
 else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': 'django_forum_db',
-            'USER': 'django_forum_db_user',
-            'PASSWORD': '3cX18eZ9v',
-            'HOST': '127.0.0.1',
-            'PORT': '5432',
-    }
-}
+    # DATABASES = {
+    #     'default': {
+    #         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+    #         'NAME': 'django_forum_db',
+    #         'USER': 'django_forum_db_user',
+    #         'PASSWORD': '3cX18eZ9v',
+    #         'HOST': '127.0.0.1',
+    #         'PORT': '5432',
+    # }
+#}
+      DATABASES = {
+      'default': {
+          'ENGINE': 'django.db.backends.mysql',
+          'NAME': 'django_forum_db',
+          'USER': 'django_forum_db_user',
+          'PASSWORD': '!#66subrosa#!',
+          'HOST': '127.0.0.1',
+          'PORT': '3306'
+      }
 
+      }
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
@@ -131,6 +148,9 @@ AUTH_PASSWORD_VALIDATORS = [
     # },
     # {
     #     'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+    #     'OPTIONS': {
+    #         'min_length': 12,
+    #      }
     # },
     # {
     #     'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
@@ -138,7 +158,29 @@ AUTH_PASSWORD_VALIDATORS = [
     # {
     #     'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     # },
+    # {
+    #     'NAME': 'django_password_validators.password_history.password_validation.UniquePasswordsValidator',
+    #     'OPTIONS': {
+    #              # How many recently entered passwords matter.
+    #              # Passwords out of range are deleted.
+    #              # Default: 0 - All passwords entered by the user. All password hashes are stored.
+    #         'last_passwords': 5 # Only the last 5 passwords entered by the user
+    #     }
+    # },
+    # {
+    #    'NAME': 'django_password_validators.password_character_requirements.password_validation.PasswordCharacterValidator',
+    #     'OPTIONS': {
+    #         'min_length_digit': 1,
+    #         'min_length_alpha': 1,
+    #         'min_length_special': 1,
+    #         'min_length_lower': 1,
+    #         'min_length_upper': 1,
+    #         'special_characters': "~!@#$%^&*()_+{}\":;'[]"
+    #     }
+    # },
 ]
+
+### TODO: consider using shadowd web app firewall, if there is enough power...
 
 # needed for django debug toolbar
 
@@ -164,7 +206,7 @@ USE_TZ = True
 
 
 
-ADMINS = [('james', 'jamesstewartmiller@gmail.com')]
+#ADMINS = [('james', 'jamesstewartmiller@gmail.com')]
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
@@ -234,7 +276,7 @@ SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']
 ## SESSION SETTINGS
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SESSION_COOKIE_AGE = 129600 # 36 hours.  # defaults to two weeks
-SESSION_COOKIE_SECURE = False    # set this to true when using https
+SESSION_COOKIE_SECURE = False    # set this to true when using https  ### TODO: Set to True in production
 # SESSION_SAVE_EVERY_REQUEST = True  #updates timestamp to increase session_cookie_age
 
 
@@ -305,3 +347,13 @@ ELASTICSEARCH_INDEX_NAMES = {
 # ELASTICSEARCH_INDEX_NAMES = {
 #     'search_indexes.documents.address': 'prod_address',
 # }
+
+### ABOUT PAGE
+## TODO: change url
+ABOUT_US_SPIEL = "<span class='spiel-headline'>Ceramic Isles</span> <span class='spiel-normal'>as a website is presented \
+                  on behalf of ceramicists, sculptors, potters \
+                  and anyone else who likes to work with clay, \
+                  in the Channel Islands.</span>"
+
+### RULES PAGE
+APP_NAME = 'Ceramic Isles'
