@@ -24,13 +24,17 @@ class ProfileUpdateView(UpdateView):
         context = super().get_context_data(**kwargs)
         if self.request.method == 'GET':
             context['user_form'] = self.user_form_class(initial={'username':self.request.user.username,
-                                                                  'email':self.request.user.email })     
+                                                                  'email':self.request.user.email,
+                                                                  'first_name':self.request.user.first_name,
+                                                                  'last_name':self.request.user.last_name })     
         return context
 
     def form_valid(self, form, *args, **kwargs):
         user_form = self.user_form_class(self.request.POST)
         user_form.initial = {'username':self.request.user.username,
-                             'email':self.request.user.email }
+                             'email':self.request.user.email,
+                             'first_name':self.request.user.first_name,
+                             'last_name':self.request.user.last_name }
         user_form.errors.clear()  ### django validates username against database automatically, but not email
         if user_form.has_changed():
             if user_form.is_valid():

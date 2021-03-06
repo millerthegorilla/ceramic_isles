@@ -10,7 +10,7 @@ font-family: 'Akaya Kanadaka', cursive;*/
   background-repeat: no-repeat;
   background-attachment: fixed;
   background: rgb(9,121,113);
-  background: linear-gradient(0deg, rgba(2,0,36,1) 2%, rgba(9,121,113,1) 54%, rgba(0,212,255,1) 100%);
+  background: linear-gradient(0deg, rgba(82,80,126,1) 2%, rgba(9,121,113,1) 54%, rgba(0,212,255,1) 100%);
 }
 
 .main-container-post {
@@ -99,6 +99,7 @@ font-family: 'Akaya Kanadaka', cursive;*/
   left: 0;
   padding: 0;
   height: 100vh;
+  margin-top: 12vh;
 }
 
 /* PROFILE */
@@ -119,10 +120,13 @@ font-family: 'Akaya Kanadaka', cursive;*/
   font-size: 2.2rem;
   font-family: 'Lobster Two', cursive;
 }
+
+.people-page {
+  padding: 0;
+}
 /* CAROUSEL */
 
 #carousel-large-background {
-  margin-top: 10vh;
   height: 100vh;
 }
 
@@ -141,12 +145,12 @@ font-family: 'Akaya Kanadaka', cursive;*/
 .carousel-caption {
   font-family: 'Ubuntu', sans-serif;
   background-color: rgba(23, 62, 67, 0.75);
+  visibility: hidden;
 }
 
 .carousel-image {
   position: relative;
   object-fit: scale-down;
-  top: 2vh;
   height: 87vh;
   width:100vw;
   margin: auto;

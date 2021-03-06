@@ -8,25 +8,14 @@
         {% else %}
           <div id="image-{{ forloop.counter }}-carousel" class="carousel-item">
         {% endif %}
-<!--              {% thumbnail image.image_file image_size as im %}
+             {% thumbnail image.image_file image_size as im %}
                 <img src="{{ im.url }}" class="carousel-image" id="image-{{ forloop.counter }}-image" />
-              {% endthumbnail %} -->
-
-                    <img src="{% thumbnail image.image_file image_size as im %}
-                        {{ im.url }}
-                      {% endthumbnail %}" 
-                          srcset="{% thumbnail image.image_file '350x350' as im %}
-                                      {{ im.url }} {{ im.x }}w
-                                  {% endthumbnail %},
-                                  {% thumbnail image.image_file image_size as im %}
-                                      {{ im.url }} {{ im.x }}w
-                                  {% endthumbnail %}" 
-                          sizes="(max-width: 410px) 350px, 768px" class="carousel-image" id="image-{{forloop.counter}}-image" >
+              {% endthumbnail %}
             <div class="carousel-caption p-2 col-sm-6 col-md-4 col-lg-3 d-md-block text-white">
               <h5>{{ image.image_title }}</h5>
               <p>{{ image.image_text }}</p>
-              <p>Made by <a class="headline-text" href='{% url "django_forum_app:personal_page_view" name_slug=image.user_profile.display_name %}'>{{image.user_profile.display_name}}</a>
-              <p>You can buy this at <a href="{{ image.image_shop_link }}" target="blank" class="landing-img-link text-warning">{{ image.image_shop_link_title }}</a></p>
+              <p>Made by <a href='people/{{image.user_profile.display_name}}'>{{image.user_profile.display_name}}</a>
+              <p>You can buy this at <a href="{{ image.image_shop_link }}" class="landing-img-link text-warning">{{ image.image_shop_link_title }}</a></p>
             </div>
           </div>
         {% endfor %}

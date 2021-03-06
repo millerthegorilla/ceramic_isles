@@ -11,7 +11,7 @@
 		<div class="row h-75 align-items-center">
 			<div class="col-auto mx-auto">
 				{% if success %} 
-					<h2>Congratulations <span class="text-white">{{ user.username }}...</span><br>
+					<h2>Congratulations <span class="text-white">{{ user.profile.display_name }}...</span><br>
 						<span class="ps-5">your account is confirmed!</span></h2><br>
 					<span><h4><a class="text-white" href="{% url 'logout' %}?next={% url 'login' %}">Login</a></h4></span>
 					<div class="balloon"></div>

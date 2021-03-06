@@ -109,9 +109,11 @@ class ForumPostView(LoginRequiredMixin, PostView):
         post = ForumPost.objects.get(pk=kwargs['pk'])
         new_comment_form = self.form_class()
         comments = ForumComment.objects.filter(post=post)
+        user_display_name = self.request.user.profile.display_name
         return render(self.request, self.template_name, {'post': post,
                                                          'comments': comments,
-                                                         'comment_form': new_comment_form})
+                                                         'comment_form': new_comment_form,
+                                                         'user_display_name': user_display_name})
 
 
 @method_decorator(never_cache, name='dispatch')
