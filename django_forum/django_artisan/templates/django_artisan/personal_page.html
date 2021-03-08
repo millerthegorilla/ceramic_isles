@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}{{ siteName }} - Personal Page{% endblock title %}
+{% block content %}
+{% load thumbnail %}
+<div class="container-fluid people-page">
+	{% if name is None and bio == "" and profile_image_file is None and images.count == 0 and outlets == '' and shop_link == '' %}
+	<div class="col-12 col-sm-10 col-md-8 col-lg-5 mx-auto mt-5 text-white">
+		<span><h3 class="ms-3">{{ display_name }}...</h3><h4>has yet to upload any details or images or their work.</h4></span>
+	</div>
+	{% else %}
+		<div class="row mb-3">
+			<div class="p3 col-11 col-sm-10 col-md-8 col-lg-5 text-white">
+				<h4 class="ms-3 profile-names">{{ name|cut:"None" }}</h4><br>
+				<div class="ps-3">
+					<div>{{ bio }}</div>
+					{% if shop_link %}
+					<div>You can buy my work here... <a class="text-warning" target="_blank" href="{{ shop_link }}">{{ shop_link }}</a></div>
+					{% endif %}
+					{% if outlets %}
+					<div>Or at one of the following outlets:</div>
+					<div>{{ outlets }}</div>
+					{% endif %}
+				</div>
+			</div>
+			<div class="ms-3 col-auto">
+	            <img src="{% thumbnail profile_image_file '400x400' as im %}
+	                {{ im.url }}
+          	    {% endthumbnail %}" 
+          	        srcset="{% thumbnail profile_image_file '250x250' as im %}
+                                {{ im.url }} {{ im.x }}w
+                            {% endthumbnail %},
+                            {% thumbnail profile_image_file '400x400' as im %}
+                                {{ im.url }} {{ im.x }}w
+                            {% endthumbnail %}" 
+                    sizes="(max-width: 410px) 250px, 400px" >
+			</div>
+		</div>
+		<div class="row mx-auto gx-0">
+			<div class="col-auto">
+				{% if images %}
+				<span class="ms-3 profile-names text-white"><h2 class="ms-3">{% if name %}{{ name }}'s Gallery...{% else %}Gallery...{% endif %}</h2></span>
+	    		{% include './carousel.html' %}
+	    		{% endif %}
+	    	</div>
+	 	</div>
+	 {% endif %}
+</div>
+{% endblock content %}

@@ -1,6 +1,6 @@
 <!--dajngo_users_app/templates/registration/login.html-->
-
 {% extends 'base.html' %}
+{% block title %}{{ siteName }} - Login{% endblock title %}
 {% load crispy_forms_tags %}
 {% block content %}
     <div class="row align-items-center h-75">
@@ -14,8 +14,8 @@
                     </div>
                     <button type="submit" class="btn btn-primary mb-3">Sign in</button>
                     <div class="row justify-content-between">
-                        <a href="{% url 'password_reset' %}" class="ml-3 col-auto me-auto text-white">Reset password</a>
-                        <a href="{% url 'register' %}" class="ml-3 col-auto text-white">Register</a>
+                        <a href="{% url 'password_reset' %}" class="atxt ml-3 col-auto me-auto">Reset password</a>
+                        <a href="{% url 'register' %}" class="atxt ml-3 col-auto">Register</a>
                     </div>
                 </div>
             </form>

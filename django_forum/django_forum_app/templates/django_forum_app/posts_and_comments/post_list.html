@@ -1,0 +1,65 @@
+{% load thumbnail %}
+<div class="mb-3" style="overflow-x:auto;">
+                <table>
+                    <tbody id="post-table" class="tinfo">
+                    <tr class="sub-headline-text">
+                        <th></th>
+                        <th>Title (try clicking one)</th>
+                        <th>Post Leader</th>
+                        <th>Category</th>
+                        <th class="text-center"># Comments</th>
+                        <th>Date</th>
+                    </tr>
+                        {% for post in page_obj.object_list %}
+                            <tr >
+                                    <td>
+                                        {{ post.user_profile.avatar}}
+                                        {% thumbnail post.user_profile.avatar.image_file "50x50" crop="center" as im %}
+                                            <img src="{{ im.url }}" height="{{ im.height }}" width="{{ im.width }}" class="rounded-circle" id="image-{{ post.user_profile.display_name }}_avatar-image" title="{{post.user_profile.display_name}}" />
+                                        {% endthumbnail %}
+                                    </td>
+                                    <td>
+                                        <a href="{{ post.get_absolute_url|safe }}" class="tinfo">{{ post.title }}</a>
+                                    </td>
+                                    <td>
+                                        {{ post.text|striptags|safe|slice:":40" }}...
+                                    </td>
+                                    <td>
+                                        {{ post.get_category_display|safe }}
+                                    </td>
+                                    <td class="text-center">
+                                        {{ post.comments.count }}
+                                    </td>
+                                    <td>
+                                        {{ post.date_created|date }}
+                                    </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="row">
+                {% if request.path == '/forum/posts/' %}
+                    <div class="col-3 mx-auto fixed-bottom mb-3">
+                {% else %}
+                    <div class="col-3 mx-auto">
+                {% endif %}
+                    <div class="row pagination">
+                        <span class="d-flex step-links justify-content-around flex-fill">
+                            {% if page_obj.has_previous %}
+                                <a class="tinfo" href="?page=1">&laquo; first</a>
+                                <a class="tinfo" href="?page={{ page_obj.previous_page_number }}">...previous</a>
+                            {% endif %}
+
+                            <span class="current tinfo">
+                                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                            </span>
+
+                            {% if page_obj.has_next %}
+                                <a class="tinfo" href="?page={{ page_obj.next_page_number }}">next...</a>
+                                <a class="tinfo" href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>

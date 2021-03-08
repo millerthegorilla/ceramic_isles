@@ -1,15 +1,68 @@
 {% extends 'base.html' %}
+{% block title %}{{ siteName }} - Forum Posts{% endblock title %}
 {% block content %}
-    {% if post_list %}
-        <div class="container-fluid h-75">
-            {% for post in post_list %}
-            <div class="row">
-                <span class="col-4 align-self-start"><a href="{{ post.get_absolute_url|safe }}">{{ post.title }}</a></span><span class="col align-self-center">{{ post.text|striptags|safe|slice:":40" }}...</span> 
-                <span class="col align-self-end">{{ post.date_created|date }}</span>
+    {% if page_obj.object_list.count == 0 %}
+        <div class="row">
+            <div class="col-auto mx-auto mt-5">
+                <p><h3>There are currently no posts in the forum.  Why not <a href="{% url 'django_posts_and_comments:post_create_view' %}">add</a> one...?</h3></p>
             </div>
-            {% endfor %}
         </div>
     {% else %}
-        <p>There are no posts in the forum.</p>
+        <div class="container-fluid main-container-post">
+            <div class="row">
+                <div class="col-auto mx-auto headline-text">
+                    <h2>Forum Posts...</h2>
+                </div>
+            </div>
+            <div class="mb-3" style="overflow-x:auto;">
+                <table>
+                    <tbody id="post-table">
+                    <tr class="sub-headline-text">
+                        <th>Title (try clicking one)</th>
+                        <th>Post Leader</th>
+                        <th class="text-center"># Comments</th>
+                        <th>Date</th>
+                    </tr>
+                        {% for post in page_obj.object_list %}
+                            <tr >
+                                <td>
+                                    <a href="{{ post.get_absolute_url|safe }}">{{ post.title }}</a>
+                                </td>
+                                <td>
+                                    {{ post.text|striptags|safe|slice:":40" }}...
+                                </td>
+                                <td class="text-center">
+                                    {{ post.comments.count }}
+                                </td>
+                                <td>
+                                    {{ post.date_created|date }}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="row">
+                <div class="col-3 mx-auto fixed-bottom mb-3">
+                    <div class="row pagination">
+                        <span class="d-flex step-links justify-content-around flex-fill">
+                            {% if page_obj.has_previous %}
+                                <a href="?page=1">&laquo; first</a>
+                                <a href="?page={{ page_obj.previous_page_number }}">...previous</a>
+                            {% endif %}
+
+                            <span class="current">
+                                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                            </span>
+
+                            {% if page_obj.has_next %}
+                                <a href="?page={{ page_obj.next_page_number }}">next...</a>
+                                <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
     {% endif %} 
 {% endblock %}

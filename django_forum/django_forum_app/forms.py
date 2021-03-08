@@ -8,14 +8,11 @@ from tinymce.widgets import TinyMCE
 
 from django_profile.forms import ProfileUserForm, ProfileDetailForm
 from django_posts_and_comments.forms import PostCreateForm, CommentForm
-from .models import ForumProfile, ForumProfileImage, ForumPost, ForumComment
+from .models import ForumProfile, ForumPost, ForumComment
 from .fields import FloatingField, FileInput
 
-from safe_filefield.forms import SafeImageField    ## TODO: need to setup clamav.conf properly
 
 ### START FORUMPROFILE
-
-
 class ForumProfileUserForm(ProfileUserForm):
     # class Meta(ProfileUserForm.Meta):
     #     fields = ProfileUserForm.Meta.fields
@@ -27,11 +24,6 @@ class ForumProfileUserForm(ProfileUserForm):
 
 
 class ForumProfileDetailForm(ProfileDetailForm):
-    image_file = SafeImageField(allowed_extensions=('jpg','png'), 
-                               check_content_type=True, 
-                               scan_viruses=True, 
-                               media_integrity=True,
-                               max_size_limit=2621440)
     class Meta(ProfileDetailForm.Meta):
         model = ForumProfile
         fields = ProfileDetailForm.Meta.fields + [
@@ -39,26 +31,21 @@ class ForumProfileDetailForm(ProfileDetailForm):
                                                   'address_line_2', \
                                                   'parish', \
                                                   'postcode', \
-                                                  'bio', \
-                                                  'shop_web_address', \
-                                                  'outlets', \
-                                                  'image_file'
+                                                  'bio',
                                                  ]
         exclude = ['profile_user']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['image_file'].required = False
-        self.fields['image_file'].label = 'A single image for your personal page, click Update Profile to upload it...'
         self.helper = FormHelper()
         self.helper.form_tag = False
         self.helper.layout = Layout(
-                HTML('<span class="text-white">Your display name is used in the forum, and to make \
+                HTML('<span class="tinfo">Your display name is used in the forum, and to make \
                         your personal page address.  Try your first name and last name, \
                         or use your business name.  It *must* be different to your username.  It will be \
                         converted to an internet friendly name when you save it.</span>'),
                 FloatingField('display_name'),
-                HTML('<span class="text-white">Address details are only necessary if there is mail for users</span>'),
+                HTML('<span class="tinfo">Address details are only necessary if there is mail for users</span>'),
                 HTML('<a class="btn btn-primary mb-3" data-bs-toggle="collapse" \
                      href="#collapseAddress" role="button" aria-expanded="false" \
                      aria-controls="collapseAddress">Address details</a><br>'),
@@ -68,98 +55,10 @@ class ForumProfileDetailForm(ProfileDetailForm):
                 FloatingField('parish'),
                 FloatingField('postcode'),
                 css_class="collapse ps-3", id="collapseAddress"),
-                HTML('<span class="text-white">Biographical detail is a maximum 500 character space to display \
-                         on your personal page.</span>'),
-                FloatingField('bio'),
-                HTML('<span class="text-white">Your shop web address to be displayed on your personal page</span>'),
-                FloatingField('shop_web_address'),
-                HTML('<span class="text-white">A comma separated list of outlets that sell your stuff, for your personal page.</span>'),
-                FloatingField('outlets'),
-                Field('image_file', css_class="text-white")
         )
         self.helper.form_id = 'id-profile-form'
         self.helper.form_method = 'post'
         self.helper.form_class = 'col-auto'
-
-
-MAX_NUMBER_OF_IMAGES = settings.MAX_USER_IMAGES
-
-
-class ForumProfileImageForm(forms.ModelForm):
-    image_file = SafeImageField(allowed_extensions=('jpg','png'), 
-                               check_content_type=True, 
-                               scan_viruses=True, 
-                               media_integrity=True,
-                               max_size_limit=2621440)
-    class Meta:
-        model = ForumProfileImage
-        fields = ['image_file', 'image_title', 'image_text', 'image_shop_link', 'image_shop_link_title']
-
-    def __init__(self, instance=None, user=None, *args, **kwargs):
-        self.user = user
-        super().__init__(*args, **kwargs)
-        self.fields['image_file'].validators.append(self.restrict_amount)
-
-        self.helper = FormHelper()
-        self.helper.form_tag = False
-        self.helper.layout = Layout(
-            Fieldset(
-                '',
-                FileInput('image_file', name="image_file"),
-                FloatingField('image_title'),
-                FloatingField('image_text'),
-                FloatingField('image_shop_link'),
-                FloatingField('image_shop_link_title'),),
-        )
-        self.helper.form_id = 'id-upload-form'
-        self.helper.form_method = 'post'
-        self.helper.form_class = 'col-auto col-xs-3'
-
-
-    def restrict_amount(self, value):
-        if self.user is not None:
-            if ForumProfileImage.objects.filter(user_profile=self.user.profile.forumprofile).count() >= MAX_NUMBER_OF_IMAGES:
-                raise ValidationError('User already has {} images'.format(MAX_NUMBER_OF_IMAGES))
-
-
-# handle deletion
-class ForumProfileImages(forms.ModelForm):
-    image_file = SafeImageField(allowed_extensions=('jpg','png'), 
-                               check_content_type=True, 
-                               scan_viruses=True, 
-                               media_integrity=True,
-                               max_size_limit=2621440)
-    class Meta:
-        model = ForumProfileImage
-        fields = ['image_file', 'image_text', 'image_shop_link']
-    
-    def __init__(self, user=None, *args, **kwargs):
-        self.user = user
-        super().__init__(*args, **kwargs)
-        self.fields['image_file'].validators.append(self.restrict_amount)
-
-        self.helper = FormHelper()
-        self.helper.layout = Layout(
-            Fieldset(
-                '',
-                FileInput('image_file', css_class="col-auto"),
-                FloatingField('image_text', css_class="col-auto"),
-                FloatingField('image_shop_link', css_class="col-auto"),),        
-        )
-        self.helper.form_id = 'id-upload-form'
-        self.helper.form_method = 'post'
-        self.helper.form_class = 'col-12'
-
-
-    def restrict_amount(self, value):
-        if self.user is not None:
-            if ForumProfileImage.objects.filter(user_profile=self.user.profile.forumprofile).count() >= MAX_NUMBER_OF_IMAGES:
-                raise ValidationError(_('User already has {0} images'.format(MAX_NUMBER_OF_IMAGES)),
-                                      code='max_image_limit',
-                                      params={'value':'3'})
-
-    def clean(self, *args, **kwargs):
-        cleaned_data = super().clean()
 
 
 ###  ENDPROFILE
@@ -180,8 +79,8 @@ class ForumPostCreateForm(PostCreateForm):
                 'Create your post...',
                 FloatingField('title'),
                 Field('text', css_class="mb-3", style="min-height:60vh"),
-                HTML("<div class='font-italic mb-3 text-white'>Maximum of 2000 characters.  Click on word count to see how many characters you have used...</div>"),
-                Div(Field('category'), css_class="text-white"),
+                HTML("<div class='font-italic mb-3 tinfo'>Maximum of 2000 characters.  Click on word count to see how many characters you have used...</div>"),
+                Div(Field('category'), css_class="tinfo"),
                 Submit('save', 'Publish Post', css_class="col-3 mt-3 mb-3"),
             )
         )
@@ -202,11 +101,11 @@ class ForumCommentForm(CommentForm):
                     Column(
                         Field('text', style="max-height:15vh"),
                         Div(HTML('<span>...characters left: 500</span>'), 
-                            id="count", css_class="ms-auto text-white"),
+                            id="count", css_class="ms-auto tinfo"),
                                css_class="d-flex flex-column"),
                         css_class="d-flex flex-row align-items-end"),
                 Submit('save', 'comment', css_class="col-auto mt-3"),
-            css_class="text-white")
+            css_class="tinfo")
         )
         self.helper.form_id = 'id-post-create-form'
         self.helper.form_method = 'post'

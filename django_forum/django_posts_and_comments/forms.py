@@ -49,10 +49,10 @@ class CommentForm(ModelForm):
                     Column(
                         Field('text', style="max-height:15vh"),
                         Div(HTML('<span>...characters left: 500</span>'), 
-                            id="count", css_class="ms-auto text-white"),
+                            id="count", css_class="ms-auto tinfo"),
                                css_class="d-flex flex-column"),
                         css_class="d-flex flex-row align-items-end"),
-                Submit('save', 'comment', css_class="col-auto mt-3"), css_class="text-white"
+                Submit('save', 'comment', css_class="col-auto mt-3"), css_class="tinfo"
             )
         )
         self.helper.form_id = 'id-post-create-form'

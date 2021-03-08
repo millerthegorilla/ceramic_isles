@@ -6,8 +6,8 @@ from django.conf import settings
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, Row, Column, Field, Fieldset, Div
 from .fields import FloatingField
-from .models import Profile, ProfileImage
-from safe_filefield.forms import SafeImageField    ## TODO: need to setup clamav.conf properly
+from .models import Profile
+from safe_imagefield.forms import SafeImageField    ## TODO: need to setup clamav.conf properly
 
 
 class ProfileUserForm(ModelForm):
@@ -26,6 +26,7 @@ class ProfileUserForm(ModelForm):
         for fieldname in ['username', 'email']:
             self.fields[fieldname].help_text = None
         self.helper = FormHelper()
+        self.helper.form_tag = False
         self.helper.css_class =''
         self.helper.layout = Layout(
                 FloatingField('username'),
@@ -72,82 +73,13 @@ class ProfileDetailForm(ModelForm):
     class Meta:
         model = Profile
         fields = ['profile_user', 'display_name']
+        exclude = ['profile_user']
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs) 
-
-
-MAX_NUMBER_OF_IMAGES = settings.MAX_USER_IMAGES
-
-
-class ProfileImageForm(ModelForm):
-    image_file = SafeImageField(allowed_extensions=('jpg','png'), 
-                               check_content_type=True, 
-                               scan_viruses=True, 
-                               media_integrity=True,
-                               max_size_limit=2621440)
-    class Meta:
-        model = ProfileImage
-        fields = ['image_file']
-
-    def __init__(self, instance=None, user=None, *args, **kwargs):
-        self.user = user
         super().__init__(*args, **kwargs)
-        self.fields['image_file'].validators.append(self.restrict_amount)
-
         self.helper = FormHelper()
+        self.helper.css_class =''
         self.helper.form_tag = False
         self.helper.layout = Layout(
-            Fieldset(
-                '',
-                FileInput('image_file', name="image_file"),),
+                FloatingField('display_name'),
         )
-        self.helper.form_id = 'id-upload-form'
-        self.helper.form_method = 'post'
-        self.helper.form_class = 'col-auto col-xs-3'
-
-
-    def restrict_amount(self, value):
-        if self.user is not None:
-            if ProfileImage.objects.filter(user_profile=self.user.profile.forumprofile).count() >= MAX_NUMBER_OF_IMAGES:
-                raise ValidationError('User already has {} images'.format(MAX_NUMBER_OF_IMAGES))
-
-
-# handle deletion
-class ProfileImages(ModelForm):
-    image_file = SafeImageField(allowed_extensions=('jpg','png'), 
-                               check_content_type=True, 
-                               scan_viruses=True, 
-                               media_integrity=True,
-                               max_size_limit=2621440)
-    class Meta:
-        model = ProfileImage
-        fields = ['image_file']
-    
-    def __init__(self, user=None, *args, **kwargs):
-        self.user = user
-        super().__init__(*args, **kwargs)
-        self.fields['image_file'].validators.append(self.restrict_amount)
-
-        self.helper = FormHelper()
-        self.helper.layout = Layout(
-            Fieldset(
-                '',
-                FileInput('image_file', css_class="col-auto"),),        
-        )
-        self.helper.form_id = 'id-upload-form'
-        self.helper.form_method = 'post'
-        self.helper.form_class = 'col-12'
-
-
-    def restrict_amount(self, value):
-        if self.user is not None:
-            if ProfileImage.objects.filter(user_profile=self.user.profile.forumprofile).count() >= MAX_NUMBER_OF_IMAGES:
-                raise ValidationError(_('User already has {0} images'.format(MAX_NUMBER_OF_IMAGES)),
-                                      code='max_image_limit',
-                                      params={'value':'3'})
-
-    def clean(self, *args, **kwargs):
-        cleaned_data = super().clean()
-
-

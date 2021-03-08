@@ -1,32 +1,28 @@
 from django.urls import path, include
-from .profile_views import ForumProfileUpdateView, \
-                           ForumProfileImageDeleteView, \
-                           ForumProfileUploadView
-from .views import LandingPageView, \
-                   ForumPostListView, \
+
+from .views import ForumPostListView, \
                    ForumPostView, \
                    ForumPostCreateView, \
-                   PersonalPageView, \
-                   AboutPageView, \
-                   CustomRegisterView
-                   #posts_search, autocomplete
+                   CustomRegisterView, \
+                   ForumProfileUpdateView, \
+                   RulesPageView
+                   #autocomplete
 from .forms import ForumPostCreateForm
 from .models import ForumPost
 
 app_name="django_forum_app"
 urlpatterns = [
-    path('users/accounts/profile/', ForumProfileUpdateView.as_view(), 
+    path('profile/', ForumProfileUpdateView.as_view(), 
                                 name='profile_update_view'),
-    path('users/accounts/profile/images/update/', ForumProfileUploadView.as_view(), name='image_update'),
-    path('users/accounts/profile/images/update/<slug:unique_id>/', ForumProfileImageDeleteView.as_view(), name='remove_images'),
-    path('users/accounts/register/', CustomRegisterView.as_view(), name='register'),
-    path('forum/create_post/', ForumPostCreateView.as_view(), name='post_create_view'),
-    path('forum/posts/<slug:search_slug>', ForumPostListView.as_view(), name='post_list_view'),
-    path('forum/posts/', ForumPostListView.as_view(), name='post_list_view'),
-    path('forum/<int:pk>/<slug:post_slug>/', ForumPostView.as_view(), name='post_view'),
-    path('', LandingPageView.as_view(), name='landing_page'),
-    path('people/<slug:name_slug>/', PersonalPageView.as_view(), name='personal_page_view'),
-    path('about/', AboutPageView.as_view(), name='about_view'),
-    # path('posts_search/', posts_search, name='custom-search'),
-    # path('autocomplete/', autocomplete, name='autocomplete')
+    path('create_post/', ForumPostCreateView.as_view(), name='post_create_view'),
+    path('posts/<slug:search_slug>', ForumPostListView.as_view(), name='post_list_view'),
+    path('posts/', ForumPostListView.as_view(), name='post_list_view'),
+    path('<int:pk>/<slug:post_slug>/', ForumPostView.as_view(), name='post_view'),
+    path('rules/', RulesPageView.as_view(), name='rules_view')
+    # path('autocomplete/', autocomplete, name='autocomplete')  # experimental autocomplete
 ]
+
+### NEEDED FOR ADDITION OF DISPLAY_NAME AND RULES
+# the following goes in the project top level urls.py
+# from django_profile.views import CustomRegisterView
+# path('users/accounts/register/', CustomRegisterView.as_view(), name='register'),

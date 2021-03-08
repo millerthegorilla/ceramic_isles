@@ -18,21 +18,22 @@ from django.urls import include, path
 import debug_toolbar
 from django_email_verification import urls as mail_urls
 from django_users_app import urls as users_app_urls
+#from django_profile import urls as profile_urls
 from django_forum_app import urls as forum_app_urls
+from django_artisan import urls as artisan_app_urls
+#from django_posts_and_comments import urls as p_c_urls
 from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import re_path
 from django.contrib.staticfiles import views
-
-admin.site.site_header = 'Ceramic Isles admin'
-admin.site.site_title = 'Ceramic Isles admin'
-admin.site.site_url = 'http://127.0.0.1/'      ### TODO:  change this in production
-admin.site.index_title = 'Ceramic Isles administration'
-admin.empty_value_display = '**Empty**'
+from django_forum_app.views import CustomRegisterView
 
 urlpatterns = [
-    path('', include(forum_app_urls)),
-    path('forum/', include('django_posts_and_comments.urls')),
+    path('', include(artisan_app_urls)),
+    path('forum/', include(forum_app_urls)),
+   # path('forum/', include(p_c_urls)),
+   # path('profile/', include(profile_urls)),
+    path('users/accounts/register/', CustomRegisterView.as_view(), name='register'),
     path('users/', include(users_app_urls)),
     path('email/', include(mail_urls)),
     path('admin/', admin.site.urls),

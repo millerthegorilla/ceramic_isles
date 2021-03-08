@@ -1,0 +1,30 @@
+{% load thumbnail %}
+{% load crispy_forms_tags %}
+<div class="col-xs-12 col-sm-12 col-md-7 col-lg-6 me-auto">
+    <div class="row">
+        <div class="col-auto">
+            {% if images.count %}
+                <h5>Currently uploaded user images</h5><br>
+                <h6>(click image to delete):</h6>
+            {% endif %}
+        </div>
+    </div>
+    {% for image in images %}
+    <div class="container-fluid">
+        <div id="image-card" class="card image-card w-100 mb-4 p-3" style="background-color: rgba(54, 133, 77, 0.6);">
+            <form action="{% url 'django_artisan:remove_images' image.image_id|stringformat:'s' %}" method="post" class="mb-3">
+                {% csrf_token %}
+                <div>
+                {% thumbnail image.image_file "80x80" as im %}
+                    <input type="image" src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}" name="saveForm-{{ forloop.counter }}" class="btTxt submit img-thumbnail card-img-left" id="saveForm-{{ forloop.counter }}" />
+                {% endthumbnail %}
+                </div>
+            </form>
+            <h6 class="text-white card-title">Image number {{ forloop.counter }}</h6>
+            <h6 class="text-white card-subtitle">Image text:</h6>{{ image.image_text }}
+            <h6 class="text-white card-link">Link to shop page</h6>{{ image.image_shop_link }}
+            <h6 class="text-white card-subtitle">Link text</h6>{{ image.image_shop_link_title }}
+        </div>
+    </div>
+    {% endfor %}
+</div>

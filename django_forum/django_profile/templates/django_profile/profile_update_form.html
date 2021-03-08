@@ -6,15 +6,13 @@
 	<div class="container">
     <div class="row">
         <div class="col-12 col-sm-10 col-md-6 col-lg-5 mb-3 mx-auto">
-    	    <form method="post" action="{% url 'django_profile:profile_update' %}" class="col-auto">
+    	    <form method="post" action="{% url 'django_profile:profile_update_view' %}" class="col-auto">
     	        {% csrf_token %}
                 <fieldset legend="profile">
     	        {% crispy user_form %}
     	        {% crispy form %}
                 </fieldset>
-                <div class="row justify-content-between">
-                    <a href="{% url 'dashboard' %}" class="col-auto">Return to Dashboard</a>
-                    <a href="{% url 'django_profile:image_update' %}" class="col-auto btn btn-primary" role="button">Update Images</a>
+                <div class="row justify-content-end">
                     <button type="submit" class="btn btn-primary col-auto">Update Profile</button>
                 </div>
     	    </form>

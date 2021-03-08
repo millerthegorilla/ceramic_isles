@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% block title %}{{ siteName }} - Update Profile{% endblock title %}
 {% load crispy_forms_tags %}
 {% if user.is_authenticated %}
     {% load thumbnail %}
@@ -25,8 +26,7 @@
                     {% crispy form %}
                     </fieldset>
                     <div class="row justify-content-between">
-                        <a href="{% url 'django_forum_app:post_list_view' %}" class="col-auto text-white mb-3">Return to Forum</a>
-                        <a href="{% url 'django_forum_app:image_update' %}" class="col-auto btn btn-success mb-3" role="button">Update your gallery images</a>
+                        <a href="{% url 'django_forum_app:post_list_view' %}" class="col-auto tinfo mb-3">Return to Forum</a>
                         <button type="submit" class="btn btn-primary col-auto mb-3">Update Profile</button>
                     </div>
                 </form>
@@ -34,7 +34,7 @@
             {% if page_obj.object_list.count %}
             <div class="col-12 col-lg-5 mx-auto">
                 <h3 class="text-center headline-text">My Posts</h3>
-                {% include '../post_list.html' %}
+                {% include '../posts_and_comments/post_list.html' %}
             </div>
             {% endif %}
         </div>

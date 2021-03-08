@@ -1,9 +1,12 @@
 from django.urls import include, path
-from .views import ProfileUpdateView, ProfileUpLoadView
+from .views import ProfileUpdateView, CustomRegisterView
 
 app_name="django_profile"
 urlpatterns = [
-    path('profile/images/update/', ProfileUploadView.as_view(), name='image_update'),
-    path('profile/', ProfileUpdateView.as_view(), name='profile_update'),
-    path('profile/images/update/<slug:unique_id>/', ProfileImageDeleteView.as_view(), name='remove_images')
+    path('', ProfileUpdateView.as_view(), name='profile_update_view'),
 ]
+
+### NEEDED FOR ADDITION OF DISPLAY_NAME
+# the following goes in the project top level urls.py
+# from django_profile.views import CustomRegisterView
+# path('users/accounts/register/', CustomRegisterView.as_view(), name='register'),

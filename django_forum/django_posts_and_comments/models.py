@@ -18,10 +18,14 @@ class Post(SoftDeletionModel):
     title = models.CharField(max_length=100, default='')
     slug = models.SlugField(unique=True, db_index=True, max_length=80)    # added unique and index but not tested.
     date_created = models.DateTimeField(auto_now_add=True)
-    
+    user_profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="posts")
+
     class Meta:
         UniqueConstraint(fields=['title', 'date_created'], name='unique_post')
-        
+    
+    def post_author(self):
+        return self.user_profile.display_name
+
     def get_absolute_url(self):
         return reverse_lazy('django_posts_and_comments:post_view', args=(self.id, self.slug,))
 
@@ -35,8 +39,12 @@ class Comment(SoftDeletionModel):
     text = models.TextField(max_length=500)
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="comments")
     date_created = models.DateTimeField(auto_now_add=True)
+    user_profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="comments")
 
     def save(self, post=None, **kwargs):
         if post is not None:
             self.post = post
         super().save(**kwargs)
+
+    def comment_author(self):
+        return self.user_profile.display_name

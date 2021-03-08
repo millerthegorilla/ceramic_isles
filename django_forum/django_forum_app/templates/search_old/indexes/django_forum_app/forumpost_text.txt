@@ -1,4 +1,0 @@
-{{ object.title }}
-{{ object.user_profile.profile_user.get_full_name }}
-{{ object.text }}
-{{ object.date_created }}

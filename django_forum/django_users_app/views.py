@@ -40,7 +40,3 @@ class RegisterView(CreateView):
         super().form_valid(form)
         send_email(user, custom_salt=uuid.uuid4())
         return redirect('password_reset_done')
-
-class RulesPageView(TemplateView):
-    template_name = 'django_users_app/rules.html'
-    extra_context = { 'app_name': settings.APP_NAME }
