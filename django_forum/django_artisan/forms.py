@@ -25,23 +25,29 @@ class ArtisanForumProfileDetailForm(ForumProfileDetailForm):
         model = ArtisanForumProfile
         fields = ForumProfileDetailForm.Meta.fields + [
                                                   'image_file', \
+                                                  'bio', \
                                                   'shop_web_address', \
-                                                  'outlets',
+                                                  'outlets', \
+                                                  'listed_member', \
                                                  ]
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['image_file'].required = False
         self.fields['image_file'].label = 'A single image for your personal page, click Update Profile to upload it...'
         self.helper.layout.fields = self.helper.layout.fields + [ 
-            Field('image_file', css_class="text-white"),
-            HTML('<span class="text-white">Your shop web address to be displayed on your personal page</span>'),
+            Field('image_file', css_class="tinfo"),
+            HTML('<span class="text-white">Biographical detail is a maximum 500 character space to display \
+                                     on your personal page.</span>'),
+            FloatingField('bio'),
+            HTML('<span class="tinfo">Your shop web address to be displayed on your personal page</span>'),
             FloatingField('shop_web_address'),
-            HTML('<span class="text-white">A comma separated list of outlets that sell your stuff, for your personal page.</span>'),
+            HTML('<span class="tinfo">A comma separated list of outlets that sell your stuff, for your personal page.</span>'),
             FloatingField('outlets'),
+            Div(Field('listed_member'), css_class="tinfo"),
         ]
         self.helper.form_id = 'id-profile-form'
         self.helper.form_method = 'post'
-        self.helper.form_class = 'col-auto'
+        self.helper.form_class = 'col-auto tinfo'
 
 
 class UserProductImageForm(forms.ModelForm):

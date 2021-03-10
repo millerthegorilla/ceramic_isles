@@ -37,12 +37,13 @@ class ArtisanForumProfileUpdateView(ForumProfileUpdateView):
     def form_valid(self, form, **kwargs):
         if self.request.POST['type'] == 'update-profile':
             if form.has_changed():
-                    obj = super().form_valid(form)
+                    obj = form.save()
                     if obj.image_file:
                         url = str(settings.BASE_DIR) + obj.image_file.url
                         img = Image.open(url)
                         img = ImageOps.expand(img, border=10, fill='white')
                         img.save(url)
+            super().form_valid(form)
             return redirect(self.success_url)
         elif self.request.POST['type'] == 'update-avatar':
             super().form_valid(form)
@@ -50,13 +51,18 @@ class ArtisanForumProfileUpdateView(ForumProfileUpdateView):
 
     def get_context_data(self, **args):
         context = super().get_context_data(**args)
+        # context['form'].initial.update(
+        #             {'bio':self.request.user.profile.forumprofile.artisanforumprofile.bio,
+        #              'image_file':self.request.user.profile.forumprofile.artisanforumprofile.image_file,
+        #              'shop_web_address':self.request.user.profile.forumprofile.artisanforumprofile.shop_web_address,
+        #              'outlets':self.request.user.profile.forumprofile.artisanforumprofile.outlets,
+        #              'listed_member':self.request.user.profile.forumprofile.artisanforumprofile.listed_member})
         context['avatar'] = ArtisanForumProfile.objects.get(profile_user=self.request.user).avatar
         queryset = ForumPost.objects.filter(author=self.request.user.profile.display_name)
         paginator = Paginator(queryset, 6)
         page_number = self.request.GET.get('page')
         page_obj = paginator.get_page(page_number)
         context['page_obj'] = page_obj
-        breakpoint()
         return context
 
 
@@ -67,9 +73,13 @@ class AboutPageView(ListView):
     def get_context_data(self):
         data = super().get_context_data()
         data['about_text'] = settings.ABOUT_US_SPIEL
-        qs = ArtisanForumProfile.objects.all().exclude(profile_user__is_superuser=True) \
-                                       .values_list('display_name', flat=True)
-        data['dnames'] = qs
+        qs = ArtisanForumProfile.objects.all().exclude(profile_user__is_superuser=True).exclude(listed_member=False) \
+                                       .values_list('display_name', 'avatar__image_file')
+        if qs.count:
+            data['people'] = {}
+            for i, entry in enumerate(qs):
+                data['people'][i] = {'display_name':entry[0], 'avatar':entry[1]}
+
         data['colours'] = ['text-white', 'text-purple', 'text-warning', 'text-lightgreen', 'text-danger', 'headline-text', 'sub-headline-text']
         return data
 

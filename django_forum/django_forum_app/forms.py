@@ -31,7 +31,6 @@ class ForumProfileDetailForm(ProfileDetailForm):
                                                   'address_line_2', \
                                                   'parish', \
                                                   'postcode', \
-                                                  'bio',
                                                  ]
         exclude = ['profile_user']
 

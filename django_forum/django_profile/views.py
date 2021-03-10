@@ -33,7 +33,6 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
                                                                   'email':self.request.user.email,
                                                                   'first_name':self.request.user.first_name,
                                                                   'last_name':self.request.user.last_name }) 
-            context['form'] = self.form_class(initial={'display_name': self.request.user.profile.display_name})    
         return context
 
     def form_valid(self, form, *args, **kwargs):
@@ -42,14 +41,14 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
                              'email':self.request.user.email,
                              'first_name':self.request.user.first_name,
                              'last_name':self.request.user.last_name }
-        user_form.errors.clear()  ### django validates username against database automatically, but not email
-        if user_form.has_changed():
-            if user_form.is_valid():
-                for change in user_form.changed_data:
-                    setattr(self.request.user, change, user_form[change].value())
-                self.request.user.save()
+        #user_form.errors.clear()  ### django validates username against database automatically, but not email
+        for change in user_form.changed_data:
+            setattr(self.request.user, change, user_form[change].value())
+        self.request.user.save()
         if form.has_changed():
-            form.save()
+            obj = form.save(commit=False)
+            obj.display_name = slugify(form['display_name'].value())
+            obj.save()
         return render(self.request, self.template_name, {'form': form, 'user_form': user_form})
 
 

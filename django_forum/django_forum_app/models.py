@@ -40,11 +40,6 @@ class Avatar(models.Model):
 
 
 class ForumProfile(Profile):
-    bio = models.TextField('biographical information, max 500 chars', 
-                            max_length=500, 
-                            blank=True, 
-                            default='', 
-                            help_text="This is the biographical information that will be presented on your personal page")
     address_line_1 = models.CharField('address line 1', max_length=30, blank=True, default='')
     address_line_2 = models.CharField('address line 2', max_length=30, blank=True, default='')
     parish = models.CharField('parish', max_length=30, blank=True, default='')
