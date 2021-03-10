@@ -36,14 +36,15 @@ SECRET_KEY = 'xt==^l@8&77h0lyorjl&21va$6@fr0k7wb3@shw!h#%ch8(=_#'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', '192.168.1.8']
+ALLOWED_HOSTS = ['127.0.0.1', '192.168.200.6']
 
 # Application definition
 
 INSTALLED_APPS = [
+    'django_artisan',
     'django_forum_app',
-    'django_profile',
     'django_posts_and_comments',
+    'django_profile',
     'django_users_app',
     'django_email_verification',
     'django.contrib.admin',
@@ -91,6 +92,9 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django_forum_app.context_processors.siteName',
+                'django_artisan.context_processors.navbarSpiel',
+                'django_artisan.context_processors.siteLogo',
             ],
         },
     },
@@ -172,10 +176,10 @@ AUTH_PASSWORD_VALIDATORS = [
     #     'OPTIONS': {
     #         'min_length_digit': 1,
     #         'min_length_alpha': 1,
-    #         'min_length_special': 1,
+    #         'min_length_special': 0,
     #         'min_length_lower': 1,
     #         'min_length_upper': 1,
-    #         'special_characters': "~!@#$%^&*()_+{}\":;'[]"
+    #         'special_characters': ""
     #     }
     # },
 ]
@@ -230,8 +234,8 @@ FILE_UPLOAD_PERMISSIONS = 0o644
 
 # django_users_app
 
-LOGIN_REDIRECT_URL = reverse_lazy('django_forum_app:post_list_view')
-LOGOUT_REDIRECT_URL = reverse_lazy('django_forum_app:landing_page')
+LOGIN_REDIRECT_URL = reverse_lazy('django_artisan:post_list_view')
+LOGOUT_REDIRECT_URL = reverse_lazy('django_artisan:landing_page')
 LOGIN_URL = reverse_lazy('login')
 
 THUMBNAIL_SIZE = (120,120)
@@ -349,11 +353,22 @@ ELASTICSEARCH_INDEX_NAMES = {
 # }
 
 ### ABOUT PAGE
-## TODO: change url
 ABOUT_US_SPIEL = "<span class='spiel-headline'>Ceramic Isles</span> <span class='spiel-normal'>as a website is presented \
                   on behalf of ceramicists, sculptors, potters \
                   and anyone else who likes to work with clay, \
                   in the Channel Islands.</span>"
 
-### RULES PAGE
-APP_NAME = 'Ceramic Isles'
+### NAVBAR
+NAVBAR_SPIEL = "Welcome to Ceramic Isles, a site where ceramic artists \
+                local to the Channel Islands are able to meet, chat, and show off their work. \
+                 If you are a ceramic artist local to one of the Channel Islands, consider \
+                 registering as a user to be able to access the forum, \
+                 and to be able present images of your work here, on this page.<br> \
+                    Click the Ceramic Isles Logo to return to the landing page \
+                    which acts as a gallery for member's work.</p>"
+
+
+### The following are used by django_artisan and django_forum_app
+SITE_NAME = 'Ceramic Isles'
+SITE_LOGO = 'django_artisan/images/vase.svg'
+SITE_URL = 'http://127.0.0.1/' ### change this in production
