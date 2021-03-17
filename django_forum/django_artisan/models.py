@@ -27,6 +27,7 @@ class ArtisanForumProfile(ForumProfile):
     shop_web_address = models.CharField('shop link', max_length=50, blank=True, default='')
     outlets = models.CharField('places that sell my stuff, comma separated', max_length=400, blank=True, default='')
     listed_member = models.BooleanField('List me on about page', default=False)
+    display_personal_page = models.BooleanField('Display personal page', default=False)
 """
     disconnect dummy profile
 """

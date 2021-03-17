@@ -29,6 +29,7 @@ class ArtisanForumProfileDetailForm(ForumProfileDetailForm):
                                                   'shop_web_address', \
                                                   'outlets', \
                                                   'listed_member', \
+                                                  'display_personal_page', \
                                                  ]
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -44,6 +45,7 @@ class ArtisanForumProfileDetailForm(ForumProfileDetailForm):
             HTML('<span class="tinfo">A comma separated list of outlets that sell your stuff, for your personal page.</span>'),
             FloatingField('outlets'),
             Div(Field('listed_member'), css_class="tinfo"),
+            Div(Field('display_personal_page'), css_class="tinfo"),
         ]
         self.helper.form_id = 'id-profile-form'
         self.helper.form_method = 'post'

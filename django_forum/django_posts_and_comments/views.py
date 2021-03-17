@@ -33,6 +33,11 @@ from .forms import PostCreateForm, CommentForm
 @method_decorator(never_cache, name='dispatch')
 @method_decorator(never_cache, name='get')
 class PostView(LoginRequiredMixin, DetailView):
+    """
+        TODO: replace the single view/many form processing with separate urls for
+              each form action, pointing to individual views, each with its own form class,
+              each redirecting to this url/view with its get_context_data, for all forms.
+    """
     model = Post
     slug_url_kwarg = 'post_slug'
     slug_field = 'slug'

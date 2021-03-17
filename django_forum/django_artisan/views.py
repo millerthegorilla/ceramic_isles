@@ -145,6 +145,15 @@ class PersonalPageView(DetailView):
         context['outlets'] = u_p.outlets
         return context
 
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if self.object.display_personal_page:
+            context = self.get_context_data(object=self.object)
+            return self.render_to_response(context)
+        else:
+            return redirect('django_artisan:landing_page')
+
+
 
 class UserProductImageUploadView(LoginRequiredMixin, FormView):
     model = UserProductImage
