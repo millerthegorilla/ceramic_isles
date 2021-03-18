@@ -11,6 +11,10 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'django_forum.settings')
+from dotenv import load_dotenv
+project_folder = os.path.expanduser('/etc/opt/ceramic_isles/settings/')  # adju$
+load_dotenv(os.path.join(project_folder, '.env'))
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')
 
 application = get_wsgi_application()
