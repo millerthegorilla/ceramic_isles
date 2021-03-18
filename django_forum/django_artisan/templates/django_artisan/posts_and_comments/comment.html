@@ -69,7 +69,7 @@
             {% endfor %}
             <div class="row">
 	            <div class="card-body mx-auto">
-	                <form method="post" style="margin-top: 1.3em;">
+	                <form method="post" class="comment-form">
 	                <input type="hidden" name="type" value="comment">
 	                  {% crispy comment_form %}
 	                  {% csrf_token %}

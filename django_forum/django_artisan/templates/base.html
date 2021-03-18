@@ -54,7 +54,7 @@
             <div class="navbar navbar-dark navbar-custom shadow-sm">
               <div class="container">
                 <a href="{% url 'django_artisan:landing_page' %}" class="navbar-brand d-flex align-items-center">
-                  <img src="{% static siteLogo %}" style="height:40px" alt="Vase-Logo">
+                  <img src="{% static siteLogo %}" class="site-logo" alt="Vase-Logo">
                   <strong>{{ siteName }}</strong>
                 </a>
                 <button class="navbar-toggler collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#navbarHeader" aria-controls="navbarHeader" aria-expanded="false" aria-label="Toggle navigation">
@@ -74,15 +74,6 @@
             <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
         {% endblock body_imports %}
         {% block body_js %}
-        <script nonce="r@nd0m">
-        $(document).ready(function () {
-            $(".carousel-item").hover(function(){ $(".carousel-caption").hide();
-              $(".carousel-caption").css('visibility', 'visible');
-              $(".carousel-caption").stop().fadeIn(1000) },
-              function(){   $(".carousel-caption").stop().fadeOut(800, function() {
-                            $(".carousel-caption").css('visibility', 'hidden'); }) });
-        });
-        </script>
         {% endblock body_js %}
     </body>
 </html>

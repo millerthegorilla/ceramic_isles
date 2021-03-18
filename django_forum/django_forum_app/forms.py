@@ -77,7 +77,7 @@ class ForumPostCreateForm(PostCreateForm):
             Fieldset(
                 'Create your post...',
                 FloatingField('title'),
-                Field('text', css_class="mb-3", style="min-height:60vh"),
+                Field('text', css_class="mb-3 post-create-form-text"),
                 HTML("<div class='font-italic mb-3 tinfo'>Maximum of 2000 characters.  Click on word count to see how many characters you have used...</div>"),
                 Div(Field('category'), css_class="tinfo"),
                 Submit('save', 'Publish Post', css_class="col-3 mt-3 mb-3"),
@@ -98,7 +98,7 @@ class ForumCommentForm(CommentForm):
                 'Comment away...!',
                 Row(
                     Column(
-                        Field('text', style="max-height:15vh"),
+                        Field('text', css_class="comment-form-text"),
                         Div(HTML('<span>...characters left: 500</span>'), 
                             id="count", css_class="ms-auto tinfo"),
                                css_class="d-flex flex-column"),

@@ -92,6 +92,10 @@ font-family: 'Akaya Kanadaka', cursive;*/
   font-size: 1.8rem;
 }
 
+.site-logo { 
+    height: 40px;
+}
+
 /* LANDINGPAGE */
 .landing-page {
   position: fixed;
@@ -100,6 +104,10 @@ font-family: 'Akaya Kanadaka', cursive;*/
   padding: 0;
   height: 100vh;
   margin-top: 12vh;
+}
+
+.register-container {
+  height: 100vh;
 }
 
 /* PROFILE */
@@ -165,20 +173,32 @@ table {
   width:100%;
 }
 
-/*.form-autocomplete {
-  z-index: 1000;
+.posts-and-comments {
+  height: 70vh;
 }
 
-.autocomplete {
-  z-index: 1001;
+.posts-and-comments-container {
+  height: 70vh;
 }
 
-.ac-result {
-  z-index:1002;
-}*/
+.post-list {
+  overflow-x: auto;
+}
+
+.post-create-form-text {
+  min-height: 60vh;
+}
+
+.comment-form-text {
+  max-height: 15vh;
+}
 
 #post-edit-div {
   display: none;
+}
+
+.comment-form {
+  margin-top: 1.3em;
 }
 
 .comment-textarea {
@@ -198,6 +218,7 @@ table {
   /* Add shadows to create the "card" effect */
   box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
   transition: 0.3s;
+  background-color: rgba(54, 133, 77, 0.6);
 }
 
 /* On mouse-over, add a deeper shadow */
@@ -226,4 +247,6 @@ table {
 .invalid-feedback {
   color: yellow !important;
 }
+
+
 
