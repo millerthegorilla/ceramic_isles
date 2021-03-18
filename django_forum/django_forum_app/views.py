@@ -55,6 +55,11 @@ class ForumPostCreateView(PostCreateView):
 @method_decorator(never_cache, name='dispatch')
 @method_decorator(never_cache, name='get')
 class ForumPostView(PostView):
+    """
+        TODO: Replace superclass form processing if conditions with separate urls/views
+              and overload them individually here, where necessary, instead of redefining 
+              the whole if clause.
+    """
     model = ForumPost
     slug_url_kwarg = 'post_slug'
     slug_field = 'slug'
