@@ -1,0 +1,229 @@
+/*font-family: 'Lobster Two', cursive;
+font-family: 'Ubuntu', sans-serif;
+font-family: 'Akaya Kanadaka', cursive;*/
+.main-container {
+  padding: 0;
+  height: 100vh;
+  overflow: auto;
+  margin-right: 0;
+  margin-left: 0;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background: rgb(9,121,113);
+  background: linear-gradient(0deg, rgba(82,80,126,1) 2%, rgba(9,121,113,1) 54%, rgba(0,212,255,1) 100%);
+}
+
+.main-container-post {
+  /*height: 100vh;*/
+}
+
+.headline-text {
+  color: #CAF0F8;
+}
+
+.headline-text:hover {
+  color: #CAF0F8;
+}
+
+.sub-headline-text {
+  color: #F4A261;
+}
+
+.sub-headline-text:hover {
+  color: #F4A261;
+}
+
+.text-purple {
+  color: #871F78;
+}
+
+.text-purple:hover {
+  color: #871F78;
+}
+
+.text-lightgreen {
+  color: #93C54B;
+}
+
+.text-lightgreen:hover {
+  color: #93C54B;
+}
+
+/* ABOUT PAGE */
+.spiel-headline {
+  font-size: 2.2rem;
+  font-family: 'Lobster Two', cursive;
+}
+
+.spiel-normal {
+  font-size: 1.8rem;
+}
+
+.card-bg {
+  background-color: rgba(202,240,248,1)
+}
+
+#div_id_new_password1 {
+  margin-bottom: 0.5rem;
+}
+
+#id_old_password {
+  margin-bottom: 0.8rem;
+}
+
+/* NAVBAR */
+.header-navbar {
+  position: relative;
+  margin:0;
+  padding:0;
+  z-index: 1000;
+}
+
+.navbar-inner { 
+    background-color: #AFE1AF; 
+} 
+
+.navbar-custom { 
+    background-color: #173E43; 
+}
+
+.navbar-brand {
+  font-family: 'Lobster Two', cursive;
+  font-size: 1.8rem;
+}
+
+/* LANDINGPAGE */
+.landing-page {
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding: 0;
+  height: 100vh;
+  margin-top: 12vh;
+}
+
+/* PROFILE */
+#div_id_image_file {
+  color: white;
+}
+
+.custom-file-label {
+  display: none;
+}
+
+.form-control.custom-file > .custom-file-input {
+  line-height: 1rem;
+}
+
+/* PERSONAL PAGE */
+.profile-names {
+  font-size: 2.2rem;
+  font-family: 'Lobster Two', cursive;
+}
+
+.people-page {
+  padding: 0;
+}
+/* CAROUSEL */
+
+#carousel-large-background {
+  height: 100vh;
+}
+
+.carousel-inner {
+  height: 100vh;
+}
+
+.carousel-control-next {
+  opacity: 0;
+}
+
+.carousel-control-prev {
+  opacity: 0;
+}
+
+.carousel-caption {
+  font-family: 'Ubuntu', sans-serif;
+  background-color: rgba(23, 62, 67, 0.75);
+  visibility: hidden;
+}
+
+.carousel-image {
+  position: relative;
+  object-fit: scale-down;
+  height: 87vh;
+  width:100vw;
+  margin: auto;
+}
+
+/* POSTS */
+.custom-select {
+  width: 100px;
+}
+
+table {
+  width:100%;
+}
+
+/*.form-autocomplete {
+  z-index: 1000;
+}
+
+.autocomplete {
+  z-index: 1001;
+}
+
+.ac-result {
+  z-index:1002;
+}*/
+
+#post-edit-div {
+  display: none;
+}
+
+.comment-textarea {
+  height: 18vh;
+}
+
+.comment-text > p > a {
+  color:yellow;
+}
+
+.comment-form-buttons {
+  display: none;
+}
+
+/* IMAGE UPLOAD PAGE */
+.image-card {
+  /* Add shadows to create the "card" effect */
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+  transition: 0.3s;
+}
+
+/* On mouse-over, add a deeper shadow */
+.image-card:hover {
+  box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+}
+
+/* Add some padding inside the card container */
+.image-card-container {
+  padding: 2px 16px;
+}
+
+/* login */
+.atxt {
+  color: white;
+}
+
+.tinfo {
+  color: white;
+}
+
+#hint_id_new_password1 {
+  color: white !important;
+}
+
+.invalid-feedback {
+  color: yellow !important;
+}
+
