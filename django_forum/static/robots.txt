@@ -1,0 +1,11 @@
+User-agent: *
+Disallow: /
+Crawl-delay: 5
+Disallow: /**/media/
+Disallow: /**/static/
+Disallow: /**/templates/
+Disallow: /**/django_artisan/
+Disallow: /**/django_posts_and_comments/
+Disallow: /**/django_forum_app/
+Disallow: /**/django_users_app/
+Disallow: /**/django_profile/
