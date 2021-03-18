@@ -1,8 +1,6 @@
 {% extends 'base.html' %}
 {% block title %}{{ siteName }} - Personal Page{% endblock title %}
-{% block extra_js %}
-<script src="{% static 'django_artisan/js/carousel.js' %}" referrerpolicy="origin"></script>
-{% endblock extra_js %}
+{% load static %}
 {% block content %}
 {% load thumbnail %}
 <div class="container-fluid people-page">
@@ -49,3 +47,7 @@
 	 {% endif %}
 </div>
 {% endblock content %}
+
+{% block body_js %}
+<script src="{% static 'django_artisan/js/carousel.js' %}" referrerpolicy="origin"></script>
+{% endblock body_js %}

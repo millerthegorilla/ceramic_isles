@@ -1,10 +1,11 @@
 {% extends 'base.html' %}
 {% block title %}{{ siteName }}{% endblock title %}
-{% block extra_js %}
-<script src="{% static 'django_artisan/js/carousel.js' %}" referrerpolicy="origin"></script>
-{% endblock extra_js %}
+{% load static %}
 {% block content %}
 <div class="container-fluid landing-page">
   {% include './carousel.html' %}
 </div>
 {% endblock content %}
+{% block body_imports %}
+<script src="{% static 'django_artisan/js/carousel.js' %}" referrerpolicy="origin"></script>
+{% endblock body_imports %}
