@@ -35,10 +35,10 @@ class RegisterView(CreateView):
     model = User
     
     def form_valid(self, form, user=None):
+        super().form_valid(form)
         if user is None:
             user = form.save()
         user.is_active = False
         user.save()
-        super().form_valid(form)
         send_email(user, custom_salt=uuid.uuid4())
         return redirect('password_reset_done')
