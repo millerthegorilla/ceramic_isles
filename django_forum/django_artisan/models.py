@@ -1,20 +1,24 @@
 import os
 import uuid
 from random import randint
+from pathlib import Path
+
+from sorl.thumbnail import delete
 
 from django.contrib.auth.models import User
 from django.db import models
 from django.dispatch import receiver
-from django.db.models.signals import pre_save, post_save, post_delete
+from django.db.models.signals import pre_save, post_save, post_delete, pre_delete
+from django.conf import settings
 
 from django_forum_app.models import ForumProfile, create_user_forum_profile, save_user_forum_profile, Avatar, default_avatar
 
 
 def user_directory_path(instance, filename):
     if type(instance) is ArtisanForumProfile:
-        return 'uploads/users/{0}/{1}'.format(instance.profile_user, filename)
+        return 'uploads/users/{0}/{1}'.format(instance.display_name, filename)
     else:
-        return 'uploads/users/{0}/{1}'.format(instance.user_profile.profile_user, filename)
+        return 'uploads/users/{0}/{1}'.format(instance.user_profile.display_name, filename)
 
 
 class ArtisanForumProfile(ForumProfile):
@@ -52,6 +56,33 @@ def save_user_artisan_forum_profile(sender, instance, **kwargs):
         pass
         ## TODO: log error to log file.
 
+@receiver(pre_delete, sender=ArtisanForumProfile)
+def auto_delete_image_file_on_delete(sender, instance, **kwargs):
+    """
+    Deletes file from filesystem
+    when corresponding `MediaFile` object is deleted.
+    """
+    if instance.image_file:
+        fp = instance.image_file.path
+        fd = os.path.dirname(fp)
+        if instance.image_file:
+            if os.path.isfile(fp):
+                try:
+                    delete(instance.image_file)
+                    if len(os.listdir(fd)) == 0:
+                        os.rmdir(fd)
+                    fdu1 = settings.MEDIA_ROOT + \
+                                        'uploads/users/' + \
+                                        instance.display_name
+                    if os.path.isdir(fdu1):
+                        if len(os.listdir(fdu1)) == 0:
+                            os.rmdir(fdu1)
+
+                except ObjectDoesNotExist as i:
+                    # TODO: log file missing
+                    pass
+
+
 # TODO: validate image_shop_link properly 
 # TODO: set a default of 
 class UserProductImage(models.Model):
@@ -87,10 +118,12 @@ def auto_delete_file_on_delete(sender, instance, **kwargs):
     Deletes file from filesystem
     when corresponding `MediaFile` object is deleted.
     """
+    fp = instance.image_file.path
+    fd = os.path.dirname(fp)
     if instance.image_file:
-        delete(instance.image_file)
-        if os.path.isfile(instance.image_file.path):
-            os.remove(instance.image_file.path)
+        delete(instance.image_file)   #removes from cache - sorl thumbnail
+        if len(os.listdir(fd)) == 0:
+            os.rmdir(fd)
 
 @receiver(pre_save, sender=UserProductImage)
 def auto_delete_file_on_change(sender, instance, **kwargs):

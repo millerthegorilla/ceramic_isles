@@ -1,3 +1,4 @@
+import os
 from random import randint
 
 from django.db.models import Max
@@ -5,7 +6,7 @@ from django.core.files import File
 from django.core.exceptions import ObjectDoesNotExist, FieldError
 from django.db import models
 from django.dispatch import receiver
-from django.db.models.signals import pre_init, post_save, pre_save, post_delete
+from django.db.models.signals import pre_init, post_save, pre_save, post_delete, pre_delete
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import fields
@@ -14,6 +15,7 @@ from django.utils import dateformat
 from django.template.defaultfilters import slugify
 from django.urls import reverse_lazy
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 
 from django_profile.models import Profile
 from django_profile.models import create_user_profile, save_user_profile
@@ -35,7 +37,32 @@ def default_avatar(num):
 
 class Avatar(models.Model):
     image_file = models.ImageField(upload_to=user_directory_path_avatar)
+
+@receiver(pre_save, sender=Avatar)
+def auto_delete_file_on_change(sender, instance, **kwargs):
+    """
+    Deletes old file from filesystem
+    when corresponding `MediaFile` object is updated
+    with new file.
+    """
+    if not instance.pk:
+        return False
+
+    try:
+        old_avatar = Avatar.objects.get(pk=instance.pk)
+    except Avatar.DoesNotExist:
+        return False
     
+    if 'default_avatars' not in old_avatar.image_file.path:
+        new_file = instance.image_file
+        if not old_avatar.image_file == new_file:
+            if os.path.isfile(old_avatar.image_file.path):
+                try:
+                    delete(old_avatar.image_file)
+                except ObjectDoesNotExist as i:
+                    pass
+                    ## TODO: log error here
+        
 ### END AVATARS 
 
 
@@ -49,6 +76,11 @@ class ForumProfile(Profile):
     
     def username(self):
         return self.profile_user.username
+
+    # def delete(self, *args, **kwargs):
+    #     breakpoint()
+    #     super.delete(*args, **kwargs)
+    #     self.avatar.delete()
 """
     disconnect dummy profile
 """
@@ -59,6 +91,7 @@ post_save.disconnect(save_user_profile, sender=User)
 """
 @receiver(post_save, sender=User)
 def create_user_forum_profile(sender, instance, created, **kwargs):
+    breakpoint()
     if created:
         ForumProfile.objects.create(profile_user=instance, 
                                     avatar=Avatar.objects.create(
@@ -72,6 +105,31 @@ def save_user_forum_profile(sender, instance, **kwargs):
     except (ObjectDoesNotExist, FieldError):
         pass
         ## TODO: log error to log file.
+
+@receiver(pre_delete, sender=ForumProfile)
+def auto_delete_avatar_on_delete(sender, instance, **kwargs):
+    """
+    Deletes Avatar from filesystem  
+    when corresponding `ForumProfile` object is deleted.
+    """
+    fp = instance.avatar.image_file.path
+    fd = os.path.dirname(fp)
+    if instance.avatar.image_file and 'default_avatars' not in instance.avatar.image_file.path:
+        if os.path.isfile(fp):
+            try:
+                delete(instance.avatar.image_file)
+                instance.avatar.delete()
+                if len(os.listdir(fd)) == 0:
+                    os.rmdir(fd)
+                fdu1 = settings.MEDIA_ROOT + \
+                                    'uploads/users/' + \
+                                    instance.display_name
+                if os.path.isdir(fdu1):
+                    if len(os.listdir(fdu1)) == 0:
+                        os.rmdir(fdu1)
+            except ObjectDoesNotExist as i:
+                # TODO: log file missing
+                pass
 
 ### START POST AND COMMENTS
 class ForumPost(Post):
