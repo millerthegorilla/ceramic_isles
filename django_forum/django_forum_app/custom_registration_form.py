@@ -55,7 +55,7 @@ class CustomUserCreationForm(UserCreationForm):
                         Perhaps use your first name and last name, or maybe your business name. \
                         It will be converted to an internet friendly name when you save it. \
                         You can change it later...</span>'),
-                FloatingField('display_name', autocomplete="new-password"),
+                FloatingField('display_name', autocomplete="new-password", autofocus=''),
                 HTML('<span class="tinfo">Your username is used purely \
                         for logging in, and must be different to your display name. \
                          No one will see your username.</span>'),
