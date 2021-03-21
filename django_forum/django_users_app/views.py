@@ -40,5 +40,5 @@ class RegisterView(CreateView):
             user = form.save()
         user.is_active = False
         user.save()
-        send_email(user, custom_salt=uuid.uuid4())
+        send_email(user)
         return redirect('password_reset_done')
