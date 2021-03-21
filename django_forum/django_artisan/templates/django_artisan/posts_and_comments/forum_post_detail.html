@@ -2,11 +2,11 @@
 {% block title %}{{ siteName }} - Post{% endblock title %}
 {% load static %}
 {% block extra_js %}
-<script src="{% static 'django_forum_app/js/forum_post_detail.js' %}" referrerpolicy="origin"></script>
+<script src="{% static 'django_forum_app/js/forum_post_detail.js' %}" type="application/javascript" referrerpolicy="origin"></script>
 {% endblock extra_js %}
 {% block form_media %}
- <script src="{% static 'tinymce/tinymce.min.js' %}" referrerpolicy="origin"></script>
- <script src="{% static 'tinymce/jquery.tinymce.min.js' %}" referrerpolicy="origin"></script>
+ <script src="{% static 'tinymce/tinymce.min.js' %}" type="application/javascript" referrerpolicy="origin"></script>
+ <script src="{% static 'tinymce/jquery.tinymce.min.js' %}" type="application/javascript" referrerpolicy="origin"></script>
 {% endblock form_media %}
 {% block content %}
 <div class="container posts-and-comments">
