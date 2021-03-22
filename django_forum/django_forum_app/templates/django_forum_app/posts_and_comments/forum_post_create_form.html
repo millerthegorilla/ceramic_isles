@@ -18,6 +18,7 @@
 	{% endblock %}
 {% endif %}
 {% block body_js %}
-<script>
-</script>
 {% endblock body_js %}
+{% block body_imports %}
+    <script src="{% static 'django_forum_app/js/postCreate.js' %}" type="application/javascript" referrerpolicy="origin"></script>
+{% endblock body_imports %}

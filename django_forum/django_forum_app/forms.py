@@ -68,7 +68,7 @@ class ForumPostCreateForm(PostCreateForm):
     class Meta(PostCreateForm.Meta):
         model = ForumPost
         fields = PostCreateForm.Meta.fields + ['category']
-        widgets = { 'text': TinyMCE(attrs={'plugins':'wordcount', 'init_instance_callback': 'function (editor) { $(editor.getContainer()).find("button.tox-statusbar__wordcount").click();}',})}
+        widgets = { 'text': TinyMCE()}
         labels = { 'category':'Choose a category for your post...'}
 
     def __init__(self, **kwargs):

@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% block title %}{{ siteName }} - Profile{% endblock title %}
+{% load static %}
 {% load crispy_forms_tags %}
 {% if user.is_authenticated %}
     {% load thumbnail %}
@@ -40,16 +41,7 @@
             {% endif %}
         </div>
     {% endblock content %}
-{% block body_js %}
-<script>
-$(document).ready(function () {
-    $("#avatarImage").click(function(e) {
-        $("#avatarUpload").click();
-    });
-    $('#avatarUpload').on("change", function( event ) {
-        $("#avatarform").submit();
-    });
-}); 
-</script>
-{% endblock body_js %}
+    {% block body_imports %}
+    <script src="{% static 'django_artisan/js/profileUpdate.js' %}" type="application/javascript" referrerpolicy="origin"></script>
+    {% endblock body_imports %}
 {% endif %}
