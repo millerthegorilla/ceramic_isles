@@ -5,7 +5,6 @@
 {% if user.is_authenticated %}
     {% load thumbnail %}
     {% block extra_css %}
-    <meta http-equiv="Content-Security-Policy" content="script-src 'unsafe-inline';">
     {% endblock extra_css %}
     {% block content %}
         <div class="row my-auto ms-3">

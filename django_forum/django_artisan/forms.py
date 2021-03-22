@@ -8,7 +8,7 @@ from django import forms
 from django_forum_app.forms import ForumProfileDetailForm
 
 from .models import ArtisanForumProfile, UserProductImage
-from .fields import FloatingField, FileInput
+from .fields import FloatingField, FileClearInput, FileInput
 
 
 MAX_NUMBER_OF_IMAGES = settings.MAX_USER_IMAGES
@@ -33,10 +33,12 @@ class ArtisanForumProfileDetailForm(ForumProfileDetailForm):
                                                  ]
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['image_file'].widget.is_required = False
         self.fields['image_file'].required = False
         self.fields['image_file'].label = 'A single image for your personal page, click Update Profile to upload it...'
         self.helper.layout.fields = self.helper.layout.fields + [ 
-            Field('image_file', css_class="tinfo"),
+            HTML('<span class="text-white">A single image for your personal page, either of yourself, or perhaps an item of your work... Click \'Update Profile\' to upload, or to clear.</span>'),
+            FileClearInput('image_file', css_class="tinfo form-control form-control-lg"),
             HTML('<span class="text-white">Biographical detail is a maximum 500 character space to display \
                                      on your personal page.</span>'),
             FloatingField('bio'),
@@ -66,7 +68,6 @@ class UserProductImageForm(forms.ModelForm):
         self.user = user
         super().__init__(*args, **kwargs)
         self.fields['image_file'].validators.append(self.restrict_amount)
-
         self.helper = FormHelper()
         self.helper.form_tag = False
         self.helper.layout = Layout(

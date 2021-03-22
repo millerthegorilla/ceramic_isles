@@ -1,5 +1,6 @@
 import random
 from PIL import Image, ImageOps
+from sorl.thumbnail import delete
 
 from django.db.models import Max
 from django.shortcuts import render, redirect
@@ -37,12 +38,12 @@ class ArtisanForumProfileUpdateView(ForumProfileUpdateView):
     def form_valid(self, form, **kwargs):
         if self.request.POST['type'] == 'update-profile':
             if form.has_changed():
-                    obj = form.save()
-                    if obj.image_file:
-                        url = str(settings.BASE_DIR) + obj.image_file.url
-                        img = Image.open(url)
-                        img = ImageOps.expand(img, border=10, fill='white')
-                        img.save(url)
+                obj = form.save()
+                if obj.image_file:
+                    url = str(settings.BASE_DIR) + obj.image_file.url
+                    img = Image.open(url)
+                    img = ImageOps.expand(img, border=10, fill='white')
+                    img.save(url)
             super().form_valid(form)
             return redirect(self.success_url)
         elif self.request.POST['type'] == 'update-avatar':

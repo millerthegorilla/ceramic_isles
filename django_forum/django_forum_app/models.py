@@ -91,7 +91,6 @@ post_save.disconnect(save_user_profile, sender=User)
 """
 @receiver(post_save, sender=User)
 def create_user_forum_profile(sender, instance, created, **kwargs):
-    breakpoint()
     if created:
         ForumProfile.objects.create(profile_user=instance, 
                                     avatar=Avatar.objects.create(

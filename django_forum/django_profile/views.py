@@ -28,8 +28,8 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        if self.request.method == 'GET':
-            context['user_form'] = self.user_form_class(initial={'username':self.request.user.username,
+        #if self.request.method == 'GET':
+        context['user_form'] = self.user_form_class(initial={'username':self.request.user.username,
                                                                   'email':self.request.user.email,
                                                                   'first_name':self.request.user.first_name,
                                                                   'last_name':self.request.user.last_name }) 
@@ -60,7 +60,6 @@ class CustomRegisterView(RegisterView):
     form_class = CustomUserCreationForm
 
     def form_valid(self, form):
-        breakpoint()
         user = form.save()
         user.profile.display_name = slugify(form['display_name'].value())
         user.profile.save(update_fields=['display_name'])

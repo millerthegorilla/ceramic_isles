@@ -51,7 +51,6 @@ class ForumCommentDocument(Document):
         #related_models = [ForumPost]
 
         def get_queryset(self):
-            breakpoint()
             return super().get_queryset().select_related(
                 'forum_post'
             )
