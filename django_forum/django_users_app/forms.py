@@ -36,9 +36,9 @@ class CustomUserCreationForm(UserCreationForm):
         self.helper.form_tag = False
         self.helper.form_class = ""
         self.helper.layout = Layout(
-                FloatingField('username', autocomplete="new-password"),
+                FloatingField('username'),
                 FloatingField('email', autocomplete="new-password"),
-                FloatingField('password1', autocomplete="new-password"),
+                FloatingField('password1'),
                 FloatingField('password2', autocomplete="new-password"),
                 Field('captcha'),
             )

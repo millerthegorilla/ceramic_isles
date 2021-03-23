@@ -28,8 +28,18 @@ class ForumCommentAdmin(SoftDeletionAdmin):
     post_str.short_description = 'ForumPost'
     post_str.admin_order_field = 'forumpost' # Make row sortable
 
+    actions = ['approve_comment']
+
+    def approve_comment(self, request, queryset):
+        queryset.update(moderation=None)
+
 @admin.register(ForumPost)
 class ForumPostAdmin(SoftDeletionAdmin):
     list_display = ('moderation', 'active', 'author', 'title', 'text', 'date_created', 'deleted_at')
     list_filter = ('moderation', 'active', 'date_created', 'deleted_at', 'author')
     search_fields = ('author', 'text', 'title')
+
+    actions = ['approve_post']
+
+    def approve_post(self, request, queryset):
+        queryset.update(moderation=None)
