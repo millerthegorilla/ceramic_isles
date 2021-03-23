@@ -138,6 +138,7 @@ class ForumPost(Post):
     
     class Meta:
         ordering = ['-date_created']
+        permissions = [('approve_post', 'Approve Post')]
 
     class Category(models.TextChoices):
         EVENT = 'EV', _('Event')
@@ -171,11 +172,12 @@ class ForumComment(Comment):
     moderation = models.DateField(null=True, default=None, blank=True)
     title = models.SlugField()
 
-    def save(self, **kwargs):
-        super().save(post=self.forum_post, **kwargs)
-
     class Meta:
         ordering = ['date_created']
+        permissions = [('approve_comment', 'Approve Comment')]
+    
+    def save(self, **kwargs):
+        super().save(post=self.forum_post, **kwargs)
 
     def get_absolute_url(self):
         return self.forum_post.get_absolute_url() + '#' + self.title

@@ -21,7 +21,11 @@
                                         <a href="{{ post.get_absolute_url|safe }}" class="tinfo">{{ post.title }}</a>
                                     </td>
                                     <td>
-                                        {{ post.text|striptags|safe|slice:":40" }}...
+                                        {% if not post.moderation %}
+                                            {{ post.text|striptags|safe|slice:":40" }}...
+                                        {% else %}
+                                             Post is awaiting moderation
+                                        {% endif %}
                                     </td>
                                     <td>
                                         {{ post.get_category_display|safe }}

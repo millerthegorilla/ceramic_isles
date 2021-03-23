@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django.contrib import messages
+from django.utils.translation import ngettext
 
 from .models import UserProductImage, Event
 from django_password_validators.password_history.models import UserPasswordHistoryConfig, PasswordHistory
@@ -12,7 +14,12 @@ class ImageAdmin(admin.ModelAdmin):
     actions = ['approve_image']
 
     def approve_image(self, request, queryset):
-        queryset.update(active=True)
+        updated = queryset.update(active=True)
+        self.message_user(request, ngettext(
+                    '%d image was approved.',
+                    '%d images were approved.',
+                    updated,
+                ) % updated, messages.SUCCESS)
 
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
@@ -20,11 +27,20 @@ class EventAdmin(admin.ModelAdmin):
     actions = ['approve_event', 'disapprove_event']
 
     def approve_event(self, request, queryset):
-        queryset.update(active=True)
+        updated = queryset.update(active=True)
+        self.message_user(request, ngettext(
+                    '%d event was approved.',
+                    '%d events were approved.',
+                    updated,
+                ) % updated, messages.SUCCESS)
 
     def disapprove_event(self, request, queryset):
-        queryset.update(active=False)
-
+        updated = queryset.update(active=False)       
+        self.message_user(request, ngettext(
+                    '%d event was disapproved.',
+                    '%d events were disapproved.',
+                    updated,
+                ) % updated, messages.SUCCESS)
 
 # #admin.site.unregister(UserPasswordHistoryConfig)
-# admin.site.unregister(PasswordHistory)
+#admin.site.unregister(PasswordHistory)

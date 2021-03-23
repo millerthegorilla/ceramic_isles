@@ -86,6 +86,9 @@ def auto_delete_image_file_on_delete(sender, instance, **kwargs):
 # TODO: validate image_shop_link properly 
 # TODO: set a default of 
 class UserProductImage(models.Model):
+    class Meta:
+        permissions = [('approve_image', 'Approve Image')]
+        
     image_file = models.ImageField(upload_to=user_directory_path)
     image_text = models.CharField(max_length=400, default='', blank=True)
     image_title = models.CharField(max_length=30, default='', blank=True)

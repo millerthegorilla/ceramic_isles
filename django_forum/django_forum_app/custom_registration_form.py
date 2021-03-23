@@ -59,9 +59,9 @@ class CustomUserCreationForm(UserCreationForm):
                 HTML('<span class="tinfo">Your username is used purely \
                         for logging in, and must be different to your display name. \
                          No one will see your username.</span>'),
-                FloatingField('username', autocomplete="new-password"),
+                FloatingField('username'),
                 FloatingField('email', autocomplete="new-password"),
-                FloatingField('password1', autocomplete="new-password"),
+                FloatingField('password1'),
                 FloatingField('password2', autocomplete="new-password"),
                 Field('rules', css_class="mb-3"),
                 Field('captcha'),

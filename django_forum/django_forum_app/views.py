@@ -141,7 +141,7 @@ class ForumPostListView(PostListView):
                 if len(terms) > 1:
                     t = 'terms'
                 else:
-                    t = 'term'
+                    t = 'match'
                     terms = terms[0]
                 queryset_p = ForumPostDocument.search().query(
                             Q(t, text=terms)|

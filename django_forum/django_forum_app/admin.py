@@ -1,11 +1,12 @@
 from django.contrib import admin
 from django.urls import reverse
 from django.utils.html import escape, mark_safe
+from django.contrib import messages
+from django.utils.translation import ngettext
 
 from django_posts_and_comments.soft_deletion import SoftDeletionAdmin, SoftDeletionModel
 
 from .models import ForumPost, ForumComment
-
 
 @admin.register(ForumComment)
 class ForumCommentAdmin(SoftDeletionAdmin):
@@ -31,7 +32,12 @@ class ForumCommentAdmin(SoftDeletionAdmin):
     actions = ['approve_comment']
 
     def approve_comment(self, request, queryset):
-        queryset.update(moderation=None)
+        updated = queryset.update(moderation=None)
+        self.message_user(request, ngettext(
+                    '%d comment was approved.',
+                    '%d comments were approved.',
+                    updated,
+                ) % updated, messages.SUCCESS)
 
 @admin.register(ForumPost)
 class ForumPostAdmin(SoftDeletionAdmin):
@@ -42,4 +48,9 @@ class ForumPostAdmin(SoftDeletionAdmin):
     actions = ['approve_post']
 
     def approve_post(self, request, queryset):
-        queryset.update(moderation=None)
+        updated = queryset.update(moderation=None)
+        self.message_user(request, ngettext(
+                    '%d post was approved.',
+                    '%d posts were approved.',
+                    updated,
+                ) % updated, messages.SUCCESS)
