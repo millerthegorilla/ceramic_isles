@@ -5,8 +5,9 @@ from django.contrib import messages
 from django.utils.translation import ngettext
 
 from django_posts_and_comments.soft_deletion import SoftDeletionAdmin, SoftDeletionModel
+from django_profile.models import Profile
 
-from .models import ForumPost, ForumComment
+from .models import ForumPost, ForumComment, ForumProfile
 
 @admin.register(ForumComment)
 class ForumCommentAdmin(SoftDeletionAdmin):
@@ -54,3 +55,18 @@ class ForumPostAdmin(SoftDeletionAdmin):
                     '%d posts were approved.',
                     updated,
                 ) % updated, messages.SUCCESS)
+
+
+admin.site.unregister(Profile)
+
+# Register your models here.
+@admin.register(ForumProfile)
+class ForumProfileAdmin(admin.ModelAdmin):
+    list_display = ['display_name', 'address_line_1','address_line_2','parish','postcode','avatar','rules_agreed']
+    list_filter = ['display_name','parish','rules_agreed']
+    search_fields = ['display_name','address_line_1']
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).exclude(profile_user__is_superuser=True)
+
+    

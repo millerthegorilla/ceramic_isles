@@ -17,7 +17,7 @@ from django.contrib.auth import get_user_model
 from django.views.decorators.cache import never_cache
 from django.conf import settings
 from django.views.generic.base import TemplateView
-
+from django.core.mail import send_mail
 
 # Create your views here.
 from django_posts_and_comments.models import Post
@@ -103,14 +103,26 @@ class ForumPostView(PostView):
         elif self.request.POST['type'] == 'post-report':
             post.moderation = timezone.now()
             post.save(update_fields=['moderation'])
+            ForumPostView.send_mod_mail('Post')
             return redirect(post)
         elif self.request.POST['type'] == 'comment-report':
             comment = ForumComment.objects.get(id=self.request.POST['id'])
             comment.moderation = timezone.now()
             comment.save(update_fields=['moderation'])
+            ForumPostView.send_mod_mail('Comment')
             return redirect(post)
         else:
             return redirect('django_forum_app:post_list_view')
+
+    @staticmethod
+    def send_mod_mail(type):
+        send_mail(
+            'Moderation for {0}'.format(type),
+            'A {0} has been created and requires moderation.  Please visit the {1} AdminPanel, and inspect the {0}'.format(type, settings.SITE_NAME),
+            settings.EMAIL_ADDRESS,
+            list(get_user_model().objects.filter(is_staff=True).values_list('email', flat=True)),
+            fail_silently=False,
+        )
 
     def get(self, *args, **kwargs):
         post = ForumPost.objects.get(pk=kwargs['pk'])
@@ -128,7 +140,11 @@ class ForumPostListView(PostListView):
     model = ForumPost
     template_name = 'django_forum_app/posts_and_comments/forum_post_list.html'
     paginate_by = 6
- 
+    """
+       the documentation for django-elasticsearch and elasticsearch-py as well as elasticsearch
+       is not particularly good, at least not in my experience.  The following searches posts and 
+       comments.  The search indexes are defined in documents.py.
+    """
     def get(self, request, search_slug=None):
         search = 0
         p_c = None
@@ -195,8 +211,8 @@ class ForumProfileUpdateView(ProfileUpdateView):
         if self.request.POST['type'] == 'update-profile':
             if form.has_changed():
                 form.save()
-            super().form_valid(form)
-            return redirect(self.success_url)
+            return super().form_valid(form)
+                #return redirect(self.success_url)
         elif self.request.POST['type'] == 'update-avatar':
             fp = ForumProfile.objects.get(profile_user=self.request.user)
             fp.avatar.image_file.save(self.request.FILES['avatar'].name, self.request.FILES['avatar'])

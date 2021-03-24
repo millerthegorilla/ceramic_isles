@@ -2,8 +2,10 @@ from django.contrib import admin
 from django.contrib import messages
 from django.utils.translation import ngettext
 
-from .models import UserProductImage, Event
-from django_password_validators.password_history.models import UserPasswordHistoryConfig, PasswordHistory
+from django_password_validators.password_history.models import PasswordHistory
+
+from django_forum_app.models import ForumProfile
+from .models import UserProductImage, Event, ArtisanForumProfile
 
 
 @admin.register(UserProductImage)
@@ -43,4 +45,20 @@ class EventAdmin(admin.ModelAdmin):
                 ) % updated, messages.SUCCESS)
 
 # #admin.site.unregister(UserPasswordHistoryConfig)
-#admin.site.unregister(PasswordHistory)
+admin.site.unregister(PasswordHistory)
+
+admin.site.unregister(ForumProfile)
+
+# Register your models here.
+@admin.register(ArtisanForumProfile)
+class ArtisanForumProfileAdmin(admin.ModelAdmin):
+    list_display = ['display_name', 'bio', 'image_file', 'shop_web_address', 
+                    'outlets', 'listed_member', 'display_personal_page', 
+                    'address_line_1','address_line_2','parish','postcode',
+                    'avatar','rules_agreed']
+    list_filter = ['display_name','parish','rules_agreed', 'shop_web_address',
+                   'listed_member', 'display_personal_page']
+    search_fields = ['display_name','address_line_1', 'parish', 'bio']
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).exclude(profile_user__is_superuser=True)

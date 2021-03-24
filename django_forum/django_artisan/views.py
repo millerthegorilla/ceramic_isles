@@ -44,8 +44,8 @@ class ArtisanForumProfileUpdateView(ForumProfileUpdateView):
                     img = Image.open(url)
                     img = ImageOps.expand(img, border=10, fill='white')
                     img.save(url)
-            super().form_valid(form)
-            return redirect(self.success_url)
+            return super().form_valid(form)
+            #return redirect(self.success_url)
         elif self.request.POST['type'] == 'update-avatar':
             super().form_valid(form)
             return redirect(self.success_url)
@@ -148,7 +148,7 @@ class PersonalPageView(DetailView):
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
-        if self.object.display_personal_page:
+        if self.object.display_personal_page or self.request.user.is_authenticated:
             context = self.get_context_data(object=self.object)
             return self.render_to_response(context)
         else:

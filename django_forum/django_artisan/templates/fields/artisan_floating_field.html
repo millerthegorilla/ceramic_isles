@@ -3,6 +3,7 @@
     {% crispy_field field required %}
     <label for="{{ field.id_for_label }}">{{ field.label }}</label>
     <div class="invalid-feedback">
+    	HEY!!! {{field.errors}}
 	    {% if field.errors %}
 		    {% for error in field.errors %}
 		        <span id="error_{{ forloop.counter }}_{{ field.auto_id }}"><strong>{{ error }}</strong></span>

@@ -13,10 +13,14 @@ from .fields import FloatingField, FileInput
 
 
 ### START FORUMPROFILE
+# class AvatarForm(forms.Form):
+#     def __init__(*args, **kwargs):
+        
+
 class ForumProfileUserForm(ProfileUserForm):
-    # class Meta(ProfileUserForm.Meta):
-    #     fields = ProfileUserForm.Meta.fields
-    #     model = ProfileUserForm.Meta.model
+    class Meta(ProfileUserForm.Meta):
+        fields = ProfileUserForm.Meta.fields
+        model = ProfileUserForm.Meta.model
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

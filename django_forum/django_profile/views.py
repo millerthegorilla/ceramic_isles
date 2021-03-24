@@ -41,7 +41,13 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
                              'email':self.request.user.email,
                              'first_name':self.request.user.first_name,
                              'last_name':self.request.user.last_name }
-        #user_form.errors.clear()  ### django validates username against database automatically, but not email
+        ### django validates username against database automatically, but not email
+        ### so I clear the errors from the database as my form is validating the username
+        ### independently of the database validation.
+        ### the is_valid function then populates errors.
+        user_form.errors.clear() 
+        if not user_form.is_valid():
+            return render(self.request, self.template_name, context={'form': form, 'user_form': user_form})
         for change in user_form.changed_data:
             setattr(self.request.user, change, user_form[change].value())
         self.request.user.save()
@@ -49,7 +55,8 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
             obj = form.save(commit=False)
             obj.display_name = slugify(form['display_name'].value())
             obj.save()
-        return render(self.request, self.template_name, {'form': form, 'user_form': user_form})
+        return redirect(self.success_url)
+        #return render(self.request, self.template_name, {'form': form, 'user_form': user_form})
 
 
 ### NEEDED FOR ADDITION OF DISPLAY_NAME

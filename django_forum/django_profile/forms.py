@@ -11,11 +11,12 @@ from safe_imagefield.forms import SafeImageField    ## TODO: need to setup clama
 
 
 class ProfileUserForm(ModelForm):
-    def clean_username(self):
-        username = self.cleaned_data['username']
-        if User.objects.filter(username=username):
-            self.add_error('username', 'Error, That username already exists!')
-        return username
+    # def clean_username(self, *args, **kwargs):
+    #     breakpoint()
+    #     username = self.cleaned_data['username']
+    #     if User.objects.filter(username=username):
+    #         self.add_error('username', 'Error, That username already exists!')
+    #     return username
    
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

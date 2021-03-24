@@ -12,7 +12,7 @@ from django.db.models.signals import pre_save, post_save, post_delete, pre_delet
 from django.conf import settings
 
 from django_forum_app.models import ForumProfile, create_user_forum_profile, save_user_forum_profile, Avatar, default_avatar
-
+from django_forum_app.views import ForumPostView
 
 def user_directory_path(instance, filename):
     if type(instance) is ArtisanForumProfile:
@@ -98,7 +98,7 @@ class UserProductImage(models.Model):
     user_profile = models.ForeignKey(ArtisanForumProfile, on_delete=models.CASCADE, related_name="forum_images")
     image_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     id = models.PositiveIntegerField(default=0, editable=False)
-
+    
     # def __str__(self):
     #     return f"Profile_image:user={self.user_profile.profile_user.username},active={self.active}"
 
@@ -148,6 +148,13 @@ def auto_delete_file_on_change(sender, instance, **kwargs):
         if os.path.isfile(old_image_field.file.path):
             delete(old_image_field) # clear thumbs from cache
             os.remove(old_image_field.file.path)
+
+@receiver(post_save, sender=UserProductImage)
+def send_email_when_image_uploaded(sender, instance, **kwargs):
+    """
+       Send email to moderators
+    """
+    ForumPostView.send_mod_mail('Image')
 
 
 class Event(models.Model):

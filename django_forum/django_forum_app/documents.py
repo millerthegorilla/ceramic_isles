@@ -27,6 +27,9 @@ class ForumCommentDocument(Document):
                         'number_of_replicas': 0}
 
     class Django:
+        """
+           I no longer have an autocomplete defined, as the amount of requests is crazy.
+        """
         # text = fields.TextField(
         #     attr='text',
         #     fields={
@@ -48,7 +51,11 @@ class ForumCommentDocument(Document):
             'author',
         ]
 
-        #related_models = [ForumPost]
+        """
+          the commented code below allows searched comments to return a post as the 'found'
+          record.
+        """
+        # related_models = [ForumPost]
 
         # def get_queryset(self):
         #     return super().get_queryset().select_related(
@@ -76,7 +83,10 @@ class ForumPostDocument(Document):
                         'number_of_replicas': 0}
 
     class Django:
-
+        """
+            I no longer have an autocomplete defined as the amount of requests goes
+            through the roof.
+        """
         # text = fields.TextField(
         #     attr='text',
         #     fields={
@@ -106,14 +116,6 @@ class ForumPostDocument(Document):
             'text',
             'category',
             'author',
-            #'forum_comments',
         ]
-
-    #     related_models = [ForumComment]
-
-    # def get_instances_from_related(self, related_instance):
-    #     if isinstance(related_instance, ForumComment):
-    #         return related_instance.forum_post
-
 
 

@@ -10,6 +10,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, Field, Fieldset, HTML, Button, Div
 from crispy_forms.bootstrap import StrictButton
 from .fields import FloatingField
+from .models import Profile
 
 
 class CustomUserCreationForm(UserCreationForm):
@@ -24,6 +25,18 @@ class CustomUserCreationForm(UserCreationForm):
             self.add_error('username', 'Error! your username is too similar to your display name')
             self.valid = False
         return username
+
+    def clean_display_name(self):
+        breakpoint()
+        displayname = self.cleaned_data['display_name']
+        dname = slugify(displayname)
+        try:
+            ForumProfile.objects.get(display_name=dname)
+        except ForumProfile.DoesNotExist:
+            return displayname          
+        self.add_error('display_name', 'Error! That display name already exists!')
+        self.valid = False
+        return displayname
 
     def clean_email(self):
         email = self.cleaned_data['email']
@@ -48,11 +61,12 @@ class CustomUserCreationForm(UserCreationForm):
         self.helper.form_class = ""
         self.helper.layout = Layout(
                 HTML('<span class="tinfo">Your display name \
-                        must be *different* to your username. \
+                        must be *different* to your username.  It must be unique.\
                         You can change it later...</span>'),
                 FloatingField('display_name', autocomplete="new-password"),
                 HTML('<span class="tinfo">Your username is used purely \
                         for logging in, and must be different to your display name. \
+                        It must be unique. \
                          No one will see your username.</span>'),
                 FloatingField('username'),
                 FloatingField('email', autocomplete="new-password"),
