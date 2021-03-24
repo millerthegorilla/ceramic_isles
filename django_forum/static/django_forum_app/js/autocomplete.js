@@ -67,7 +67,7 @@ Autocomplete.prototype.show_results = function (data) {
 };
 
 
-// <script type="text/javascript">
+// <script type="application/javascript">
 //   $(function () {
 //     window.autocomplete = new Autocomplete({
 //       form_selector: '.form-autocomplete',

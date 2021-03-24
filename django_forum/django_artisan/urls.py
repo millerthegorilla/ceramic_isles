@@ -22,7 +22,7 @@ urlpatterns = [
 	  path('users/accounts/profile/', ArtisanForumProfileUpdateView.as_view(), name='profile_update_view'),
 	  path('users/accounts/profile/images/update/', UserProductImageUploadView.as_view(), name='image_update'),
 	  path('users/accounts/profile/images/update/<slug:unique_id>/', UserProductImageDeleteView.as_view(), name='remove_images'),
-	  path('forum/posts/<slug:search_slug>', ForumPostListView.as_view(
+    path('forum/posts/<slug:search_slug>', ForumPostListView.as_view(
 		            template_name='django_artisan/posts_and_comments/forum_post_list.html'), name='post_list_view'),
     path('forum/posts/', ForumPostListView.as_view(
     	            template_name='django_artisan/posts_and_comments/forum_post_list.html'), name='post_list_view'),

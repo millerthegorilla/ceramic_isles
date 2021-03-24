@@ -1,6 +1,3 @@
-/*font-family: 'Lobster Two', cursive;
-font-family: 'Ubuntu', sans-serif;
-font-family: 'Akaya Kanadaka', cursive;*/
 .main-container {
   padding: 0;
   height: 100vh;
@@ -11,10 +8,6 @@ font-family: 'Akaya Kanadaka', cursive;*/
   background-attachment: fixed;
   background: rgb(9,121,113);
   background: linear-gradient(0deg, rgba(82,80,126,1) 2%, rgba(9,121,113,1) 54%, rgba(0,212,255,1) 100%);
-}
-
-.main-container-post {
-  /*height: 100vh;*/
 }
 
 .headline-text {
@@ -247,6 +240,3 @@ table {
 .invalid-feedback {
   color: yellow !important;
 }
-
-
-

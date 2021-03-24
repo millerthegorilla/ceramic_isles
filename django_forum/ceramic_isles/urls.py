@@ -24,19 +24,21 @@ from django.conf.urls.static import static
 from django.urls import re_path
 from django.contrib.staticfiles import views
 from django_forum_app.views import CustomRegisterView
+from django_users_app.views import PasswordResetView
 
 
 urlpatterns = [
+   # path('users/accounts/password_reset/', PasswordResetView.as_view(template_name="registration/password_reset_form.html"), name='lando'),
+    path('users/accounts/register/', CustomRegisterView.as_view(), name='register'),
     path('', include(artisan_app_urls)),
     path('forum/', include(forum_app_urls)),
-    path('users/accounts/register/', CustomRegisterView.as_view(), name='register'),
     path('users/', include(users_app_urls)),
     path('email/', include(mail_urls)),
     path('admin/', admin.site.urls),
     path('tinymce/', include('tinymce.urls')),
 ]
 
-if settings.DEBUG:
+if True:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     import debug_toolbar
