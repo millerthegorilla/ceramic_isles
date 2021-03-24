@@ -119,7 +119,7 @@ class ForumPostView(PostView):
         send_mail(
             'Moderation for {0}'.format(type),
             'A {0} has been created and requires moderation.  Please visit the {1} AdminPanel, and inspect the {0}'.format(type, settings.SITE_NAME),
-            settings.EMAIL_ADDRESS,
+            settings.EMAIL_HOST_USER,
             list(get_user_model().objects.filter(is_staff=True).values_list('email', flat=True)),
             fail_silently=False,
         )
