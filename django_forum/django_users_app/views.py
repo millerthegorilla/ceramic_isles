@@ -3,6 +3,7 @@ import uuid # used as custom salt
 from django.shortcuts import render, redirect
 from django.views.generic.base import TemplateView
 from django.contrib.auth.models import User
+from django.contrib.auth.views import PasswordResetView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.edit import CreateView, UpdateView
 from django.views.generic.list import ListView
@@ -15,17 +16,9 @@ from django_email_verification import send_email
 from .forms import CustomUserCreationForm
 
 
-class DashboardView(LoginRequiredMixin, TemplateView):
-    http_method_names = ['get']
-    template_name = 'django_users_app/dashboard.html'
+class PasswordResetView(PasswordResetView):
+    template_name = 'registration/password_reset_form.html'
 
-    def get(self, request, *args, **kwargs):
-        return super().get(request)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        #context['number'] = random.randrange(1, 100)
-        return context
 
 class RegisterView(CreateView):
     http_method_names = ['get', 'post']

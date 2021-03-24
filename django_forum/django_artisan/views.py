@@ -17,7 +17,7 @@ from django.core.paginator import Paginator
 from django.conf import settings
 
 from django_forum_app.forms import ForumProfileUserForm
-from django_forum_app.views import ForumProfileUpdateView
+from django_forum_app.views import ForumProfileUpdateView, CustomRegisterView
 from django_forum_app.models import ForumPost
 
 from .models import Event, UserProductImage, ArtisanForumProfile
