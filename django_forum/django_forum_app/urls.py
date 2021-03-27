@@ -18,7 +18,8 @@ urlpatterns = [
     path('posts/<slug:search_slug>', ForumPostListView.as_view(), name='post_list_view'),
     path('posts/', ForumPostListView.as_view(), name='post_list_view'),
     path('<int:pk>/<slug:post_slug>/', ForumPostView.as_view(), name='post_view'),
-    path('rules/', RulesPageView.as_view(), name='rules_view')
+    path('rules/', RulesPageView.as_view(), name='rules_view'),
+    path('register/', CustomRegisterView.as_view(), name='register')
     # path('autocomplete/', autocomplete, name='autocomplete')  # experimental autocomplete
 ]
 

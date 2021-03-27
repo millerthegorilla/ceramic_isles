@@ -1,39 +1,41 @@
 {% load thumbnail %}
 <div class="mb-3 post-list">
                 <table>
+                    <thead>
+                        <tr class="sub-headline-text">
+                            <th scope=""></th>
+                            <th scope="Title">Title (try clicking one)</th>
+                            <th scope="PostLeader">Post Leader</th>
+                            <th scope="Category">Category</th>
+                            <th scope="#comments" class="text-center"># Comments</th>
+                            <th scope="Date">Date</th>
+                        </tr>
+                    </thead>
                     <tbody id="post-table" class="tinfo">
-                    <tr class="sub-headline-text">
-                        <th></th>
-                        <th>Title (try clicking one)</th>
-                        <th>Post Leader</th>
-                        <th>Category</th>
-                        <th class="text-center"># Comments</th>
-                        <th>Date</th>
-                    </tr>
                         {% for post in page_obj.object_list %}
                             <tr >
-                                    <td>
+                                    <td scope="row" class="avatar" data-label="">
                                         {% thumbnail post.user_profile.forumprofile.avatar.image_file "50x50" crop="center" as im %}
                                             <a href="/people/{{post.user_profile.display_name}}"><img src="{{ im.url }}" height="{{ im.height }}" width="{{ im.width }}" class="rounded-circle" id="image-{{ post.user_profile.display_name }}_avatar-image" title="{{post.user_profile.display_name}}" /></a>
                                         {% endthumbnail %}
                                     </td>
-                                    <td>
+                                    <td data-label="Title (click-me)">
                                         <a href="{{ post.get_absolute_url|safe }}" class="tinfo">{{ post.title }}</a>
                                     </td>
-                                    <td>
+                                    <td data-label="PostLeader">
                                         {% if not post.moderation %}
                                             {{ post.text|striptags|safe|slice:":40" }}...
                                         {% else %}
                                              Post is awaiting moderation
                                         {% endif %}
                                     </td>
-                                    <td>
+                                    <td data-label="Category">
                                         {{ post.get_category_display|safe }}
                                     </td>
-                                    <td class="text-center">
+                                    <td data-label="#comments" class="num-comments">
                                         {{ post.comments.count }}
                                     </td>
-                                    <td>
+                                    <td data-label="Date">
                                         {{ post.date_created|date }}
                                     </td>
                             </tr>

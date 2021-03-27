@@ -8,8 +8,11 @@
 		<form method="post" autocomplete="off">
 		{% csrf_token %}
 		{% crispy form %}
-		<div class="row justify-content-end">
-			<div class="col-auto">
+		<div class="row justify-content-between">
+			<div class="col-auto mt-3">
+				<a href="{% url 'resend_confirmation' %}" class="tinfo mt-3">Resend Confirmation Token</a>
+		    </div>
+		    <div class="col-auto">
 		        <button class="btn btn-primary mb-4" type="submit">Register</button>
 		    </div>
 	    </div>

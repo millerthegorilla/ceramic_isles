@@ -2,6 +2,7 @@ from uuid import uuid4
 import bleach
 import html
 from elasticsearch_dsl import Q
+from random import randint
 
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
@@ -18,6 +19,7 @@ from django.views.decorators.cache import never_cache
 from django.conf import settings
 from django.views.generic.base import TemplateView
 from django.core.mail import send_mail
+from django.db.models.signals import post_save
 
 # Create your views here.
 from django_posts_and_comments.models import Post
@@ -31,7 +33,7 @@ from .forms import  ForumPostCreateForm, ForumPostListSearch, \
                     ForumCommentForm, ForumProfileUserForm, \
                     ForumProfileDetailForm
 from .custom_registration_form import CustomUserCreationForm
-
+from .models import create_user_forum_profile, Avatar, default_avatar
 
 ### START POSTS AND COMMENTS
 
@@ -242,6 +244,7 @@ class CustomRegisterView(RegisterView):
         user.profile.forumprofile.save(update_fields=['rules_agreed'])
         user.profile.display_name = slugify(form['display_name'].value())
         user.profile.save(update_fields=['display_name'])
+        user.save()
         super().form_valid(form, user)
         return redirect('password_reset_done')
 

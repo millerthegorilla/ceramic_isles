@@ -14,7 +14,7 @@ class Profile(models.Model):
         user profile
     """
     profile_user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
-    display_name = models.CharField(max_length=30, blank=True, unique=True)
+    display_name = models.CharField(max_length=37, blank=True, unique=True, default=str(uuid.uuid4()))
 
     def __str__(self):
         return str(self._meta.get_fields(include_hidden=True))

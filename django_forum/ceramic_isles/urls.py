@@ -24,11 +24,9 @@ from django.conf.urls.static import static
 from django.urls import re_path
 from django.contrib.staticfiles import views
 from django_forum_app.views import CustomRegisterView
-from django_users_app.views import PasswordResetView
 
 
 urlpatterns = [
-   # path('users/accounts/password_reset/', PasswordResetView.as_view(template_name="registration/password_reset_form.html"), name='lando'),
     path('users/accounts/register/', CustomRegisterView.as_view(), name='register'),
     path('', include(artisan_app_urls)),
     path('forum/', include(forum_app_urls)),

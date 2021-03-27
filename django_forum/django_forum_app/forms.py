@@ -49,7 +49,7 @@ class ForumProfileDetailForm(ProfileDetailForm):
                         converted to an internet friendly name when you save it.</span>'),
                 FloatingField('display_name'),
                 HTML('<span class="tinfo">Address details are only necessary if there is mail for users</span>'),
-                HTML('<a class="btn btn-primary mb-3" data-bs-toggle="collapse" \
+                HTML('<a class="btn btn-primary mb-3 ms-3" data-bs-toggle="collapse" \
                      href="#collapseAddress" role="button" aria-expanded="false" \
                      aria-controls="collapseAddress">Address details</a><br>'),
                 Div(
