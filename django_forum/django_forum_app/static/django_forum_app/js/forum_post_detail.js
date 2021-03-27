@@ -80,16 +80,16 @@ $(document).ready(function () {
     'custom_undo_redo_levels': "10",
 	});
 	//tinymce.editors[0].hide()
+  var commentModal = document.getElementById('commentModal')
+  commentModal.addEventListener('show.bs.modal', function (event) {
+    // Button that triggered the modal
+    var button = event.relatedTarget
+    // Extract info from data-bs-* attributes
+    var value_val = button.getAttribute('data-bs-whatever')
+    // If necessary, you could initiate an AJAX request here
+    // and then do the updating in a callback.
+    //
+    // Update the modal's content.
+    $('#rem-comment').attr('value', value_val)
+  })
 });
-var commentModal = document.getElementById('commentModal')
-commentModal.addEventListener('show.bs.modal', function (event) {
-  // Button that triggered the modal
-  var button = event.relatedTarget
-  // Extract info from data-bs-* attributes
-  var value_val = button.getAttribute('data-bs-whatever')
-  // If necessary, you could initiate an AJAX request here
-  // and then do the updating in a callback.
-  //
-  // Update the modal's content.
-  $('#rem-comment').attr('value', value_val)
-})
