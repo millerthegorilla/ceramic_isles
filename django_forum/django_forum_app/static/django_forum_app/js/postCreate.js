@@ -6,7 +6,7 @@ $(document).ready(function () {
     }
     tinymce.init({
     	'selector': '.update-form-text',
-    	'init_instance_callback': "onInstanceInit",
+    	'init_instance_callback': onInstanceInit,
         'menubar': "False",
         'min-height': "500px",
         'browser_spellcheck': "True",
