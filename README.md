@@ -1,4 +1,4 @@
-# django_forum
+# django_artisan
 
 my django site set up for ceramic isles
 
