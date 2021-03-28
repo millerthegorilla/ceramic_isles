@@ -5,7 +5,7 @@
 {% block content %}
 	<div class="col-11 col-sm-10 col-md-7 col-lg-5 mx-auto">
 		<span class="tinfo"><h2>Register</h2></span>
-		<form method="post" autocomplete="off">
+		<form method="post">
 		{% csrf_token %}
 		{% crispy form %}
 		<div class="row justify-content-between">

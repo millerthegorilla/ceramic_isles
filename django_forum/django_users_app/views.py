@@ -39,7 +39,6 @@ class ResendConfirmationView(FormView):
     success_url = 'django_users_app/registration_confirmation_sent.html'
 
     def form_valid(self, form, **kwargs):
-        breakpoint()
         super().form_valid(form)
         try:
             user = get_user_model().objects.get(username=form['username'].value())
