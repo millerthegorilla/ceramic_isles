@@ -3,5 +3,6 @@ django_artisan/static/**/*
 !django_artisan/static/robots.txt
 !django_artisan/static/sitemap.xml
 django_artisan/media/**/*
+!django_artisan/media/default_avatars
 !django_artisan/media/default_avatars/**/*
 /**/__pycache__/**/*
