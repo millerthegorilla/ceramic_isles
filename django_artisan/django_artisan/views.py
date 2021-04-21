@@ -40,7 +40,7 @@ class ArtisanForumProfileUpdateView(ForumProfileUpdateView):
             if form.has_changed():
                 obj = form.save()
                 if obj.image_file:
-                    url = str(settings.BASE_DIR) + obj.image_file.url
+                    url = str(settings.MEDIA_ROOT) + obj.image_file.url
                     img = Image.open(url)
                     img = ImageOps.expand(img, border=10, fill='white')
                     img.save(url)
