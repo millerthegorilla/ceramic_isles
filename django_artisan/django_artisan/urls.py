@@ -10,7 +10,7 @@ from .views import AboutPageView, LandingPageView, PersonalPageView, \
                    
 admin.site.site_header = settings.SITE_NAME + ' admin'
 admin.site.site_title = settings.SITE_NAME + ' admin'
-admin.site.site_url = 'https://' + settings.SITE_URL
+# admin.site.site_url = 'https://' + settings.SITE_URL
 admin.site.index_title = settings.SITE_NAME + ' administration'
 admin.empty_value_display = '**Empty**'
    
