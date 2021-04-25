@@ -40,10 +40,9 @@ class ArtisanForumProfileUpdateView(ForumProfileUpdateView):
             if form.has_changed():
                 obj = form.save()
                 if obj.image_file:
-                    url = str(settings.MEDIA_ROOT) + obj.image_file.url
-                    img = Image.open(url)
+                    img = Image.open(obj.image_file.path)
                     img = ImageOps.expand(img, border=10, fill='white')
-                    img.save(url)
+                    img.save(obj.image_file.path)
             return super().form_valid(form)
             #return redirect(self.success_url)
         elif self.request.POST['type'] == 'update-avatar':
