@@ -204,8 +204,8 @@ class UserProductImageDeleteView(LoginRequiredMixin, UpdateView):
     model = UserProductImage
     slug_url_kwarg = 'unique_id'
     slug_field = 'slug'
-    success_url = reverse_lazy('django_forum_app:image_update')  
-    template_name = 'django_forum_app/profile/images/image_list.html'                  
+    success_url = reverse_lazy('django_artisan:image_update')  
+    template_name = 'django_artisan/profile/images/image_list.html'                  
 
     def post(self, request, *args, **kwargs):
         UserProductImage.objects.get(image_id=self.kwargs['unique_id']).delete()
