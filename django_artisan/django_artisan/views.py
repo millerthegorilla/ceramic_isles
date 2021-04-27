@@ -208,12 +208,12 @@ class UserProductImageDeleteView(LoginRequiredMixin, UpdateView):
     template_name = 'django_forum_app/profile/images/image_list.html'                  
 
     def post(self, request, *args, **kwargs):
-        ForumProfileImage.objects.get(image_id=self.kwargs['unique_id']).delete()
+        UserProductImage.objects.get(image_id=self.kwargs['unique_id']).delete()
         return redirect(self.success_url)
 
     def get_object(self, queryset=None, *args, **kwargs):
         try:
-            image = ForumProfileImage.objects.get(id=self.kwargs['unique_id'])
+            image = UserProductImage.objects.get(id=self.kwargs['unique_id'])
         except Exception as e:
             print(e)
             image = None
