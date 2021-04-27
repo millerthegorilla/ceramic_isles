@@ -173,10 +173,9 @@ class UserProductImageUploadView(LoginRequiredMixin, FormView):
         obj = form.save(commit=False)
         obj.user_profile = self.request.user.profile.forumprofile.artisanforumprofile
         obj.save()
-        url = str(settings.BASE_DIR) + obj.image_file.url
-        img = Image.open(url)
+        img = Image.open(obj.image_file.path)
         img = ImageOps.expand(img, border=10, fill='white')
-        img.save(url)
+        img.save(obj.image_file.path)
         return redirect('django_artisan:image_update')
 
     def form_invalid(self, form):
