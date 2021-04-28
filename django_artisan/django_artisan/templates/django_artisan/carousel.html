@@ -22,7 +22,8 @@
               <h5>{{ image.image_title }}</h5>
               <p>{{ image.image_text }}</p>
               <p>Made by <a class="headline-text" href='{% if image.user_profile.display_personal_page %}{% url "django_artisan:personal_page_view" name_slug=image.user_profile.display_name %}{% else %}#{% endif %}'>{{image.user_profile.display_name}}</a>
-              <p>You can buy this at <a href="{{ image.image_shop_link }}" target="blank" class="landing-img-link text-warning">{{ image.image_shop_link_title }}</a></p>
+              {% if image.image_shop_link %}
+              <p>You can buy this at <a href="{{ image.image_shop_link }}" target="blank" class="landing-img-link text-warning">{{ image.image_shop_link_title }}</a></p>{% endif %}
             </div>
           </div>
         {% endfor %}
