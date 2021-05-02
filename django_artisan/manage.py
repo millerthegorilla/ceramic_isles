@@ -6,6 +6,11 @@ import sys
 
 def main():
     """Run administrative tasks."""
+
+    from dotenv import load_dotenv
+    project_folder = os.path.expanduser('/etc/opt/ceramic_isles_dev/settings/')  # adju$
+    load_dotenv(os.path.join(project_folder, '.env'))
+
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')
     try:
         from django.core.management import execute_from_command_line

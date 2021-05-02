@@ -1,8 +1,6 @@
 import math
 import magic
-import PIL
 from PIL import Image as ImageP
-from wand.image import Image as ImageW
 import ffmpeg
 from subprocess import Popen, PIPE
 ##  some of the below code is from https://github.com/ftarlao/check-media-integrity
@@ -13,7 +11,6 @@ from subprocess import Popen, PIPE
 def detect_content_type(f):
     sample = f.read(2048)
     f.seek(0)
-
     return magic.from_buffer(sample, mime=True)
 
 
@@ -38,7 +35,7 @@ def pil_check(file):
     # Image manipulation is mandatory to detect few defects
     # detects truncated file.
     img = ImageP.open(file)
-    img.transpose(PIL.Image.FLIP_LEFT_RIGHT)
+    img.transpose(ImageP.FLIP_LEFT_RIGHT)
 
 
 def convert_size(size_bytes):
