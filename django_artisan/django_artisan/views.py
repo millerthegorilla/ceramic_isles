@@ -173,10 +173,9 @@ class UserProductImageUploadView(LoginRequiredMixin, FormView):
         obj = form.save(commit=False)
         obj.user_profile = self.request.user.profile.forumprofile.artisanforumprofile
         obj.save()
-        url = str(settings.BASE_DIR) + obj.image_file.url
-        img = Image.open(url)
+        img = Image.open(obj.image_file.path)
         img = ImageOps.expand(img, border=10, fill='white')
-        img.save(url)
+        img.save(obj.image_file.path)
         return redirect('django_artisan:image_update')
 
     def form_invalid(self, form):
@@ -205,16 +204,16 @@ class UserProductImageDeleteView(LoginRequiredMixin, UpdateView):
     model = UserProductImage
     slug_url_kwarg = 'unique_id'
     slug_field = 'slug'
-    success_url = reverse_lazy('django_forum_app:image_update')  
-    template_name = 'django_forum_app/profile/images/image_list.html'                  
+    success_url = reverse_lazy('django_artisan:image_update')  
+    template_name = 'django_artisan/profile/images/image_list.html'                  
 
     def post(self, request, *args, **kwargs):
-        ForumProfileImage.objects.get(image_id=self.kwargs['unique_id']).delete()
+        UserProductImage.objects.get(image_id=self.kwargs['unique_id']).delete()
         return redirect(self.success_url)
 
     def get_object(self, queryset=None, *args, **kwargs):
         try:
-            image = ForumProfileImage.objects.get(id=self.kwargs['unique_id'])
+            image = UserProductImage.objects.get(id=self.kwargs['unique_id'])
         except Exception as e:
             print(e)
             image = None
