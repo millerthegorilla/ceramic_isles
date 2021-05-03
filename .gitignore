@@ -6,3 +6,5 @@ django_artisan/media/**/*
 !django_artisan/media/default_avatars
 !django_artisan/media/default_avatars/**/*
 /**/__pycache__/**/*
+django_artisan/ceramic_isles/wsgi.py
+django_artisan/manage.py
