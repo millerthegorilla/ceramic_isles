@@ -5,7 +5,8 @@ from django.contrib import messages
 from django.conf import settings
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, Row, Column, Field, Fieldset, Div
-from .fields import FloatingField
+from crispy_bootstrap5.bootstrap5 import FloatingField
+
 from .models import Profile
 from safe_imagefield.forms import SafeImageField    ## TODO: need to setup clamav.conf properly
 

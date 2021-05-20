@@ -1,6 +1,8 @@
 from safe_imagefield.forms import SafeImageField    ## TODO: need to setup clamav.conf properly
+from django.core.exceptions import ValidationError
 from crispy_forms.layout import Layout, Submit, Row, Column, Field, Fieldset, HTML, Div
 from crispy_forms.helper import FormHelper
+from crispy_bootstrap5.bootstrap5 import FloatingField
 
 from django.conf import settings
 from django import forms
@@ -8,7 +10,7 @@ from django import forms
 from django_forum_app.forms import ForumProfileDetailForm
 
 from .models import ArtisanForumProfile, UserProductImage
-from .fields import FloatingField, FileClearInput, FileInput
+from .fields import FileClearInput, FileInput
 
 
 MAX_NUMBER_OF_IMAGES = settings.MAX_USER_IMAGES
@@ -35,16 +37,23 @@ class ArtisanForumProfileDetailForm(ForumProfileDetailForm):
         super().__init__(*args, **kwargs)
         self.fields['image_file'].widget.is_required = False
         self.fields['image_file'].required = False
-        self.fields['image_file'].label = 'A single image for your personal page, click Update Profile to upload it...'
+        self.fields['image_file'].help_text = '<span class="text-white">A single image for your personal page, click Update Profile to upload it...</span>'
+        self.fields['bio'] = forms.fields.CharField(
+                label="<span class='tinfo'>Biographical Information</span>",
+                help_text='<span class="text-white">Biographical detail is a maximum 500 character space to display \
+                                     on your personal page.</span>',
+                widget=forms.Textarea())
+        self.fields['shop_web_address'] = forms.fields.CharField(
+                label='Your Online Shop Web Address',
+                help_text='<span class="tinfo">Your shop web address to be displayed on your personal page</span>')
+        self.fields['outlets'] = forms.fields.CharField(
+                label='Outlets that sell your wares',
+                help_text='<span class="tinfo">A comma separated list of outlets that sell your stuff, for your personal page.</span>')
+        # override the base class fields by adding new ones
         self.helper.layout.fields = self.helper.layout.fields + [ 
-            HTML('<span class="text-white">A single image for your personal page, either of yourself, or perhaps an item of your work... Click \'Update Profile\' to upload, or to clear.</span>'),
             FileClearInput('image_file', css_class="tinfo form-control form-control-lg"),
-            HTML('<span class="text-white">Biographical detail is a maximum 500 character space to display \
-                                     on your personal page.</span>'),
-            FloatingField('bio'),
-            HTML('<span class="tinfo">Your shop web address to be displayed on your personal page</span>'),
+            Field('bio'),
             FloatingField('shop_web_address'),
-            HTML('<span class="tinfo">A comma separated list of outlets that sell your stuff, for your personal page.</span>'),
             FloatingField('outlets'),
             Div(Field('listed_member'), css_class="tinfo"),
             Div(Field('display_personal_page'), css_class="tinfo"),

@@ -210,11 +210,11 @@ class ForumProfileUpdateView(ProfileUpdateView):
     template_name = 'django_forum_app/profile/forum_profile_update_form.html'
 
     def form_valid(self, form, **kwargs):
+        breakpoint()
         if self.request.POST['type'] == 'update-profile':
             if form.has_changed():
                 form.save()
-            return super().form_valid(form)
-                #return redirect(self.success_url)
+            return super().form_valid(form)  # process other form in django_profile app
         elif self.request.POST['type'] == 'update-avatar':
             fp = ForumProfile.objects.get(profile_user=self.request.user)
             fp.avatar.image_file.save(self.request.FILES['avatar'].name, self.request.FILES['avatar'])

@@ -20,10 +20,18 @@
                 {% endthumbnail %}
                 </div>
             </form>
-            <h6 class="text-white card-title">Image number {{ forloop.counter }}</h6>
-            <h6 class="text-white card-subtitle">Image text:</h6>{{ image.image_text }}
-            <h6 class="text-white card-link">Link to shop page</h6>{{ image.image_shop_link }}
-            <h6 class="text-white card-subtitle">Link text</h6>{{ image.image_shop_link_title }}
+            {% if image.image_title %}
+                <h6 class="text-white card-title">Image text : {{ image.image_title }}</h6>
+            {% endif %}
+            {% if image.image_text %}
+                <h6 class="text-white card-title">Image text : {{ image.image_text }}</h6>
+            {% endif %}
+            {% if image.image_shop_link %}
+                <h6 class="text-white card-title">Link to shop page : {{ image.image_shop_link }}</h6>
+            {% endif %}
+            {% if image.image_shop_link_title %}
+                <h6 class="text-white card-title">Link text : {{ image.image_shop_link_title }}</h6>
+            {% endif %}
         </div>
     </div>
     {% endfor %}

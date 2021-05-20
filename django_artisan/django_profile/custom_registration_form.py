@@ -9,7 +9,9 @@ from captcha.widgets import ReCaptchaV2Checkbox
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, Field, Fieldset, HTML, Button, Div
 from crispy_forms.bootstrap import StrictButton
-from .fields import FloatingField
+from crispy_bootstrap5.bootstrap5 import FloatingField
+
+
 from .models import Profile
 
 
@@ -52,7 +54,6 @@ class CustomUserCreationForm(UserCreationForm):
         super().__init__(*args, **kwargs)
         self.fields['display_name'] = fields.CharField(
                 label='Display name',
-                help_text='display name',
             )
         self.helper = FormHelper()
         self.helper.form_method = 'post'
