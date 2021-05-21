@@ -7,7 +7,8 @@
         <div class="col-xs-12 col-sm-12 col-md-6 col-lg-5">
             <div class="row">
                 <div class="col-auto">
-                    {{ message }}{{ error_msg|safe }}
+                    <span class="text-white">{{ message }}</span>
+                    <span class="text-danger">{{ error_msg|safe }}</span>
                     <form method="post" action="{% url 'django_artisan:image_update' %}" enctype="multipart/form-data">
                         {% csrf_token %}
                         {% crispy form %}

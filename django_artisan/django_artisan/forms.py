@@ -1,4 +1,6 @@
 from safe_imagefield.forms import SafeImageField    ## TODO: need to setup clamav.conf properly
+from django.core.exceptions import ValidationError
+
 from crispy_forms.layout import Layout, Submit, Row, Column, Field, Fieldset, HTML, Div
 from crispy_forms.helper import FormHelper
 
@@ -87,7 +89,7 @@ class UserProductImageForm(forms.ModelForm):
     def restrict_amount(self, value):
         if self.user is not None:
             if UserProductImage.objects.filter(user_profile=self.user.profile.forumprofile).count() >= MAX_NUMBER_OF_IMAGES:
-                raise ValidationError('User already has {} images'.format(MAX_NUMBER_OF_IMAGES))
+                raise ValidationError('You already have a maximum of {} images.  Delete one before you try uploading another'.format(MAX_NUMBER_OF_IMAGES))
 
 
 # handles deletion
@@ -122,7 +124,7 @@ class UserProductImagesForm(forms.ModelForm):
     def restrict_amount(self, value):
         if self.user is not None:
             if UserProductImage.objects.filter(user_profile=self.user.profile.forumprofile).count() >= MAX_NUMBER_OF_IMAGES:
-                raise ValidationError(_('User already has {0} images'.format(MAX_NUMBER_OF_IMAGES)),
+                raise ValidationError(('You already have a maximum of {} images.  Delete one before you try uploading another'.format(MAX_NUMBER_OF_IMAGES)),
                                       code='max_image_limit',
                                       params={'value':'3'})
 
