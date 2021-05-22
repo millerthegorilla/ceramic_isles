@@ -30,20 +30,6 @@ class ForumCommentDocument(Document):
         """
            I no longer have an autocomplete defined, as the amount of requests is crazy.
         """
-        # text = fields.TextField(
-        #     attr='text',
-        #     fields={
-        #         'raw': fields.TextField(analyzer=html_strip),
-        #         'suggest': fields.Completion(analyzer=sugg_analyzer),
-        #     }
-        # )
-
-        # author = fields.TextField(
-        #     attr='title',
-        #     fields={
-        #         'raw': fields.TextField(analyzer=html_strip),
-        #         'suggest': fields.Completion(analyzer=sugg_analyzer),
-        #     })
 
         model = ForumComment
         fields = [
@@ -65,16 +51,16 @@ class ForumCommentDocument(Document):
 
 @registry.register_document
 class ForumPostDocument(Document):
-    forum_comments = fields.NestedField(properties={
-                                                         'author':fields.TextField(
-                                                            attr="author",
-                                                            fields={'raw': fields.TextField(analyzer=html_strip),
-                                                                    'suggest': fields.Completion(analyzer=sugg_analyzer)}),
-                                                         'text':fields.TextField(
-                                                            attr="text",
-                                                            fields={'raw': fields.TextField(analyzer=html_strip),
-                                                                    'suggest': fields.Completion(analyzer=sugg_analyzer)})
-                                                      })
+    text = fields.TextField(
+        attr='text',
+        analyzer=html_strip,
+    )
+
+    category = fields.TextField(
+            attr='category_label'
+        )
+
+
     class Index:
             # Name of the Elasticsearch index
             name = 'forum_posts_index'
@@ -87,35 +73,11 @@ class ForumPostDocument(Document):
             I no longer have an autocomplete defined as the amount of requests goes
             through the roof.
         """
-        # text = fields.TextField(
-        #     attr='text',
-        #     fields={
-        #         'raw': fields.TextField(analyzer=html_strip),
-        #         'suggest': fields.Completion(analyzer=sugg_analyzer),
-        #     }
-        # )
 
-        # title = fields.TextField(
-        #     attr='title',
-        #     fields={
-        #         'raw': fields.TextField(analyzer=html_strip),
-        #         'suggest': fields.Completion(analyzer=sugg_analyzer),
-        #     }
-        # )
-
-        # author = fields.TextField(
-        #     attr='title',
-        #     fields={
-        #         'raw': fields.TextField(analyzer=html_strip),
-        #         'suggest': fields.Completion(analyzer=sugg_analyzer),
-        #     })
-        
         model = ForumPost
         fields = [
-            'title',
-            'text',
-            'category',
-            'author',
+             'title',
+             'author',
         ]
 
 

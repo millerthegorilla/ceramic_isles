@@ -39,20 +39,23 @@ class ArtisanForumProfileDetailForm(ForumProfileDetailForm):
         self.fields['image_file'].required = False
         self.fields['image_file'].help_text = '<span class="text-white">A single image for your personal page, click Update Profile to upload it...</span>'
         self.fields['bio'] = forms.fields.CharField(
-                label="<span class='tinfo'>Biographical Information</span>",
+                label="Biographical Information",
                 help_text='<span class="text-white">Biographical detail is a maximum 500 character space to display \
                                      on your personal page.</span>',
-                widget=forms.Textarea())
+                widget=forms.Textarea(),
+                required=False)
         self.fields['shop_web_address'] = forms.fields.CharField(
                 label='Your Online Shop Web Address',
-                help_text='<span class="tinfo">Your shop web address to be displayed on your personal page</span>')
+                help_text='<span class="tinfo">Your shop web address to be displayed on your personal page</span>',
+                required=False)
         self.fields['outlets'] = forms.fields.CharField(
                 label='Outlets that sell your wares',
-                help_text='<span class="tinfo">A comma separated list of outlets that sell your stuff, for your personal page.</span>')
-        # override the base class fields by adding new ones
+                help_text='<span class="tinfo">A comma separated list of outlets that sell your stuff, for your personal page.</span>',
+                required=False)
+        # add to the super class fields
         self.helper.layout.fields = self.helper.layout.fields + [ 
             FileClearInput('image_file', css_class="tinfo form-control form-control-lg"),
-            Field('bio'),
+            FloatingField('bio'),
             FloatingField('shop_web_address'),
             FloatingField('outlets'),
             Div(Field('listed_member'), css_class="tinfo"),

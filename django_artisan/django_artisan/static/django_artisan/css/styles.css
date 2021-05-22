@@ -104,6 +104,10 @@
 }
 
 /* PROFILE */
+#id_bio {
+  height: 200px;
+}
+
 #div_id_image_file {
   color: white;
 }

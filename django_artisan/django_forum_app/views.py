@@ -161,6 +161,7 @@ class ForumPostListView(PostListView):
                 else:
                     t = 'match'
                     terms = terms[0]
+                breakpoint()
                 queryset_p = ForumPostDocument.search().query(
                             Q(t, text=terms)|
                             Q(t, author=terms)|
