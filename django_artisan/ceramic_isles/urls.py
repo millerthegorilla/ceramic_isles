@@ -23,8 +23,12 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import re_path
 from django.contrib.staticfiles import views
+from django.contrib.sitemaps.views import sitemap
+from django_artisan.sitemaps import StaticViewSitemap, PersonalPageSiteMap
 from django_forum_app.views import CustomRegisterView
 
+sitemaps = { 'main': StaticViewSitemap,
+             'personalpage': PersonalPageSiteMap }
 
 urlpatterns = [
     path('users/accounts/register/', CustomRegisterView.as_view(), name='register'),
@@ -34,6 +38,8 @@ urlpatterns = [
     path('email/', include(mail_urls)),
     path('admin/', admin.site.urls),
     path('tinymce/', include('tinymce.urls')),
+    path('sitemap.xml', sitemap, {'sitemaps': sitemaps},
+         name='django.contrib.sitemaps.views.sitemap')
 ]
 
 try:
