@@ -1,3 +1,4 @@
+from random_username.generate import generate_username
 
 from django.db import models
 from django.contrib.auth.models import User
@@ -7,10 +8,8 @@ from django.template.defaultfilters import slugify
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 
-
-def get_default_display_name():
-    return str(uuid.uuid4())
-
+def default_display_name():
+    return generate_username()[0]
 
 # Create your models here.
 class Profile(models.Model):
@@ -18,7 +17,7 @@ class Profile(models.Model):
         user profile
     """
     profile_user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
-    display_name = models.CharField(max_length=37, blank=True, unique=True, default=get_default_display_name())
+    display_name = models.CharField(max_length=37, blank=True, unique=True, default=default_display_name)
 
     def __str__(self):
         return str(self._meta.get_fields(include_hidden=True))

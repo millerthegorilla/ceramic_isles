@@ -7,7 +7,7 @@ class StaticViewSitemap(Sitemap):
     changefreq = 'daily'
 
     def items(self):
-        return ['about_view', 'register', 'landing_page', 'login', 'rules_view']
+        return ['django_artisan:about_view', 'register', 'django_artisan:landing_page', 'login', 'django_forum_app:rules_view']
 
     def location(self, item):
         return reverse(item)
@@ -17,7 +17,10 @@ class PersonalPageSiteMap(Sitemap):
     changefreq = 'daily'
 
     def items(self):
-        return ArtisanForumProfile.objects.all().filter(display_personal_page=True).values('display_name')
+        '''
+    	    the order_by removes garbage warning about pagination.
+        '''
+        return ArtisanForumProfile.objects.all().filter(display_personal_page=True).values('display_name').order_by('pk')
 
     def location(self, item):
-        return  '/people/' + str(item)
+        return  '/people/' + item['display_name']

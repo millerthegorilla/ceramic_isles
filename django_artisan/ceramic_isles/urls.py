@@ -27,6 +27,12 @@ from django.contrib.sitemaps.views import sitemap
 from django_artisan.sitemaps import StaticViewSitemap, PersonalPageSiteMap
 from django_forum_app.views import CustomRegisterView
 
+from django.contrib.sites.models import Site
+current_site = Site.objects.all().first()
+current_site.domain_name = "127.0.0.1:8000"
+current_site.name = "127.0.0.1:8000"
+current_site.save()
+
 sitemaps = { 'main': StaticViewSitemap,
              'personalpage': PersonalPageSiteMap }
 
