@@ -1,6 +1,17 @@
 from django.contrib.sitemaps import Sitemap
 from django.urls import reverse
 from django_artisan.models import ArtisanForumProfile
+#from django.contrib.sites.models import Site
+
+
+# class SitemapSite(Sitemap):
+#     def __init__(self):
+#         super().__init__()
+#         current_site = Site.objects.all().first()
+#         if current_site.domain != "127.0.0.1:8000":
+#             current_site.domain = "127.0.0.1:8000"
+#             current_site.name = "127.0.0.1:8000"
+#             current_site.save()
 
 class StaticViewSitemap(Sitemap):
     priority = 0.5
@@ -18,7 +29,7 @@ class PersonalPageSiteMap(Sitemap):
 
     def items(self):
         '''
-    	    the order_by removes garbage warning about pagination.
+            the order_by removes garbage warning about pagination.
         '''
         return ArtisanForumProfile.objects.all().filter(display_personal_page=True).values('display_name').order_by('pk')
 
