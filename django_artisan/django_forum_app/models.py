@@ -159,6 +159,9 @@ class ForumPost(Post):
     def __str__(self):
         return f"Post by {self.author}"
 
+    def category_label(self):
+        return settings.CATEGORY(self.category).label
+
 @receiver(post_save, sender=ForumPost)
 def save_author_on_post_creation(sender, instance, created, **kwargs):
     if created:
