@@ -1,5 +1,6 @@
 import os
 import uuid
+import logging
 from random import randint
 from pathlib import Path
 
@@ -13,6 +14,8 @@ from django.conf import settings
 
 from django_forum_app.models import ForumProfile, create_user_forum_profile, save_user_forum_profile, Avatar, default_avatar
 from django_forum_app.views import ForumPostView
+
+logger = logging.getLogger(__name__)
 
 def user_directory_path(instance, filename):
     if type(instance) is ArtisanForumProfile:
@@ -52,9 +55,8 @@ def create_user_artisan_forum_profile(sender, instance, created, **kwargs):
 def save_user_artisan_forum_profile(sender, instance, **kwargs):
     try:
         instance.profile.save()
-    except (ObjectDoesNotExist, FieldError):
-        pass
-        ## TODO: log error to log file.
+    except (ObjectDoesNotExist, FieldError) as e:
+        logger.error("Error saving ArtisanForumProfile : {0}".format(e))
 
 @receiver(pre_delete, sender=ArtisanForumProfile)
 def auto_delete_image_file_on_delete(sender, instance, **kwargs):
@@ -78,9 +80,8 @@ def auto_delete_image_file_on_delete(sender, instance, **kwargs):
                         if len(os.listdir(fdu1)) == 0:
                             os.rmdir(fdu1)
 
-                except ObjectDoesNotExist as i:
-                    # TODO: log file missing
-                    pass
+                except ObjectDoesNotExist as e:
+                    logger.error("Error deleting image file : {0}".format(e))
 
 
 # TODO: validate image_shop_link properly 
@@ -140,7 +141,8 @@ def auto_delete_file_on_change(sender, instance, **kwargs):
 
     try:
         old_image_field = UserProductImage.objects.get(pk=instance.pk)
-    except UserProductImage.DoesNotExist:
+    except UserProductImage.DoesNotExist as e:
+        logger.error("Unable to get UserProductImage when deleting image : {0}".format(e))
         return False
 
     new_file = instance.image_file

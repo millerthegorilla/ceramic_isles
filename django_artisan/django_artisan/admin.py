@@ -1,11 +1,38 @@
+import dropbox
+
 from django.contrib import admin
 from django.contrib import messages
 from django.utils.translation import ngettext
+from django.core import management
+from django.apps import AppConfig
+from django.db.models.signals import post_migrate
+from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 
 from django_password_validators.password_history.models import PasswordHistory
 
 from django_forum_app.models import ForumProfile
 from .models import UserProductImage, Event, ArtisanForumProfile
+
+
+def callback(sender, **kwargs):
+    from django.contrib.sites.models import Site
+    try:
+        current_site = Site.objects.get(id=settings.SITE_ID)
+        if current_site.domain != settings.SITE_DOMAIN:
+            raise ImproperlyConfigured("SITE_ID does not match SITE_DOMAIN") 
+    except Site.DoesNotExist:
+        logger.info("Creating Site Model with domain={0}, name={1}, id={2}".format(settings.SITE_DOMAIN,
+                                                                                   settings.SITE_NAME,
+                                                                                   settings.SITE_ID))
+        Site.objects.create(domain=settings.SITE_DOMAIN, name=settings.SITE_NAME, id=settings.SITE_ID)
+    
+
+class DjangoArtisanConfig(AppConfig):
+    name = 'django_artisan'
+
+    def ready(self):
+        post_migrate.connect(callback, sender=self)
 
 
 @admin.register(UserProductImage)
@@ -62,3 +89,14 @@ class ArtisanForumProfileAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         return super().get_queryset(request).exclude(profile_user__is_superuser=True)
+
+
+## TODO switch from dbbackup to runrestic to use restic - https://restic.net/
+class tasks:
+    def db_backup():
+        # clear existing backups first - dbbackup --clean doesn't work with dropbox.
+        dbx = dropbox.Dropbox(settings.DBBACKUP_STORAGE_OPTIONS['oauth2_access_token'])
+        for entry in dbx.files_list_folder('/opt/ceramic_isles_dev/ceramicisles/').entries:
+            dbx.files_delete(entry.path_lower)
+        management.call_command("dbbackup")
+        management.call_command("mediabackup")

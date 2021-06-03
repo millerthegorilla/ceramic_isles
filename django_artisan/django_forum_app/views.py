@@ -1,6 +1,7 @@
-from uuid import uuid4
 import bleach
 import html
+import logging
+from uuid import uuid4
 from elasticsearch_dsl import Q
 from random import randint
 
@@ -35,8 +36,11 @@ from .forms import  ForumPostCreateForm, ForumPostListSearch, \
 from .custom_registration_form import CustomUserCreationForm
 from .models import create_user_forum_profile, Avatar, default_avatar
 
-### START POSTS AND COMMENTS
 
+logger = logging.getLogger(__name__)
+
+
+### START POSTS AND COMMENTS
 class ForumPostCreateView(PostCreateView):
     model = ForumPost
     template_name = "django_forum_app/posts_and_comments/forum_post_create_form.html"
@@ -101,7 +105,7 @@ class ForumPostView(PostView):
                 comment.save(update_fields=['text'])
                 return redirect(post)
             except ObjectDoesNotExist as e:
-                pass  ### TODO: log errors here.
+                logger.error("Error accessing comment : {0}".format(e))
         elif self.request.POST['type'] == 'post-report':
             post.moderation = timezone.now()
             post.save(update_fields=['moderation'])

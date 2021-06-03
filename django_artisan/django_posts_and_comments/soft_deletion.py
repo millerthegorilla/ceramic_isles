@@ -1,8 +1,14 @@
+import datetime
+
 from django.db import models
 from django.db.models.query import QuerySet
 from django.contrib import admin
 from django.utils import timezone
+from django.conf import settings
 
+from django_q.tasks import schedule
+### The below is from https://adriennedomingus.com/blog/soft-deletion-in-django
+### with djangoq added... :)
 
 class SoftDeletionQuerySet(QuerySet):
     def delete(self):
@@ -34,7 +40,6 @@ class SoftDeletionManager(models.Manager):
 
 class SoftDeletionModel(models.Model):
     deleted_at = models.DateTimeField(blank=True, null=True)
-
     objects = SoftDeletionManager()
     all_objects = SoftDeletionManager(alive_only=False)
 
@@ -44,6 +49,10 @@ class SoftDeletionModel(models.Model):
     def delete(self):
         self.deleted_at = timezone.now()
         self.save()
+        schedule(self.hard_delete, name="soft_delete_timeout",
+                                   schedule_type="O",
+                                   repeats=-1,
+                                   next_run=timezone.now() + settings.DELETION_TIMEOUT)
 
     def hard_delete(self):
         super(SoftDeletionModel, self).delete()

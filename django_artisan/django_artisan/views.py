@@ -1,4 +1,5 @@
 import random
+import logging
 from PIL import Image, ImageOps
 from sorl.thumbnail import delete
 
@@ -22,6 +23,8 @@ from django_forum_app.models import ForumPost
 
 from .models import Event, UserProductImage, ArtisanForumProfile
 from .forms import ArtisanForumProfileDetailForm, UserProductImageForm
+
+logger = logging.getLogger(__name__)
 
 
 @method_decorator(never_cache, name='dispatch')
@@ -197,8 +200,6 @@ class UserProductImageUploadView(LoginRequiredMixin, FormView):
         return kwarg_dict
 
 
-
-# TODO: prompt on deletion as security against path hack
 class UserProductImageDeleteView(LoginRequiredMixin, UpdateView):
     http_method_names = ['post']
     model = UserProductImage
@@ -214,8 +215,8 @@ class UserProductImageDeleteView(LoginRequiredMixin, UpdateView):
     def get_object(self, queryset=None, *args, **kwargs):
         try:
             image = UserProductImage.objects.get(id=self.kwargs['unique_id'])
-        except Exception as e:
-            print(e)
+        except UserProductImage.DoesNotExist as e:
+            logger.error("Unable to get UserProductImage when deleting : {0}".format(e))
             image = None
         if image is None:
             redirect(self.success_url)
