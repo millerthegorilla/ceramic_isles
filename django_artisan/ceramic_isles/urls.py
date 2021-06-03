@@ -1,18 +1,5 @@
-"""django_forum URL Configuration
+import logging
 
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/3.1/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
 from django.urls import include, path
 from django_email_verification import urls as mail_urls
@@ -26,12 +13,8 @@ from django.contrib.staticfiles import views
 from django.contrib.sitemaps.views import sitemap
 from django_artisan.sitemaps import StaticViewSitemap, PersonalPageSiteMap
 from django_forum_app.views import CustomRegisterView
-# from django.contrib.sites.models import Site
 
-# current_site = Site.objects.all().first()
-# current_site.domain_name = "127.0.0.1:8000"
-# current_site.name = "127.0.0.1:8000"
-# current_site.save()
+logger = logging.getLogger(__name__)
 
 sitemaps = { 'main': StaticViewSitemap,
              'personalpage': PersonalPageSiteMap }
@@ -51,12 +34,15 @@ urlpatterns = [
 try:
     settings.DEBUG
 except NameError:
-    pass # log that we are not debug
+    logger.info("settings.DEBUG is not defined")
 else:
     if settings.DEBUG == True:
+        logger.info("Django is in debug mode")
         urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
         urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
         import debug_toolbar
         urlpatterns = [
             path('__debug__/', include(debug_toolbar.urls)),
         ] + urlpatterns
+    else:
+        logger.info("Django is in production mode")

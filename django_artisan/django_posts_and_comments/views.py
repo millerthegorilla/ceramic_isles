@@ -1,5 +1,6 @@
 import bleach
 import html
+import logging
 from uuid import uuid4
 
 from django.urls import reverse_lazy
@@ -22,13 +23,9 @@ from django.core.paginator import Paginator
 from .models import Post, Comment
 from .forms import PostCreateForm, CommentForm
 
-# Create your views here.
 
+logger = logging.getLogger(__name__)
 
-# class PostView(DetailView):
-#     model = Post
-#     slug_url_kwarg = 'post_slug'
-#     slug_field = 'slug'
 
 @method_decorator(never_cache, name='dispatch')
 @method_decorator(never_cache, name='get')
@@ -77,9 +74,9 @@ class PostView(LoginRequiredMixin, DetailView):
                 comment.save(update_fields=['text'])
                 return redirect(post)
             except ObjectDoesNotExist as e:
-                pass  ### TODO: log errors here.
+                logger.error("Error accessing comment : {0}".format(e))
         else:
-            ### TODO:  LOG ERROR HERE
+            logger.warn("request has no processable type")
             return redirect('django_posts_and_comments:post_list_view')
 
     def get(self, *args, **kwargs):

@@ -1,4 +1,5 @@
 import os
+import logging
 from random import randint
 
 from django.db.models import Max
@@ -23,6 +24,9 @@ from django_posts_and_comments.models import Post, Comment
 from safe_imagefield.models import SafeImageField
 from sorl.thumbnail.fields import ImageField
 from sorl.thumbnail import delete
+
+logger = logging.getLogger(__name__)
+
 ### START PROFILE
 ### helper functions
 def user_directory_path_avatar(instance, filename):
@@ -50,7 +54,8 @@ def auto_delete_file_on_change(sender, instance, **kwargs):
 
     try:
         old_avatar = Avatar.objects.get(pk=instance.pk)
-    except Avatar.DoesNotExist:
+    except Avatar.DoesNotExist as e:
+        logger.warn("unable to get old avatar file : {0}".format(e))
         return False
     
     if 'default_avatars' not in old_avatar.image_file.path:
@@ -59,9 +64,8 @@ def auto_delete_file_on_change(sender, instance, **kwargs):
             if os.path.isfile(old_avatar.image_file.path):
                 try:
                     delete(old_avatar.image_file)
-                except ObjectDoesNotExist as i:
-                    pass
-                    ## TODO: log error here
+                except ObjectDoesNotExist as e:
+                    logger.error("Error, avatar does not exist : {0}".format(e))
         
 ### END AVATARS 
 
@@ -101,9 +105,8 @@ def create_user_forum_profile(sender, instance, created, **kwargs):
 def save_user_forum_profile(sender, instance, **kwargs):
     try:
         instance.profile.save()
-    except (ObjectDoesNotExist, FieldError):
-        pass
-        ## TODO: log error to log file.
+    except (ObjectDoesNotExist, FieldError) as e:
+        logger.error("Error saving forum profile : {0}".format(e))
 
 @receiver(pre_delete, sender=ForumProfile)
 def auto_delete_avatar_on_delete(sender, instance, **kwargs):
@@ -126,9 +129,8 @@ def auto_delete_avatar_on_delete(sender, instance, **kwargs):
                 if os.path.isdir(fdu1):
                     if len(os.listdir(fdu1)) == 0:
                         os.rmdir(fdu1)
-            except ObjectDoesNotExist as i:
-                # TODO: log file missing
-                pass
+            except ObjectDoesNotExist as e:
+                logger.error("unable to delete avatar : {0}".format(e))
 
 ### START POST AND COMMENTS
 class ForumPost(Post):

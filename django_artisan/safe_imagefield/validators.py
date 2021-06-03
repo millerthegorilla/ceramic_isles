@@ -1,5 +1,6 @@
 import mimetypes
 import os
+import logging
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 from . import clamav
@@ -7,6 +8,9 @@ from .utils import detect_content_type, \
                    pil_check, \
                    ffmpeg_check, \
                    convert_size
+
+
+logger = logging.getLogger(__name__)
 
 
 #class FileNameValidator(object):
@@ -164,7 +168,7 @@ class MediaIntegrityValidator:
             try:
                 pil_check(file)
             except Exception as e:
-                print('Exception Type at validators.py line 151 is', e)
+                logger.error("PIL CHECK ERROR : {0}".format(e))
                 raise ValidationError(self.message, self.error_code, params={'error': str(e)})
 
 
