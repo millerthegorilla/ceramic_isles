@@ -1,8 +1,8 @@
 from safe_imagefield.forms import SafeImageField    ## TODO: need to setup clamav.conf properly
 from django.core.exceptions import ValidationError
-
 from crispy_forms.layout import Layout, Submit, Row, Column, Field, Fieldset, HTML, Div
 from crispy_forms.helper import FormHelper
+from crispy_bootstrap5.bootstrap5 import FloatingField
 
 from django.conf import settings
 from django import forms
@@ -10,7 +10,7 @@ from django import forms
 from django_forum_app.forms import ForumProfileDetailForm
 
 from .models import ArtisanForumProfile, UserProductImage
-from .fields import FloatingField, FileClearInput, FileInput
+from .fields import FileClearInput, FileInput
 
 
 MAX_NUMBER_OF_IMAGES = settings.MAX_USER_IMAGES
@@ -37,16 +37,26 @@ class ArtisanForumProfileDetailForm(ForumProfileDetailForm):
         super().__init__(*args, **kwargs)
         self.fields['image_file'].widget.is_required = False
         self.fields['image_file'].required = False
-        self.fields['image_file'].label = 'A single image for your personal page, click Update Profile to upload it...'
+        self.fields['image_file'].help_text = '<span class="text-white">A single image for your personal page, click Update Profile to upload it...</span>'
+        self.fields['bio'] = forms.fields.CharField(
+                label="Biographical Information",
+                help_text='<span class="text-white">Biographical detail is a maximum 500 character space to display \
+                                     on your personal page.</span>',
+                widget=forms.Textarea(),
+                required=False)
+        self.fields['shop_web_address'] = forms.fields.CharField(
+                label='Your Online Shop Web Address',
+                help_text='<span class="tinfo">Your shop web address to be displayed on your personal page</span>',
+                required=False)
+        self.fields['outlets'] = forms.fields.CharField(
+                label='Outlets that sell your wares',
+                help_text='<span class="tinfo">A comma separated list of outlets that sell your stuff, for your personal page.</span>',
+                required=False)
+        # add to the super class fields
         self.helper.layout.fields = self.helper.layout.fields + [ 
-            HTML('<span class="text-white">A single image for your personal page, either of yourself, or perhaps an item of your work... Click \'Update Profile\' to upload, or to clear.</span>'),
             FileClearInput('image_file', css_class="tinfo form-control form-control-lg"),
-            HTML('<span class="text-white">Biographical detail is a maximum 500 character space to display \
-                                     on your personal page.</span>'),
             FloatingField('bio'),
-            HTML('<span class="tinfo">Your shop web address to be displayed on your personal page</span>'),
             FloatingField('shop_web_address'),
-            HTML('<span class="tinfo">A comma separated list of outlets that sell your stuff, for your personal page.</span>'),
             FloatingField('outlets'),
             Div(Field('listed_member'), css_class="tinfo"),
             Div(Field('display_personal_page'), css_class="tinfo"),
@@ -89,7 +99,7 @@ class UserProductImageForm(forms.ModelForm):
     def restrict_amount(self, value):
         if self.user is not None:
             if UserProductImage.objects.filter(user_profile=self.user.profile.forumprofile).count() >= MAX_NUMBER_OF_IMAGES:
-                raise ValidationError('You already have a maximum of {} images.  Delete one before you try uploading another'.format(MAX_NUMBER_OF_IMAGES))
+                raise ValidationError('User already has {} images'.format(MAX_NUMBER_OF_IMAGES))
 
 
 # handles deletion
@@ -124,7 +134,7 @@ class UserProductImagesForm(forms.ModelForm):
     def restrict_amount(self, value):
         if self.user is not None:
             if UserProductImage.objects.filter(user_profile=self.user.profile.forumprofile).count() >= MAX_NUMBER_OF_IMAGES:
-                raise ValidationError(('You already have a maximum of {} images.  Delete one before you try uploading another'.format(MAX_NUMBER_OF_IMAGES)),
+                raise ValidationError(_('User already has {0} images'.format(MAX_NUMBER_OF_IMAGES)),
                                       code='max_image_limit',
                                       params={'value':'3'})
 

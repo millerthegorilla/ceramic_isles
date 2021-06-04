@@ -28,8 +28,7 @@ class ArtisanForumProfile(ForumProfile):
     bio = models.TextField('biographical information, max 500 chars', 
                             max_length=500, 
                             blank=True, 
-                            default='', 
-                            help_text="This is the biographical information that will be presented on your personal page")
+                            default='')
     image_file = models.ImageField('A single image for your personal page', upload_to=user_directory_path, null=True, blank=True)
     shop_web_address = models.CharField('shop link', max_length=50, blank=True, default='')
     outlets = models.CharField('places that sell my stuff, comma separated', max_length=400, blank=True, default='')

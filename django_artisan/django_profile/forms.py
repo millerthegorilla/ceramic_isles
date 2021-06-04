@@ -1,20 +1,14 @@
-import logging
-
 from django.forms import ModelForm
 from django.contrib.auth.models import User
 from django.db import IntegrityError
 from django.contrib import messages
 from django.conf import settings
-
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, Row, Column, Field, Fieldset, Div
+from crispy_bootstrap5.bootstrap5 import FloatingField
 
-from .fields import FloatingField
 from .models import Profile
 from safe_imagefield.forms import SafeImageField    ## TODO: need to setup clamav.conf properly
-
-
-logger = logging.getLogger(__name__)
 
 
 class ProfileUserForm(ModelForm):
@@ -29,8 +23,8 @@ class ProfileUserForm(ModelForm):
         super().__init__(*args, **kwargs)
         try:
             self.initial = kwargs['initial']
-        except KeyError as e:
-            logger.warn("no initial kwargs : {0}".format(e))
+        except KeyError:
+            pass
         for fieldname in ['username', 'email']:
             self.fields[fieldname].help_text = None
         self.helper = FormHelper()
@@ -52,7 +46,7 @@ class ProfileUserForm(ModelForm):
                 return username
             except IntegrityError as e:
                 error_message = e.__cause__
-                logger.error(error_message)
+                messages.error(None, error_message)
             self.valid = False
             self.add_error('username', 'Error, That username already exists!')
         return username
@@ -66,7 +60,7 @@ class ProfileUserForm(ModelForm):
                 return email
             except IntegrityError as e:
                 error_message = e.__cause__
-                logger.error(error_message)
+                messages.error(None, error_message)
             self.valid = False 
             self.add_error('email', 'Error! That email already exists!')
         return email

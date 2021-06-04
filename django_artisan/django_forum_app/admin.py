@@ -10,7 +10,7 @@ from django_profile.models import Profile
 from .models import ForumPost, ForumComment, ForumProfile
 
 @admin.register(ForumComment)
-class ForumCommentAdmin(SoftDeletionAdmin):
+class ForumCommentAdmin(admin.ModelAdmin): #SoftDeletionAdmin):
     #fields = ('moderation', 'active', 'author', 'title', 'text', 'date_created', 'deleted_at', 'user_profile')
     # fieldsets = [
     #     ('Moderation', {'fields': ['moderation']}),
@@ -20,7 +20,7 @@ class ForumCommentAdmin(SoftDeletionAdmin):
     # ]
     list_display = ('moderation', 'active', 'post_str', 'author', 'text', 'date_created', 'deleted_at')
     list_editable = ('text', )
-    list_filter = ('moderation', 'active', 'date_created', 'deleted_at', 'post', 'author')
+    list_filter = ('moderation', 'active', 'date_created', 'post', 'author', 'deleted_at')
     search_fields = ('author', 'text')
 
     def post_str(self, obj: ForumComment):
@@ -41,9 +41,9 @@ class ForumCommentAdmin(SoftDeletionAdmin):
                 ) % updated, messages.SUCCESS)
 
 @admin.register(ForumPost)
-class ForumPostAdmin(SoftDeletionAdmin):
+class ForumPostAdmin(admin.ModelAdmin): #SoftDeletionAdmin):
     list_display = ('moderation', 'active', 'author', 'title', 'text', 'date_created', 'deleted_at')
-    list_filter = ('moderation', 'active', 'date_created', 'deleted_at', 'author')
+    list_filter = ('moderation', 'active', 'date_created', 'author', 'deleted_at')
     search_fields = ('author', 'text', 'title')
 
     actions = ['approve_post']

@@ -10,7 +10,7 @@ from captcha.widgets import ReCaptchaV2Checkbox
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, Field, Fieldset, HTML, Button, Div
 from crispy_forms.bootstrap import StrictButton
-from .fields import FloatingField
+from crispy_bootstrap5.bootstrap5 import FloatingField
 
 
 class CustomUserCreationForm(UserCreationForm):

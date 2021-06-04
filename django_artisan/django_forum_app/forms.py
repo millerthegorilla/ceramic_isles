@@ -4,12 +4,14 @@ from django.core.exceptions import ValidationError
 from django.conf import settings
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, Row, Column, Field, Fieldset, HTML, Div
+from crispy_bootstrap5.bootstrap5 import FloatingField
+
 from tinymce.widgets import TinyMCE
 
 from django_profile.forms import ProfileUserForm, ProfileDetailForm
 from django_posts_and_comments.forms import PostCreateForm, CommentForm
 from .models import ForumProfile, ForumPost, ForumComment
-from .fields import FloatingField, FileInput
+from .fields import FileInput
 
 
 ### START FORUMPROFILE
@@ -24,7 +26,20 @@ class ForumProfileUserForm(ProfileUserForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        if len(args):
+            initl = args[0].get('display_name')
+        else:
+            initl = ForumProfile.objects.get(profile_user__username= kwargs['initial']['username']).display_name
+        self.fields['display_name'] = forms.CharField(
+            help_text='<span class="tinfo">Your display name is used in the forum, and to make \
+                        your personal page address.  Try your first name and last name, \
+                        or use your business name.  It *must* be different to your username.  It will be \
+                        converted to an internet friendly name when you save it.</span>',
+            initial=initl)
         self.helper.form_tag = False
+        self.helper.layout = Layout(
+            FloatingField('display_name'),
+            self.helper.layout)
 
 
 class ForumProfileDetailForm(ProfileDetailForm):
@@ -43,12 +58,7 @@ class ForumProfileDetailForm(ProfileDetailForm):
         self.helper = FormHelper()
         self.helper.form_tag = False
         self.helper.layout = Layout(
-                HTML('<span class="tinfo">Your display name is used in the forum, and to make \
-                        your personal page address.  Try your first name and last name, \
-                        or use your business name.  It *must* be different to your username.  It will be \
-                        converted to an internet friendly name when you save it.</span>'),
-                FloatingField('display_name'),
-                HTML('<span class="tinfo">Address details are only necessary if there is mail for users</span>'),
+                HTML('<span class="tinfo">Address details are only necessary if there is going to be mail for users</span>'),
                 HTML('<a class="btn btn-primary mb-3 ms-3" data-bs-toggle="collapse" \
                      href="#collapseAddress" role="button" aria-expanded="false" \
                      aria-controls="collapseAddress">Address details</a><br>'),

@@ -142,17 +142,10 @@ class ForumPost(Post):
         ordering = ['-date_created']
         permissions = [('approve_post', 'Approve Post')]
 
-    class Category(models.TextChoices):
-        EVENT = 'EV', _('Event')
-        QUESTION = 'QN', _('Question')
-        GENERAL = 'GL', _('General')
-        PICTURES = 'PS', _('Pictures')
-        FORSALE = 'FS', _('For Sale')
-
     category = models.CharField(
         max_length=2,
-        choices=Category.choices,
-        default=Category.GENERAL,
+        choices=settings.CATEGORY.choices,
+        default=settings.CATEGORY.GENERAL,
     )
 
     def get_absolute_url(self):

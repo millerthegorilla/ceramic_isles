@@ -2,8 +2,8 @@ from django.forms import ModelForm, CharField, Form
 from .models import Post, Comment
 from tinymce.widgets import TinyMCE
 from crispy_forms.layout import Layout, Submit, Row, Column, Field, Fieldset, HTML, Div
-from .fields import FloatingField
 from crispy_forms.helper import FormHelper
+from crispy_bootstrap5.bootstrap5 import FloatingField
 
 
 class PostCreateForm(ModelForm):
