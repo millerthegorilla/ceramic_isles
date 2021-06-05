@@ -31,6 +31,7 @@
                                     </td>
                                     <td data-label="Category">
                                         {{ post.get_category_display|safe }}
+                                        {% if post.pinned %}...pinned post{% endif %}
                                     </td>
                                     <td data-label="#comments" class="num-comments">
                                         {{ post.comments.count }}

@@ -41,9 +41,9 @@ class ForumCommentAdmin(admin.ModelAdmin): #SoftDeletionAdmin):
                 ) % updated, messages.SUCCESS)
 
 @admin.register(ForumPost)
-class ForumPostAdmin(admin.ModelAdmin): #SoftDeletionAdmin):
-    list_display = ('moderation', 'active', 'author', 'title', 'text', 'date_created', 'deleted_at')
-    list_filter = ('moderation', 'active', 'date_created', 'author', 'deleted_at')
+class ForumPostAdmin(SoftDeletionAdmin):
+    list_display = ('pinned', 'moderation', 'active', 'author', 'title', 'text', 'date_created', 'deleted_at')
+    list_filter = ('pinned', 'moderation', 'active', 'date_created', 'author', 'deleted_at')
     search_fields = ('author', 'text', 'title')
 
     actions = ['approve_post']
@@ -55,6 +55,14 @@ class ForumPostAdmin(admin.ModelAdmin): #SoftDeletionAdmin):
                     '%d posts were approved.',
                     updated,
                 ) % updated, messages.SUCCESS)
+
+    # def pin_post(self, request, queryset):    
+    #     self.message_user(request, ngettext(
+    #                 '%d post was approved.',
+    #                 '%d posts were approved.',
+    #                 updated,
+    #             ) % updated, messages.SUCCESS)
+
 
 
 admin.site.unregister(Profile)

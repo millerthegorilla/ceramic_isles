@@ -1,4 +1,5 @@
 import dropbox
+import logging
 
 from django.contrib import admin
 from django.contrib import messages
@@ -13,6 +14,9 @@ from django_password_validators.password_history.models import PasswordHistory
 
 from django_forum_app.models import ForumProfile
 from .models import UserProductImage, Event, ArtisanForumProfile
+
+
+logger = logging.getLogger(__name__)
 
 
 def callback(sender, **kwargs):
@@ -95,8 +99,21 @@ class ArtisanForumProfileAdmin(admin.ModelAdmin):
 class tasks:
     def db_backup():
         # clear existing backups first - dbbackup --clean doesn't work with dropbox.
-        dbx = dropbox.Dropbox(settings.DBBACKUP_STORAGE_OPTIONS['oauth2_access_token'])
-        for entry in dbx.files_list_folder('/opt/ceramic_isles_dev/ceramicisles/').entries:
-            dbx.files_delete(entry.path_lower)
+        try:
+            dbx = dropbox.Dropbox(settings.DBBACKUP_STORAGE_OPTIONS['oauth2_access_token'])
+        except dropbox.exceptions.AuthError as e:
+            logger.error("Dropbox Auth Issue : {0}".format(e))
+        except dropbox.exceptions.HttpError as e:
+            logger.error("Dropbox HttpError : {0}".format(e))
+        for entry in dbx.files_list_folder('', recursive=True).entries:
+            dbx.files_delete(entry.path_display)
         management.call_command("dbbackup")
         management.call_command("mediabackup")
+        logger.info("succesfully backed up database and media files")
+
+    # def ping_google():
+    #     """
+    #         You must be registered with google search console for this to work
+    #         ... https://search.google.com/search-console/welcome
+    #     """
+    #     management.call_command("ping_google")

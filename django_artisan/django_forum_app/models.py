@@ -137,6 +137,7 @@ class ForumPost(Post):
     author = models.CharField(default='', max_length=40)
     active = models.BooleanField(default=True)
     moderation = models.DateField(null=True, default=None, blank=True)
+    pinned = models.SmallIntegerField(default=0)
     
     class Meta:
         ordering = ['-date_created']

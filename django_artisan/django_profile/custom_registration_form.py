@@ -29,7 +29,6 @@ class CustomUserCreationForm(UserCreationForm):
         return username
 
     def clean_display_name(self):
-        breakpoint()
         displayname = self.cleaned_data['display_name']
         dname = slugify(displayname)
         try:

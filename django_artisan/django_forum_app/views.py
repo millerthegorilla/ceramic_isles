@@ -165,7 +165,6 @@ class ForumPostListView(PostListView):
                 else:
                     t = 'match'
                     terms = terms[0]
-                breakpoint()
                 queryset_p = ForumPostDocument.search().query(
                             Q(t, text=terms)|
                             Q(t, author=terms)|
@@ -179,7 +178,7 @@ class ForumPostListView(PostListView):
             else:
                 return render(request, self.template_name, {'form':form})  ## TODO: show form errors?
         else:
-            queryset = ForumPost.objects.all()
+            queryset = ForumPost.objects.order_by('-pinned')
         if search:
             paginator = Paginator(p_c, 6)
         else:
@@ -215,7 +214,6 @@ class ForumProfileUpdateView(ProfileUpdateView):
     template_name = 'django_forum_app/profile/forum_profile_update_form.html'
 
     def form_valid(self, form, **kwargs):
-        breakpoint()
         if self.request.POST['type'] == 'update-profile':
             if form.has_changed():
                 form.save()

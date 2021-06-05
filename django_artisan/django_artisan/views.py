@@ -2,6 +2,7 @@ import random
 import logging
 from PIL import Image, ImageOps
 from sorl.thumbnail import delete
+from django_q.tasks import async_task
 
 from django.db.models import Max
 from django.shortcuts import render, redirect
@@ -16,6 +17,7 @@ from django.urls import reverse_lazy
 from django.views.generic.edit import FormView, UpdateView
 from django.core.paginator import Paginator
 from django.conf import settings
+from django.contrib.sitemaps import ping_google
 
 from django_forum_app.forms import ForumProfileUserForm
 from django_forum_app.views import ForumProfileUpdateView, CustomRegisterView
@@ -24,8 +26,15 @@ from django_forum_app.models import ForumPost
 from .models import Event, UserProductImage, ArtisanForumProfile
 from .forms import ArtisanForumProfileDetailForm, UserProductImageForm
 
+
 logger = logging.getLogger(__name__)
 
+def ping_google_func():
+    try:
+        ping_google()
+        logger.info("Pinged Google!")
+    except Exception as e:
+        logger.error("unable to ping_google : {0}".format(e))
 
 @method_decorator(never_cache, name='dispatch')
 class ArtisanForumProfileUpdateView(ForumProfileUpdateView):
@@ -41,6 +50,10 @@ class ArtisanForumProfileUpdateView(ForumProfileUpdateView):
     def form_valid(self, form, **kwargs):
         if self.request.POST['type'] == 'update-profile':
             if form.has_changed():
+                logger.info("HEY!!!!!!!!!!!!")
+                if 'display_personal_page' in form.changed_data or \
+                   'listed_member' in form.changed_data:
+                   async_task(ping_google_func)
                 obj = form.save()
                 if obj.image_file:
                     img = Image.open(obj.image_file.path)
