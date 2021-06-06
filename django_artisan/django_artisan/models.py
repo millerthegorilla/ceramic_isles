@@ -4,6 +4,7 @@ import logging
 from random import randint
 from pathlib import Path
 
+from django_q.tasks import async_task
 from sorl.thumbnail import delete
 
 from django.contrib.auth.models import User
@@ -15,7 +16,7 @@ from django.conf import settings
 from django_forum_app.models import ForumProfile, create_user_forum_profile, save_user_forum_profile, Avatar, default_avatar
 from django_forum_app.views import ForumPostView
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('django')
 
 def user_directory_path(instance, filename):
     if type(instance) is ArtisanForumProfile:
@@ -128,34 +129,35 @@ def auto_delete_file_on_delete(sender, instance, **kwargs):
         if len(os.listdir(fd)) == 0:
             os.rmdir(fd)
 
-@receiver(pre_save, sender=UserProductImage)
-def auto_delete_file_on_change(sender, instance, **kwargs):
-    """
-    Deletes old file from filesystem
-    when corresponding `MediaFile` object is updated
-    with new file.
-    """
-    if not instance.pk:
-        return False
+# @receiver(pre_save, sender=UserProductImage)
+# def auto_delete_file_on_change(sender, instance, **kwargs):
+#     """
+#     Deletes old file from filesystem
+#     when corresponding `MediaFile` object is updated
+#     with new file.
+#     """
+#     if not instance.pk:
+#         return False
 
-    try:
-        old_image_field = UserProductImage.objects.get(pk=instance.pk)
-    except UserProductImage.DoesNotExist as e:
-        logger.error("Unable to get UserProductImage when deleting image : {0}".format(e))
-        return False
+#     try:
+#         breakpoint()
+#         old_image_field = UserProductImage.objects.get(pk=instance.pk)
+#     except UserProductImage.DoesNotExist as e:
+#         logger.info("New UserProductImage being installed?: {0}".format(e))
+#         return False
 
-    new_file = instance.image_file
-    if not old_image_field.file == new_file:
-        if os.path.isfile(old_image_field.file.path):
-            delete(old_image_field) # clear thumbs from cache
-            os.remove(old_image_field.file.path)
+#     new_file = instance.image_file
+#     if not old_image_field.file == new_file:
+#         if os.path.isfile(old_image_field.file.path):
+#             delete(old_image_field) # clear thumbs from cache
+#             os.remove(old_image_field.file.path)
 
 @receiver(post_save, sender=UserProductImage)
 def send_email_when_image_uploaded(sender, instance, **kwargs):
     """
        Send email to moderators
     """
-    ForumPostView.send_mod_mail('Image')
+    async_task(ForumPostView.send_mod_mail('Image'))
 
 
 class Event(models.Model):

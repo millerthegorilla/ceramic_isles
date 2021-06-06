@@ -37,7 +37,7 @@ from .custom_registration_form import CustomUserCreationForm
 from .models import create_user_forum_profile, Avatar, default_avatar
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('django')
 
 
 ### START POSTS AND COMMENTS

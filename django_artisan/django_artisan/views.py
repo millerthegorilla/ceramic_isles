@@ -27,7 +27,7 @@ from .models import Event, UserProductImage, ArtisanForumProfile
 from .forms import ArtisanForumProfileDetailForm, UserProductImageForm
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('django')
 
 def ping_google_func():
     try:

@@ -25,7 +25,7 @@ from safe_imagefield.models import SafeImageField
 from sorl.thumbnail.fields import ImageField
 from sorl.thumbnail import delete
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('django')
 
 ### START PROFILE
 ### helper functions

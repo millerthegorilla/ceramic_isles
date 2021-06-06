@@ -16,7 +16,7 @@ from django_forum_app.models import ForumProfile
 from .models import UserProductImage, Event, ArtisanForumProfile
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('django')
 
 
 def callback(sender, **kwargs):

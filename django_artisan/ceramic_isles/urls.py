@@ -14,10 +14,13 @@ from django.contrib.sitemaps.views import sitemap
 from django_artisan.sitemaps import StaticViewSitemap, PersonalPageSiteMap
 from django_forum_app.views import CustomRegisterView
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('django')
 
 sitemaps = { 'main': StaticViewSitemap,
              'personalpage': PersonalPageSiteMap }
+
+def trigger_error(request):
+    division_by_zero = 1 / 0
 
 urlpatterns = [
     path('users/accounts/register/', CustomRegisterView.as_view(), name='register'),
@@ -28,7 +31,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('tinymce/', include('tinymce.urls')),
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps},
-         name='django.contrib.sitemaps.views.sitemap')
+         name='django.contrib.sitemaps.views.sitemap'),
+    path('sentry-debug/', trigger_error)
 ]
 
 try:

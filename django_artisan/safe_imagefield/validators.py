@@ -10,7 +10,7 @@ from .utils import detect_content_type, \
                    convert_size
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('django')
 
 
 #class FileNameValidator(object):
