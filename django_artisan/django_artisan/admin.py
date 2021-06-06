@@ -4,6 +4,7 @@ import logging
 from django.contrib import admin
 from django.contrib import messages
 from django.utils.translation import ngettext
+from django.utils import log
 from django.core import management
 from django.apps import AppConfig
 from django.db.models.signals import post_migrate
