@@ -5,7 +5,8 @@ from .views import ForumPostListView, \
                    ForumPostCreateView, \
                    CustomRegisterView, \
                    ForumProfileUpdateView, \
-                   RulesPageView
+                   RulesPageView, \
+                   subscribe
                    #autocomplete
 from .forms import ForumPostCreateForm
 from .models import ForumPost
@@ -19,7 +20,8 @@ urlpatterns = [
     path('posts/', ForumPostListView.as_view(), name='post_list_view'),
     path('<int:pk>/<slug:post_slug>/', ForumPostView.as_view(), name='post_view'),
     path('rules/', RulesPageView.as_view(), name='rules_view'),
-    path('register/', CustomRegisterView.as_view(), name='register')
+    path('register/', CustomRegisterView.as_view(), name='register'),
+    path('subscribe/', subscribe, name='subscribe')
     # path('autocomplete/', autocomplete, name='autocomplete')  # experimental autocomplete
 ]
 

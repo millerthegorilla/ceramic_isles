@@ -50,7 +50,6 @@ class ArtisanForumProfileUpdateView(ForumProfileUpdateView):
     def form_valid(self, form, **kwargs):
         if self.request.POST['type'] == 'update-profile':
             if form.has_changed():
-                logger.info("HEY!!!!!!!!!!!!")
                 if 'display_personal_page' in form.changed_data or \
                    'listed_member' in form.changed_data:
                    async_task(ping_google_func)

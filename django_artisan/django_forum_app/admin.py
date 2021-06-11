@@ -3,11 +3,14 @@ from django.urls import reverse
 from django.utils.html import escape, mark_safe
 from django.contrib import messages
 from django.utils.translation import ngettext
+from django.core.mail import EmailMessage
+from django.conf import settings
 
 from django_posts_and_comments.soft_deletion import SoftDeletionAdmin, SoftDeletionModel
 from django_profile.models import Profile
 
 from .models import ForumPost, ForumComment, ForumProfile
+
 
 @admin.register(ForumComment)
 class ForumCommentAdmin(admin.ModelAdmin): #SoftDeletionAdmin):
@@ -65,7 +68,7 @@ class ForumPostAdmin(SoftDeletionAdmin):
 
 
 
-admin.site.unregister(Profile)
+# admin.site.unregister(Profile)
 
 # Register your models here.
 @admin.register(ForumProfile)
@@ -77,4 +80,21 @@ class ForumProfileAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         return super().get_queryset(request).exclude(profile_user__is_superuser=True)
 
-    
+
+class tasks:
+    def send_susbcribed_email(post, scheme, site, path_info):
+        # need to pass parameter or similar to get post href
+        # need to make settings objects for email_from, subscribed_msg
+        # reply_to
+        href = "{0}://{1}{2}".format(scheme, site, path_info)
+        
+        email = EmailMessage(
+            'A new comment has been made at {}!'.format(settings.SITE_NAME),
+            settings.SUBSCRIBED_MSG.format(href),
+            settings.EMAIL_FROM_ADDRESS,
+            ['subscribed_user@ceramicisles.org'],
+            list(post.subscribed_users),
+            reply_to=[settings.EMAIL_FROM_ADDRESS],
+        )
+        email.content_subtype = "html"
+        email.send()

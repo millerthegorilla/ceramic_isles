@@ -138,6 +138,7 @@ class ForumPost(Post):
     active = models.BooleanField(default=True)
     moderation = models.DateField(null=True, default=None, blank=True)
     pinned = models.SmallIntegerField(default=0)
+    subscribed_users = models.ManyToManyField(User, blank=True, related_name="subscribed_posts")
     
     class Meta:
         ordering = ['-date_created']

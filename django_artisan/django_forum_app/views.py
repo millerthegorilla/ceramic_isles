@@ -5,6 +5,8 @@ from uuid import uuid4
 from elasticsearch_dsl import Q
 from random import randint
 
+from django_q.tasks import async_task
+
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.template.defaultfilters import slugify
@@ -16,6 +18,7 @@ from django.utils import dateformat
 from django.utils.decorators import method_decorator
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import User
 from django.views.decorators.cache import never_cache
 from django.conf import settings
 from django.views.generic.base import TemplateView
@@ -35,7 +38,7 @@ from .forms import  ForumPostCreateForm, ForumPostListSearch, \
                     ForumProfileDetailForm
 from .custom_registration_form import CustomUserCreationForm
 from .models import create_user_forum_profile, Avatar, default_avatar
-
+from .admin import tasks
 
 logger = logging.getLogger('django')
 
@@ -52,6 +55,8 @@ class ForumPostCreateView(PostCreateView):
         post.text = PostCreateView.sanitize_post_text(post.text)
         post.slug = slugify(post.title + '-' + str(dateformat.format(timezone.now(), 'Y-m-d H:i:s')))
         post.save()
+        if 'subscribe' in self.request.POST:
+            post.subscribed_users.add(self.request.user)
         return redirect(self.get_success_url(post))
  
     def get_success_url(self, post, *args, **kwargs):
@@ -70,7 +75,8 @@ class ForumPostView(PostView):
     slug_url_kwarg = 'post_slug'
     slug_field = 'slug'
     template_name = 'django_forum_app/posts_and_comments/forum_post_detail.html'
-    form_class = ForumCommentForm
+    form_class = ForumPostCreateForm
+    comment_form_class = ForumCommentForm
 
     def post(self, *args, **kwargs):
         post = ForumPost.objects.get(pk=kwargs['pk'])
@@ -85,6 +91,10 @@ class ForumPostView(PostView):
                 new_comment.forum_post = post
                 new_comment.user_profile = self.request.user.profile.forumprofile
                 new_comment.save()
+                async_task(tasks.send_susbcribed_email, post, 
+                                                        self.request.scheme, 
+                                                        self.request.site, 
+                                                        self.request.path_info)
                 return redirect(post)
             else:
                 comments = ForumComment.objects.filter(post=post).all()
@@ -132,14 +142,41 @@ class ForumPostView(PostView):
 
     def get(self, *args, **kwargs):
         post = ForumPost.objects.get(pk=kwargs['pk'])
-        new_comment_form = self.form_class()
+        form = self.form_class(user_name=self.request.user.username, post=post)
+        subscribed = ''
+        try:
+            if post.subscribed_users.get(username=self.request.user.username):
+                subscribed = 'checked'
+        except get_user_model().DoesNotExist:
+            subscribed = ''
+        new_comment_form = self.comment_form_class()
         comments = ForumComment.objects.filter(post=post)
         user_display_name = self.request.user.profile.display_name
-        return render(self.request, self.template_name, {'post': post,
+        return render(self.request, self.template_name, {'form': form,
+                                                         'post': post,
+                                                         'subscribed': subscribed,
                                                          'comments': comments,
                                                          'comment_form': new_comment_form,
                                                          'user_display_name': user_display_name})
 
+
+def subscribe(request):
+
+    # request should be ajax and method should be POST.
+    if request.is_ajax and request.method == "POST":
+        try:
+            fp = ForumPost.objects.get(slug=request.POST['post_slug'])
+            if request.POST['data'] == 'true':
+                fp.subscribed_users.add(request.user)
+            else:
+                fp.subscribed_users.remove(request.user)
+            return JsonResponse({},status=200)
+        except ForumPost.DoesNotExist as e:
+            logger.error('There is no post with that slug : {0}'.format(e))
+            return JsonResponse({"error": "no post with that slug"}, status=500)
+
+    else:
+        return JsonResponse({"error": ""}, status=500)
 
 @method_decorator(never_cache, name='dispatch')
 class ForumPostListView(PostListView):

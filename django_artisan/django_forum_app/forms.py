@@ -82,11 +82,16 @@ class ForumPostCreateForm(PostCreateForm):
     class Meta(PostCreateForm.Meta):
         model = ForumPost
         fields = PostCreateForm.Meta.fields + ['category']
-        widgets = { 'text': TinyMCE()}
+        widgets = { 'text': TinyMCE() }
         labels = { 'category':'Choose a category for your post...'}
 
-    def __init__(self, **kwargs):
+    def __init__(self, user_name=None, post=None, **kwargs):
+        checked_string = ''
         super().__init__(**kwargs)
+        if post and user_name and post.subscribed_users.filter(username=user_name).count():
+            checked_string='checked'
+        checkbox_string = '<input type="checkbox" id="subscribe_cb" name="subscribe" value="Subscribe" ' + checked_string + '> \
+                              <label for="subscribe_cb" class="tinfo">Subscribe to this post...</label><br>'
         self.helper.layout = Layout(
             Fieldset(
                 'Create your post...',
@@ -94,6 +99,7 @@ class ForumPostCreateForm(PostCreateForm):
                 Field('text', css_class="mb-3 post-create-form-text"),
                 HTML("<div class='font-italic mb-3 tinfo'>Maximum of 2000 characters.  Click on word count to see how many characters you have used...</div>"),
                 Div(Field('category'), css_class="tinfo"),
+                HTML(checkbox_string),
                 Submit('save', 'Publish Post', css_class="col-3 mt-3 mb-3"),
             )
         )

@@ -19,9 +19,6 @@ logger = logging.getLogger('django')
 sitemaps = { 'main': StaticViewSitemap,
              'personalpage': PersonalPageSiteMap }
 
-def trigger_error(request):
-    division_by_zero = 1 / 0
-
 urlpatterns = [
     path('users/accounts/register/', CustomRegisterView.as_view(), name='register'),
     path('', include(artisan_app_urls)),
@@ -32,7 +29,6 @@ urlpatterns = [
     path('tinymce/', include('tinymce.urls')),
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps},
          name='django.contrib.sitemaps.views.sitemap'),
-    path('sentry-debug/', trigger_error)
 ]
 
 try:

@@ -1,7 +1,10 @@
 		<div id='post_text' class="col-12 col-sm-11 col-md-10 col-lg-8 mx-auto my-auto">
+			<div class="row justify-content-end">
+			    <div class="col-auto"><input type='checkbox' id='subscribed_cb' {% if subscribed %}checked{% endif %}><label for="subscribed_cb" class="ps-2">Subscribe to this thread</label></div>
+			</div>
 			<div class="row align-items-end tinfo">
 				<div class="col-auto">
-				        <h3>{{ post.title|safe }} <span class="text-dark ps-2">by</span></h3>
+				        <h3><span id="post_title">{{ post.title|safe }}</span> <span class="text-dark ps-2">by</span></h3>
 			    </div>
 			    <div class="col-auto">
 			    	<h4>{{ post.post_author }}<span class="text-dark ps-3">on</span></h4>

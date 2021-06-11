@@ -17,6 +17,21 @@ function showEditor() {
 	    $('#modify-post-btns').show();
 	});
 }
+function getCookie(name) {
+var cookieValue = null;
+if (document.cookie && document.cookie != '') {
+    var cookies = document.cookie.split(';');
+    for (var i = 0; i < cookies.length; i++) {
+        var cookie = jQuery.trim(cookies[i]);
+        // Does this cookie string begin with the name we want?
+        if (cookie.substring(0, name.length + 1) == (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+        }
+    }
+}
+    return cookieValue;
+}
 
 function showUpdateComment(id) {
 	//$("textarea[id='#comment-textarea-" + id + "']").val($('#comment-text-' + id).html().trim())
@@ -82,14 +97,32 @@ $(document).ready(function () {
 	//tinymce.editors[0].hide()
   var commentModal = document.getElementById('commentModal')
   commentModal.addEventListener('show.bs.modal', function (event) {
-    // Button that triggered the modal
     var button = event.relatedTarget
-    // Extract info from data-bs-* attributes
     var value_val = button.getAttribute('data-bs-whatever')
-    // If necessary, you could initiate an AJAX request here
-    // and then do the updating in a callback.
-    //
-    // Update the modal's content.
     $('#rem-comment').attr('value', value_val)
   })
+  $('#subscribed_cb').change(function() {
+    parts = $(location).attr('href').split('/');
+    var lastSegment = parts.pop() || parts.pop();
+    $.ajax({
+      type: 'POST',
+      url: "/forum/subscribe/",
+      data: { 'post_slug': lastSegment, 'data': this.checked, 'csrfmiddlewaretoken': getCookie('csrftoken') },
+      success: function (response) {
+        text=$("label[for='subscribed_cb']").text();
+        if(text=='Subscribe to this thread') {
+            text='Subscribed to this thread';
+        } else {
+            text='Subscribe to this thread';
+        }
+        $("label[for='subscribed_cb']").text(text);
+      }
+    })
+  })
+  if ($('#subscribed_cb').prop("checked") == true) {
+    text='Subscribed to this thread';
+  } else {
+    text='Subscribe to this thread';
+  }
+  $("label[for='subscribed_cb']").text(text);
 });
