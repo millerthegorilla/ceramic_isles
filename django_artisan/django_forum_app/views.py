@@ -5,7 +5,7 @@ from uuid import uuid4
 from elasticsearch_dsl import Q
 from random import randint
 
-from django_q.tasks import async_task
+from django_q.tasks import schedule
 
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
@@ -24,6 +24,7 @@ from django.conf import settings
 from django.views.generic.base import TemplateView
 from django.core.mail import send_mail
 from django.db.models.signals import post_save
+from django.contrib.sites.models import Site
 
 # Create your views here.
 from django_posts_and_comments.models import Post
@@ -38,7 +39,7 @@ from .forms import  ForumPostCreateForm, ForumPostListSearch, \
                     ForumProfileDetailForm
 from .custom_registration_form import CustomUserCreationForm
 from .models import create_user_forum_profile, Avatar, default_avatar
-from .admin import tasks
+from .tasks import send_susbcribed_email
 
 logger = logging.getLogger('django')
 
@@ -84,17 +85,21 @@ class ForumPostView(PostView):
             post.delete()
             return redirect(reverse_lazy('django_forum_app:post_list_view'))
         elif self.request.POST['type'] == 'comment':
-            comment_form = self.form_class(data=self.request.POST)
+            comment_form = self.comment_form_class(data=self.request.POST)
             if comment_form.is_valid():
                 new_comment = comment_form.save(commit=False)
                 new_comment.text = bleach.clean(html.unescape(new_comment.text), strip=True)
                 new_comment.forum_post = post
                 new_comment.user_profile = self.request.user.profile.forumprofile
                 new_comment.save()
-                async_task(tasks.send_susbcribed_email, post, 
-                                                        self.request.scheme, 
-                                                        self.request.site, 
-                                                        self.request.path_info)
+                site = Site.objects.get_current()
+                schedule('django_forum_app.tasks.send_susbcribed_email', name="subscribe_timeout" + str(uuid4()),
+                                                       schedule_type="O",
+                                                       repeats=-1,
+                                                       next_run=timezone.now() + settings.COMMENT_WAIT,
+                                                       post_id=post.id,
+                                                       comment_id=new_comment.id,
+                                                       path_info=self.request.path_info)                                         
                 return redirect(post)
             else:
                 comments = ForumComment.objects.filter(post=post).all()

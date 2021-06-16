@@ -1,4 +1,5 @@
 import datetime
+import uuid
 
 from django.db import models
 from django.db.models.query import QuerySet
@@ -37,7 +38,6 @@ class SoftDeletionManager(models.Manager):
     def hard_delete(self):
         return self.get_queryset().hard_delete()
 
-
 class SoftDeletionModel(models.Model):
     deleted_at = models.DateTimeField(blank=True, null=True)
     objects = SoftDeletionManager()
@@ -49,10 +49,17 @@ class SoftDeletionModel(models.Model):
     def delete(self):
         self.deleted_at = timezone.now()
         self.save()
-        schedule(self.hard_delete, name="soft_delete_timeout",
-                                   schedule_type="O",
-                                   repeats=-1,
-                                   next_run=timezone.now() + settings.DELETION_TIMEOUT)
+        schedule('django_posts_and_comments.tasks.schedule_hard_delete', name="sd_timeout_" + str(uuid.uuid4()),
+                                       schedule_type="O",
+                                       repeats=-1,
+                                       next_run=timezone.now() + settings.DELETION_TIMEOUT,
+                                       post_slug=self.post.slug, 
+                                       deleted_at=str(self.deleted_at), 
+                                       type=str(self),
+                                       id=str(self.id))
+
+    ### TODO : refactor so that a regular schedule is run once every week which hard_deletes all posts/comments
+    ###        that are soft_deleted > than settings.DELETION_TIMEOUT ago.
 
     def hard_delete(self):
         super(SoftDeletionModel, self).delete()
