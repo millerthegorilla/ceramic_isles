@@ -81,9 +81,9 @@ class ForumProfileDetailForm(ProfileDetailForm):
 class ForumPostCreateForm(PostCreateForm):
     class Meta(PostCreateForm.Meta):
         model = ForumPost
-        fields = PostCreateForm.Meta.fields + ['category']
+        fields = PostCreateForm.Meta.fields + ['category', 'location']
         widgets = { 'text': TinyMCE() }
-        labels = { 'category':'Choose a category for your post...'}
+        labels = { 'category':'Choose a category for your post...', 'location':'Which island...?'}
 
     def __init__(self, user_name=None, post=None, **kwargs):
         checked_string = ''
@@ -98,9 +98,9 @@ class ForumPostCreateForm(PostCreateForm):
                 FloatingField('title'),
                 Field('text', css_class="mb-3 post-create-form-text"),
                 HTML("<div class='font-italic mb-3 tinfo'>Maximum of 2000 characters.  Click on word count to see how many characters you have used...</div>"),
-                Div(Field('category'), css_class="tinfo"),
+                Div(Field('category', css_class="col-auto"), Field('location', css_class="col-auto"), css_class="col-8 col-sm-4 col-md-4 col-lg-3 tinfo"),
                 HTML(checkbox_string),
-                Submit('save', 'Publish Post', css_class="col-3 mt-3 mb-3"),
+                Submit('save', 'Publish Post', css_class="col-auto mt-3 mb-3"),
             )
         )
         self.helper.form_action = 'django_forum_app:post_create_view'
@@ -115,7 +115,7 @@ class ForumCommentForm(CommentForm):
         super().__init__(*args, **kwargs)
         self.helper.layout = Layout(
             Fieldset(
-                'Comment away...!',
+                '<h3 class="comment-headline">Comment away...!</h3>',
                 Row(
                     Column(
                         Field('text', css_class="comment-form-text"),

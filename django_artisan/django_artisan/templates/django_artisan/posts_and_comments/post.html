@@ -1,61 +1,85 @@
+		{% load thumbnail %}
 		<div id='post_text' class="col-12 col-sm-11 col-md-10 col-lg-8 mx-auto my-auto">
 			<div class="row justify-content-end">
-			    <div class="col-auto"><input type='checkbox' id='subscribed_cb' {% if subscribed %}checked{% endif %}><label for="subscribed_cb" class="ps-2">Subscribe to this thread</label></div>
+			   
 			</div>
-			<div class="row align-items-end tinfo">
+			<div class="row align-items-end tinfo post-headline mb-2">
 				<div class="col-auto">
-				        <h3><span id="post_title">{{ post.title|safe }}</span> <span class="text-dark ps-2">by</span></h3>
+				    <h1><span id="post_title">{{ post.title|safe }}</span></h1> 
 			    </div>
 			    <div class="col-auto">
-			    	<h4>{{ post.post_author }}<span class="text-dark ps-3">on</span></h4>
+			    	<h1><span class="text-dark ps-2">by</span></h1>
 			    </div>
 			    <div class="col-auto">
-			    	<h6>{{ post.date_created }}</h6>
+			    	<h3>{{ post.post_author }}</h3>
+			    </div>
+			    <div class="col-auto">
+			    	<h3><span class="text-dark ps-3">on</span></h3>
+			    </div>
+			    <div class="col-auto">
+			    	<h4>{{ post.date_created }}</h4>
 			    </div>
 			</div>
-			<div class="row ms-auto">
-				{% if not post.moderation %}
-			    <div id="textarea" class="col-auto">{{ post.text|safe }}</div>
-			    {% else %}
-			    <div>This post has been reported and is awaiting moderation.</div>
-			    {% endif %}
-			    {% if post.post_author == user_display_name %}
-				    <div class="ms-auto">
-		    		    <form method="post">
-		    		    	{% csrf_token %}
-		    		    	<div id="post-edit-div">
-		    		    		<input type="textarea" name="update-post" class="update-form-text"></input>
-				    		    <input type="hidden" name="type" value="update">
-				    		    <div class="mt-3">
-				                    <button id="editor-cancel-btn" type="button" class="ms-auto col-auto btn btn-secondary me-2">Cancel</button>
-				                    <button id="editor-submit-btn" type="submit" class="me-auto col-auto btn btn-primary">
-				                    Save Post</button>
+			<div class='ps-4'>
+				<div class="tinfo row justify-content-between mb-2">
+					 <div class="col-auto">
+				    	<h6>Category : {{ post.get_category_display }}</h6>
+				    </div>
+				    <div class="col-auto">
+				    	<h6>Location : {{ post.get_location_display }}</h6>
+				    </div>
+				    <div class="col-auto"><input type='checkbox' id='subscribed_cb' {% if subscribed %}checked{% endif %}><label for="subscribed_cb" class="ps-2">Subscribe to this thread</label></div>
+				</div>
+				<div class="row ms-auto mb-2">
+					{% if not post.moderation %}
+				    <div id="textarea" class="col-auto">{{ post.text|safe }}</div>
+				    {% else %}
+				    <div>This post has been reported and is awaiting moderation.</div>
+				    {% endif %}
+				    {% if post.post_author == user_display_name %}
+					    <div class="ms-auto">
+			    		    <form method="post">
+			    		    	{% csrf_token %}
+			    		    	<div id="post-edit-div">
+			    		    		<input type="textarea" name="update-post" class="update-form-text"></input>
+			    		    		<div id="opt-selects" class="col-10 col-sm-4 col-md-4 col-lg-3">
+			    		    			<span class="tinfo">Category : </span><select name="category" class="col-auto select form-select" id="id_category">{{category_opts|safe}}</select>
+			    		    			<span class="tinfo">Location : </span><select name="location" class="col-auto select form-select" id="id_location">{{location_opts|safe}}</select>
+			    		    		</div>
+					    		    <input type="hidden" name="type" value="update">
+					    		    <div class="mt-3">
+					                    <button id="editor-cancel-btn" type="button" class="ms-auto col-auto btn btn-secondary me-2">Cancel</button>
+					                    <button id="editor-submit-btn" type="submit" class="me-auto col-auto btn btn-primary">
+					                    Save Post</button>
+					                </div>
 				                </div>
-			                </div>
-		                </form>
-		            </div>
-                {% else %}
-	                {% if not post.moderation and post.post_author != user_display_name %}
-	                <div class="ms-auto">
-	                    <form method="post" id="form-report-post">
-	                    	{% csrf_token %}
-	                    	<div class="tinfo">
-	                            <input type="hidden" name="type" value="post-report">
-	                            <a class="report-post text-warning" href="#">Report Post for Moderation</a>
-	                    	</div>
-	                    </form>
-	                </div>
+			                </form>
+			            </div>
+	                {% else %}
+		                {% if not post.moderation and post.post_author != user_display_name %}
+		                <div class="ms-auto">
+		                    <form method="post" id="form-report-post">
+		                    	{% csrf_token %}
+		                    	<div class="tinfo">
+		                            <input type="hidden" name="type" value="post-report">
+		                            <a class="report-post text-warning" href="#">Report Post for Moderation</a>
+		                    	</div>
+		                    </form>
+		                </div>
+		                {% endif %}
 	                {% endif %}
-                {% endif %}
-		    </div>
-		    <div class="row justify-content-end">
-	    		{% if post.post_author == user_display_name %}
-	    		    <div id="modify-post-btns">
-			    		<button id="delete-btn" type="button" class="btn btn-secondary col-auto me-2" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">Delete Post</button>
-		    		    <button id="editor-btn" class="me-auto col-auto btn btn-primary">Edit Post</button>
-	    		    </div>
-	    		{% endif %}
-		    </div>
+			    </div>
+			    <div class="row justify-content-end mb-3">
+		    		{% if post.post_author == user_display_name %}
+		    		    <div id="modify-post-btns">
+		    		    	<div class="d-flex justify-content-end">
+				    			<button id="delete-btn" type="button" class="btn btn-secondary col-auto me-2" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">Delete Post</button>
+			    		    	<button id="editor-btn" class="col-auto btn btn-primary">Edit Post</button>
+		    		    	</div>
+		    		    </div>
+		    		{% endif %}
+			    </div>
+			</div>
 		    <!-- Confirm Delete Post Modal -->
 		    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
 		      <div class="modal-dialog">
@@ -77,5 +101,10 @@
 		          </div>
 		        </div>
 		      </div>
+		    </div>
+		    <div class="row justify-content-center">
+		    	{% thumbnail 'http://127.0.0.1:8000/static/django_artisan/images/nouveau_line.png' "3000x240" format='PNG' as im %}
+		        	<img src="{{ im.url }}" width='100%' height='50' title="This post is pinned!">
+		    	{% endthumbnail %}
 		    </div>
 		</div>

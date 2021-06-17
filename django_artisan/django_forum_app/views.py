@@ -54,7 +54,7 @@ class ForumPostCreateView(PostCreateView):
         post = form.save(commit=False)
         post.user_profile = self.request.user.profile.forumprofile
         post.text = PostCreateView.sanitize_post_text(post.text)
-        post.slug = slugify(post.title + '-' + str(dateformat.format(timezone.now(), 'Y-m-d H:i:s')))
+        post.slug = slugify(post.title[:60] + '-' + str(dateformat.format(timezone.now(), 'Y-m-d H:i:s')))
         post.save()
         if 'subscribe' in self.request.POST:
             post.subscribed_users.add(self.request.user)
@@ -80,6 +80,7 @@ class ForumPostView(PostView):
     comment_form_class = ForumCommentForm
 
     def post(self, *args, **kwargs):
+        breakpoint()
         post = ForumPost.objects.get(pk=kwargs['pk'])
         if self.request.POST['type'] == 'post' and self.request.user.profile.display_name == post.author:
             post.delete()
@@ -108,7 +109,9 @@ class ForumPostView(PostView):
                                                              'comment_form': comment_form})
         elif self.request.POST['type'] == 'update':
             post.text = self.request.POST['update-post']
-            post.save(update_fields=['text'])
+            post.category = self.request.POST['category']
+            post.location = self.request.POST['location']
+            post.save(update_fields=['text', 'location', 'category'])
             return redirect(post)
         elif self.request.POST['type'] == 'rem-comment':
             ForumComment.objects.get(pk=self.request.POST['comment']).delete()
@@ -157,8 +160,25 @@ class ForumPostView(PostView):
         new_comment_form = self.comment_form_class()
         comments = ForumComment.objects.filter(post=post)
         user_display_name = self.request.user.profile.display_name
+        category = post.get_category_display()
+        cat_text=''
+        for i in [(cat.value, cat.label) for cat in settings.CATEGORY]:
+            if i[1] == category:
+                cat_text=cat_text+'<option value="' + str(i[0]) + '" selected>' + str(i[1]) + '</option>'
+            else:
+                cat_text=cat_text+'<option value="' + str(i[0]) + '">' + str(i[1]) + '</option>'
+        location = post.get_location_display()
+        loc_text=''
+        for i in [(loc.value, loc.label) for loc in settings.LOCATION]:
+            if i[1] == location:
+                loc_text=loc_text+'<option value="' + str(i[0]) + '" selected>' + str(i[1]) + '</option>'
+            else:
+                loc_text=loc_text+'<option value="' + str(i[0]) + '">' + str(i[1]) + '</option>'
+
         return render(self.request, self.template_name, {'form': form,
                                                          'post': post,
+                                                         'category_opts': cat_text,
+                                                         'location_opts': loc_text,
                                                          'subscribed': subscribed,
                                                          'comments': comments,
                                                          'comment_form': new_comment_form,
@@ -187,7 +207,7 @@ def subscribe(request):
 class ForumPostListView(PostListView):
     model = ForumPost
     template_name = 'django_forum_app/posts_and_comments/forum_post_list.html'
-    paginate_by = 6
+    paginate_by = 5
     """
        the documentation for django-elasticsearch and elasticsearch-py as well as elasticsearch
        is not particularly good, at least not in my experience.  The following searches posts and 
@@ -211,7 +231,8 @@ class ForumPostListView(PostListView):
                             Q(t, text=terms)|
                             Q(t, author=terms)|
                             Q(t, title=terms) |
-                            Q(t, category=terms)).to_queryset()
+                            Q(t, category=terms) |
+                            Q(t, location=terms)).to_queryset()
                 queryset_c = ForumCommentDocument.search().query(Q(t, text=terms)|Q(t, author=terms)).to_queryset()
                 p_c = list(queryset_p) + list(queryset_c)
                 search = len(p_c)
@@ -222,9 +243,9 @@ class ForumPostListView(PostListView):
         else:
             queryset = ForumPost.objects.order_by('-pinned')
         if search:
-            paginator = Paginator(p_c, 6)
+            paginator = Paginator(p_c, self.paginate_by)
         else:
-            paginator = Paginator(queryset, 6)
+            paginator = Paginator(queryset, self.paginate_by)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
         context = { 'page_obj': page_obj, 'search': search, 'is_a_search': is_a_search}

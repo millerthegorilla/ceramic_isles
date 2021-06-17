@@ -1,7 +1,7 @@
 {% load crispy_forms_tags %}
 		<!-- COMMENTS -->
-		<div class="col-10 col-lg-8  mx-auto">
-		    <h5 class="tinfo mt-3">Comments...</h5>
+		<div class="ps-md-5 ps-lg-5 ps-sm-3 ps-2 col-12 col-lg-8 mx-auto">
+		    <h3 class="tinfo mt-3 comment-headline">Comments...</h3>
 		    {% load thumbnail %}
 		    {% for comment in comments %}
 		        <div class="row mx-auto">
@@ -52,15 +52,19 @@
 		                	    <a href="/people/{{comment.author}}/">{% thumbnail comment.user_profile.forumprofile.avatar.image_file "40x40" crop="center" as im %}
                                     <img src="{{ im.url }}" height="{{ im.height }}" width="{{ im.width }}" class="rounded-circle" value="image-{{ forloop.counter }}"></img></a>
                                 {% endthumbnail %}
+		                    </div>
+                            <div class="col-auto">
 	                            <span class="tinfo fs-6 font-weight-normal">
 		                            {{ comment.author }}
-		                            {{ comment.date_created }}
 		                        </span>
-		                    </div>
+                                <span class="tinfo fs-6 font-weight-normal">
+		                            {{ comment.date_created }}
+                                </span>
+                            </div>
 			                {% if comment.comment_author == user_display_name %}
-		                    <div id="comment-modify-btns-{{ forloop.counter }}" class="col-auto">
-			                	<a href="#" class="tinfo" data-bs-toggle="modal" data-bs-target="#commentModal" data-bs-whatever="{{comment.id}}">Delete Comment</a>
-			                	<a id="{{ forloop.counter }}" class="comment-edit tinfo" href="#">Edit Comment</a>
+		                    <div id="comment-modify-btns-{{ forloop.counter }}" class="d-flex">
+			                	<a href="#" class="tinfo col-auto me-3" data-bs-toggle="modal" data-bs-target="#commentModal" data-bs-whatever="{{comment.id}}">Delete Comment</a>
+			                	<a id="{{ forloop.counter }}" class="comment-edit tinfo col-auto" href="#">Edit Comment</a>
 				             </div>
 				            {% endif %}
 				        </div>

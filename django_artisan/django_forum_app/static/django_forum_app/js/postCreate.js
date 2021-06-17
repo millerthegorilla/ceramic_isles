@@ -1,12 +1,14 @@
 $(document).ready(function () {
-    function onInstanceInit(editor) {
-        editor.hide()
-        $(editor.getContainer()).find('button.tox-statusbar__wordcount').click();
-        $('#textarea').show()
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+    async function onInstanceInit() {
+        await sleep(3500);
+        $('.tox-statusbar__wordcount').click();
     }
     tinymce.init({
     	'selector': '.update-form-text',
-    	'init_instance_callback': onInstanceInit,
+    	'init_instance_callback': onInstanceInit(),
         'menubar': "False",
         'min-height': "500px",
         'browser_spellcheck': "True",

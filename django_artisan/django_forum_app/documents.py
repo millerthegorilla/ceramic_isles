@@ -57,9 +57,12 @@ class ForumPostDocument(Document):
     )
 
     category = fields.TextField(
-            attr='category_label'
-        )
+        attr='category_label'
+    )
 
+    location = fields.TextField(
+        attr='location_label'
+    )
 
     class Index:
             # Name of the Elasticsearch index

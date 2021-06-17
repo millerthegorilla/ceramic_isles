@@ -25,6 +25,9 @@
                                     </td>
                                     <td>
                                         {{ post.get_category_display|safe }}
+                                    </td>  
+                                    <td>
+                                        {{ post.get_location_display|safe }}
                                     </td>
                                     <td class="text-center">
                                         {{ post.comments.count }}

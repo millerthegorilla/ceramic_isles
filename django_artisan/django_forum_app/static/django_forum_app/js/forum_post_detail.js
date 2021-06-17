@@ -1,3 +1,6 @@
+
+$(document).ready(function () {
+
 $("#id_text").keyup(function(){
   $("#count").text("...characters left: " + (500 - $(this).val().length));
 });
@@ -55,7 +58,7 @@ function onInstanceInit(editor) {
     $(editor.getContainer()).find('button.tox-statusbar__wordcount').click();
     $('#textarea').show()
 }
-$(document).ready(function () {
+
 	$('.update-form-text').hide();
 	$('#post-edit-div').hide();
 	$('#comment-textarea').hide();

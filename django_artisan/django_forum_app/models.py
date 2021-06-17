@@ -150,6 +150,12 @@ class ForumPost(Post):
         default=settings.CATEGORY.GENERAL,
     )
 
+    location = models.CharField(
+        max_length=2,
+        choices=settings.LOCATION.choices,
+        default=settings.LOCATION.ANY_ISLE,
+    )
+
     def get_absolute_url(self):
         return reverse_lazy('django_forum_app:post_view', args=(self.id, self.slug,))
 
@@ -158,6 +164,9 @@ class ForumPost(Post):
 
     def category_label(self):
         return settings.CATEGORY(self.category).label
+
+    def location_label(self):
+        return settings.LOCATION(self.location).label
 
 @receiver(post_save, sender=ForumPost)
 def save_author_on_post_creation(sender, instance, created, **kwargs):
