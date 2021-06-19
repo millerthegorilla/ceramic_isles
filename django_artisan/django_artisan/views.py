@@ -3,6 +3,7 @@ import logging
 from PIL import Image, ImageOps
 from sorl.thumbnail import delete
 from django_q.tasks import async_task
+from cookie_consent.views import CookieGroupListView
 
 from django.db.models import Max
 from django.shortcuts import render, redirect
@@ -116,7 +117,6 @@ class LandingPageView(TemplateView):
         context['image_size'] = "1024x768"
         context['username'] = self.request.user.username
         return context
-
 
 # class PeopleDirectoryView(TemplateView):
 #     template_name = 'django_forum_app/people.html'

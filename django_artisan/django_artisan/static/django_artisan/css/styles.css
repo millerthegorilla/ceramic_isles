@@ -10,6 +10,65 @@
   background: linear-gradient(0deg, rgba(82,80,126,1) 2%, rgba(9,121,113,1) 15%, rgba(0,212,255,1) 100%);
 }
 
+/* COOKIE CONSENT */
+
+.cookie-consent {
+    position: fixed;
+    bottom: -45px;
+    width: 100%;
+    height: 45px;
+    color: #fff;
+    line-height: 20px;
+    padding-left: 10px;
+    padding-right: 10px;
+    font-size: 14px;
+    background: #292929;
+    z-index: 120;
+    cursor: pointer;
+    border-radius: 0px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+     transform: translateY(100%);
+}
+
+.allow-button {
+    height: 20px;
+    width: 104px;
+    color: #fff;
+    font-size: 12px;
+    line-height: 10px;
+    border-radius: 3px;
+    border: 1px solid green;
+    background-color: green
+}
+
+.cssanimation, .cssanimation span {
+    animation-duration: 1s;
+    animation-fill-mode: forwards;
+}
+
+.cssanimation span { display: inline-block }
+
+.fadeInBottom { animation-name: fadeInBottom }
+@keyframes fadeInBottom {
+    from {
+        opacity: 0;
+        position: absolute;
+    }
+    to { opacity: 1;
+         transform: translateY(0) translateX(0);
+         bottom: 0px;
+    }
+}
+
+.cssanimation2, .cssanimation2 span {
+    animation-duration: 1s;
+    animation-fill-mode: backwards;
+}
+
+.cssanimation2 span { display: inline-block }
+
 .headline-text {
   color: #CAF0F8;
 }
@@ -162,6 +221,12 @@
 }
 
 /* POSTS */
+
+.post-table td {
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
 .custom-select {
   width: 100px;
 }

@@ -32,9 +32,13 @@
                         <a href="{% url 'django_forum_app:post_list_view' %}" class="col-auto text-white mb-3">Return to Forum</a>
                     </div>
                 </form>
+            <div class="d-flex justify-content-between tinfo">
+                <a class="tinfo" href="{% url 'django_forum_app:rules_view' %}">Read the rules</a>
+                <a class="tinfo" href="{% url 'password_change' %}">Change your password</a>
+            </div>
             </div>
             {% if page_obj.object_list.count %}
-            <div class="col-12 col-lg-5 mx-auto">
+            <div class="col-12 col-lg-6 mx-auto pe-4 ps-0">
                 <h3 class="text-center headline-text">My Posts</h3>
                 {% include '../posts_and_comments/post_list.html' %}
             </div>
