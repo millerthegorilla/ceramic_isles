@@ -80,7 +80,6 @@ class ForumPostView(PostView):
     comment_form_class = ForumCommentForm
 
     def post(self, *args, **kwargs):
-        breakpoint()
         post = ForumPost.objects.get(pk=kwargs['pk'])
         if self.request.POST['type'] == 'post' and self.request.user.profile.display_name == post.author:
             post.delete()

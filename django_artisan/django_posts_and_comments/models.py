@@ -36,14 +36,17 @@ class Post(SoftDeletionModel):
 
     def delete(self):
         super().delete()
-        schedule(schedule_hard_delete, name="sd_timeout_" + str(uuid.uuid4()),
-                                       schedule_type="O",
-                                       repeats=-1,
-                                       next_run=timezone.now() + settings.DELETION_TIMEOUT,
-                                       kwargs={'post_slug': self.post.slug, 
-                                               'deleted_at': str(self.deleted_at),
-                                               'type': 'Post',
-                                               'id': self.id })
+        breakpoint()
+        for comment in self.comments.all():
+            comment.delete()
+        # schedule(schedule_hard_delete, name="sd_timeout_" + str(uuid.uuid4()),
+        #                                schedule_type="O",
+        #                                repeats=-1,
+        #                                next_run=timezone.now() + settings.DELETION_TIMEOUT,
+        #                                kwargs={'post_slug': self.post.slug, 
+        #                                        'deleted_at': str(self.deleted_at),
+        #                                        'type': 'Post',
+        #                                        'id': self.id })
 
     def __str__(self):
         return "Post : " + f"{self.title}"

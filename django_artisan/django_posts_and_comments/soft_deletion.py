@@ -49,11 +49,16 @@ class SoftDeletionModel(models.Model):
     def delete(self):
         self.deleted_at = timezone.now()
         self.save()
+        ## slack jawed duck type hack
+        try:
+            post_slug = self.post.slug
+        except:
+            post_slug = self.slug
         schedule('django_posts_and_comments.tasks.schedule_hard_delete', name="sd_timeout_" + str(uuid.uuid4()),
                                        schedule_type="O",
                                        repeats=-1,
                                        next_run=timezone.now() + settings.DELETION_TIMEOUT,
-                                       post_slug=self.post.slug, 
+                                       post_slug=post_slug, 
                                        deleted_at=str(self.deleted_at), 
                                        type=str(self),
                                        id=str(self.id))
