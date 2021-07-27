@@ -3,7 +3,6 @@ import logging
 from PIL import Image, ImageOps
 from sorl.thumbnail import delete
 from django_q.tasks import async_task
-from cookie_consent.views import CookieGroupListView
 
 from django.db.models import Max
 from django.shortcuts import render, redirect

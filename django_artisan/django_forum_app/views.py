@@ -78,6 +78,7 @@ class ForumPostView(PostView):
     template_name = 'django_forum_app/posts_and_comments/forum_post_detail.html'
     form_class = ForumPostCreateForm
     comment_form_class = ForumCommentForm
+    #extra_context = { 'site_url':Site.objects.get_current().domain }
 
     def post(self, *args, **kwargs):
         post = ForumPost.objects.get(pk=kwargs['pk'])
@@ -92,7 +93,6 @@ class ForumPostView(PostView):
                 new_comment.forum_post = post
                 new_comment.user_profile = self.request.user.profile.forumprofile
                 new_comment.save()
-                site = Site.objects.get_current()
                 schedule('django_forum_app.tasks.send_susbcribed_email', name="subscribe_timeout" + str(uuid4()),
                                                        schedule_type="O",
                                                        repeats=-1,
@@ -102,10 +102,12 @@ class ForumPostView(PostView):
                                                        path_info=self.request.path_info)                                         
                 return redirect(post)
             else:
+                site = Site.objects.get_current()
                 comments = ForumComment.objects.filter(post=post).all()
                 return render(self.request, self.template_name, {'post': post,
                                                              'comments': comments,
-                                                             'comment_form': comment_form})
+                                                             'comment_form': comment_form,
+                                                             'site_url': site.domain })
         elif self.request.POST['type'] == 'update':
             post.text = self.request.POST['update-post']
             post.category = self.request.POST['category']
@@ -148,6 +150,7 @@ class ForumPostView(PostView):
         )
 
     def get(self, *args, **kwargs):
+        site = Site.objects.get_current()
         post = ForumPost.objects.get(pk=kwargs['pk'])
         form = self.form_class(user_name=self.request.user.username, post=post)
         subscribed = ''
@@ -181,7 +184,8 @@ class ForumPostView(PostView):
                                                          'subscribed': subscribed,
                                                          'comments': comments,
                                                          'comment_form': new_comment_form,
-                                                         'user_display_name': user_display_name})
+                                                         'user_display_name': user_display_name,
+                                                         'site_url': self.request.scheme + '://' + site.domain })
 
 
 def subscribe(request):
@@ -213,6 +217,7 @@ class ForumPostListView(PostListView):
        comments.  The search indexes are defined in documents.py.
     """
     def get(self, request, search_slug=None):
+        site = Site.objects.get_current()
         search = 0
         p_c = None
         is_a_search = False
@@ -247,7 +252,7 @@ class ForumPostListView(PostListView):
             paginator = Paginator(queryset, self.paginate_by)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
-        context = { 'page_obj': page_obj, 'search': search, 'is_a_search': is_a_search}
+        context = { 'page_obj': page_obj, 'search': search, 'is_a_search': is_a_search, 'site_url': request.scheme + '://' + site.domain}
         return render(request, self.template_name, context)
 
 # def autocomplete(request):
