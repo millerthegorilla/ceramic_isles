@@ -13,6 +13,10 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='profile',
             name='display_name',
-            field=models.CharField(blank=True, default='e9561fa5-a443-4c74-8c58-cdea15f74ef1', max_length=37, unique=True),
+            field=models.CharField(
+                blank=True,
+                default='e9561fa5-a443-4c74-8c58-cdea15f74ef1',
+                max_length=37,
+                unique=True),
         ),
     ]

@@ -13,11 +13,18 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AlterModelOptions(
             name='userproductimage',
-            options={'permissions': [('approve_image', 'Approve Image')]},
+            options={
+                'permissions': [
+                    ('approve_image',
+                     'Approve Image')]},
         ),
         migrations.AlterField(
             model_name='artisanforumprofile',
             name='image_file',
-            field=models.ImageField(blank=True, null=True, upload_to=django_artisan.models.user_directory_path, verbose_name='A single image for your personal page'),
+            field=models.ImageField(
+                blank=True,
+                null=True,
+                upload_to=django_artisan.models.user_directory_path,
+                verbose_name='A single image for your personal page'),
         ),
     ]

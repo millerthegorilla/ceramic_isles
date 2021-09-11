@@ -9,12 +9,11 @@ from crispy_bootstrap5.bootstrap5 import FloatingField
 class PostCreateForm(ModelForm):
     class Meta:
         model = Post
-        widgets = { 'text':TinyMCE() }
+        widgets = {'text': TinyMCE()}
         fields = ['title', 'text']
         labels = {
             'text': '',
         }
-
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -23,11 +22,15 @@ class PostCreateForm(ModelForm):
             Fieldset(
                 'Create your post...',
                 FloatingField('title'),
-                Field('text', css_class="mb-3 post-create-form-text"),
+                Field(
+                    'text',
+                    css_class="mb-3 post-create-form-text"),
                 HTML("<span>Maximum of 2000 characters.  Click on word count to see how many characters you have used...</span>"),
-                Submit('save', 'Publish Post', css_class="col-3 mt-3"),
-            )
-        )
+                Submit(
+                    'save',
+                    'Publish Post',
+                    css_class="col-3 mt-3"),
+            ))
         self.helper.form_id = 'id-post-create-form'
         self.helper.form_method = 'post'
         self.helper.form_class = 'col-auto'
@@ -48,10 +51,10 @@ class CommentForm(ModelForm):
                 Row(
                     Column(
                         Field('text', css_class="comment-form-text"),
-                        Div(HTML('<span>...characters left: 500</span>'), 
+                        Div(HTML('<span>...characters left: 500</span>'),
                             id="count", css_class="ms-auto tinfo"),
-                               css_class="d-flex flex-column"),
-                        css_class="d-flex flex-row align-items-end"),
+                        css_class="d-flex flex-column"),
+                    css_class="d-flex flex-row align-items-end"),
                 Submit('save', 'comment', css_class="col-auto mt-3"), css_class="tinfo"
             )
         )

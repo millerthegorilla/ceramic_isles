@@ -8,33 +8,48 @@ from django_q.tasks import async_task
 from sorl.thumbnail import delete
 
 from django.contrib.auth.models import User
-from django.db import models
+from django.db import models, transaction
 from django.dispatch import receiver
 from django.db.models.signals import pre_save, post_save, post_delete, pre_delete
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist, FieldError
 
 from django_forum_app.models import ForumProfile, create_user_forum_profile, save_user_forum_profile, Avatar, default_avatar
 from django_forum_app.views import ForumPostView
 
 logger = logging.getLogger('django')
 
+
 def user_directory_path(instance, filename):
-    if type(instance) is ArtisanForumProfile:
+    if isinstance(instance, ArtisanForumProfile):
         return 'uploads/users/{0}/{1}'.format(instance.display_name, filename)
     else:
-        return 'uploads/users/{0}/{1}'.format(instance.user_profile.display_name, filename)
+        return 'uploads/users/{0}/{1}'.format(
+            instance.user_profile.display_name, filename)
 
 
 class ArtisanForumProfile(ForumProfile):
-    bio = models.TextField('biographical information, max 500 chars', 
-                            max_length=500, 
-                            blank=True, 
-                            default='')
-    image_file = models.ImageField('A single image for your personal page', upload_to=user_directory_path, null=True, blank=True)
-    shop_web_address = models.CharField('shop link', max_length=50, blank=True, default='')
-    outlets = models.CharField('places that sell my stuff, comma separated', max_length=400, blank=True, default='')
+    bio = models.TextField('biographical information, max 500 chars',
+                           max_length=500,
+                           blank=True,
+                           default='')
+    image_file = models.ImageField(
+        'A single image for your personal page',
+        upload_to=user_directory_path,
+        null=True,
+        blank=True)
+    shop_web_address = models.CharField(
+        'shop link', max_length=50, blank=True, default='')
+    outlets = models.CharField(
+        'places that sell my stuff, comma separated',
+        max_length=400,
+        blank=True,
+        default='')
     listed_member = models.BooleanField('List me on about page', default=False)
-    display_personal_page = models.BooleanField('Display personal page', default=False)
+    display_personal_page = models.BooleanField(
+        'Display personal page', default=False)
+
+
 """
     disconnect dummy profile
 """
@@ -43,13 +58,20 @@ post_save.disconnect(save_user_forum_profile, sender=User)
 """
     Custom signals to create and update user profile
 """
+
+
 @receiver(post_save, sender=User)
 def create_user_artisan_forum_profile(sender, instance, created, **kwargs):
     if created:
-        ArtisanForumProfile.objects.create(profile_user=instance, 
-                                    avatar=Avatar.objects.create(
-                                        image_file=default_avatar(randint(1,4))))
+        ArtisanForumProfile.objects.create(
+            profile_user=instance,
+            avatar=Avatar.objects.create(
+                image_file=default_avatar(
+                    randint(
+                        1,
+                        4))))
     instance.profile.save()
+
 
 @receiver(post_save, sender=User)
 def save_user_artisan_forum_profile(sender, instance, **kwargs):
@@ -57,6 +79,7 @@ def save_user_artisan_forum_profile(sender, instance, **kwargs):
         instance.profile.save()
     except (ObjectDoesNotExist, FieldError) as e:
         logger.error("Error saving ArtisanForumProfile : {0}".format(e))
+
 
 @receiver(pre_delete, sender=ArtisanForumProfile)
 def auto_delete_image_file_on_delete(sender, instance, **kwargs):
@@ -74,8 +97,8 @@ def auto_delete_image_file_on_delete(sender, instance, **kwargs):
                     if len(os.listdir(fd)) == 0:
                         os.rmdir(fd)
                     fdu1 = settings.MEDIA_ROOT + \
-                                        'uploads/users/' + \
-                                        instance.display_name
+                        'uploads/users/' + \
+                        instance.display_name
                     if os.path.isdir(fdu1):
                         if len(os.listdir(fdu1)) == 0:
                             os.rmdir(fdu1)
@@ -84,24 +107,30 @@ def auto_delete_image_file_on_delete(sender, instance, **kwargs):
                     logger.error("Error deleting image file : {0}".format(e))
 
 
-# TODO: validate image_shop_link properly 
-# TODO: set a default of 
+# TODO: validate image_shop_link properly
+# TODO: set a default of
 class UserProductImage(models.Model):
     class Meta:
         permissions = [('approve_image', 'Approve Image')]
-        
+
     image_file = models.ImageField(upload_to=user_directory_path)
     image_text = models.CharField(max_length=400, default='', blank=True)
     image_title = models.CharField(max_length=30, default='', blank=True)
     image_shop_link = models.CharField(max_length=50, default='', blank=True)
-    image_shop_link_title = models.CharField(max_length=30, default='', blank=True)
+    image_shop_link_title = models.CharField(
+        max_length=30, default='', blank=True)
     active = models.BooleanField(default=False)
-    user_profile = models.ForeignKey(ArtisanForumProfile, on_delete=models.CASCADE, related_name="forum_images")
-    image_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user_profile = models.ForeignKey(
+        ArtisanForumProfile,
+        on_delete=models.CASCADE,
+        related_name="forum_images")
+    image_id = models.UUIDField(
+        primary_key=True, default=uuid.uuid4, editable=False)
     id = models.PositiveIntegerField(default=0, editable=False)
-    
+
     # def __str__(self):
-    #     return f"Profile_image:user={self.user_profile.profile_user.username},active={self.active}"
+    # return
+    # f"Profile_image:user={self.user_profile.profile_user.username},active={self.active}"
 
     """
          because I made the primary key a uuid field, I need a way of returning the next logical
@@ -125,7 +154,7 @@ def auto_delete_file_on_delete(sender, instance, **kwargs):
     fp = instance.image_file.path
     fd = os.path.dirname(fp)
     if instance.image_file:
-        delete(instance.image_file)   #removes from cache - sorl thumbnail
+        delete(instance.image_file)  # removes from cache - sorl thumbnail
         if len(os.listdir(fd)) == 0:
             os.rmdir(fd)
 
@@ -151,6 +180,7 @@ def auto_delete_file_on_delete(sender, instance, **kwargs):
 #         if os.path.isfile(old_image_field.file.path):
 #             delete(old_image_field) # clear thumbs from cache
 #             os.remove(old_image_field.file.path)
+
 
 @receiver(post_save, sender=UserProductImage)
 def send_email_when_image_uploaded(sender, instance, **kwargs):

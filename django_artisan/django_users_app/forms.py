@@ -16,6 +16,7 @@ from crispy_bootstrap5.bootstrap5 import FloatingField
 class CustomUserCreationForm(UserCreationForm):
     captcha = ReCaptchaField(label='', widget=ReCaptchaV2Checkbox)
     email = EmailField()
+
     class Meta(UserCreationForm.Meta):
         fields = UserCreationForm.Meta.fields + ('email', 'captcha',)
 
@@ -24,7 +25,7 @@ class CustomUserCreationForm(UserCreationForm):
         try:
             user = get_user_model().objects.get(email=email)
         except User.DoesNotExist:
-            return email          
+            return email
         self.add_error('email', 'Error! That email already exists!')
         self.valid = False
         return email
@@ -37,12 +38,12 @@ class CustomUserCreationForm(UserCreationForm):
         self.helper.form_tag = False
         self.helper.form_class = ""
         self.helper.layout = Layout(
-                FloatingField('username'),
-                FloatingField('email', autocomplete="new-password"),
-                FloatingField('password1'),
-                FloatingField('password2', autocomplete="new-password"),
-                Field('captcha'),
-            )
+            FloatingField('username'),
+            FloatingField('email', autocomplete="new-password"),
+            FloatingField('password1'),
+            FloatingField('password2', autocomplete="new-password"),
+            Field('captcha'),
+        )
 
 
 class UserPasswordResetForm(PasswordResetForm):
@@ -54,14 +55,16 @@ class UserPasswordResetForm(PasswordResetForm):
             user = get_user_model().objects.get(email=email)
             if user.is_active is False:
                 self.valid = False
-                self.add_error('email', 'Hey!, you haven\'t finished registering yet, \
+                self.add_error(
+                    'email', 'Hey!, you haven\'t finished registering yet, \
                                          perhaps you want to resend a confiration token?')
                 return email
         except User.DoesNotExist:
             self.valid = False
-            self.add_error('email', 'Hey!, you haven\'t registered, perhaps you want to try \
+            self.add_error(
+                'email', 'Hey!, you haven\'t registered, perhaps you want to try \
                                      registering first?')
-            return email          
+            return email
         return email
 
     def __init__(self, *args, **kwargs):
@@ -90,12 +93,15 @@ class UserResendConfirmationForm(Form):
             user = get_user_model().objects.get(username=username)
             if user.is_active:
                 self.valid = False
-                self.add_error('username', 'Hey, you are already a registered member, perhaps you want to \
+                self.add_error(
+                    'username', 'Hey, you are already a registered member, perhaps you want to \
                                             Reset your password?')
                 return username
         except User.DoesNotExist:
             self.valid = False
-            self.add_error('username', 'Hey!  That username does not exist!  Try registering first.')
+            self.add_error(
+                'username',
+                'Hey!  That username does not exist!  Try registering first.')
         return username
 
     def __init__(self, *args, **kwargs):
@@ -104,7 +110,8 @@ class UserResendConfirmationForm(Form):
         self.helper.form_method = 'post'
         self.helper.form_class = ""
         self.helper.layout = Layout(
-            FloatingField('username', wrapper_class="col-auto", css_class="mb-3"),
+            FloatingField('username', wrapper_class="col-auto",
+                          css_class="mb-3"),
             Field('captcha'),
             HTML('<div class="row justify-content-end"> \
                     <div class="col-auto"> \

@@ -27,20 +27,25 @@ from sorl.thumbnail import delete
 
 logger = logging.getLogger('django')
 
-### START PROFILE
-### helper functions
+# START PROFILE
+# helper functions
+
+
 def user_directory_path_avatar(instance, filename):
-    return 'uploads/users/{0}/avatar/{1}'.format(instance.user_profile.display_name, filename)
+    return 'uploads/users/{0}/avatar/{1}'.format(
+        instance.user_profile.display_name, filename)
+
 
 def default_avatar(num):
     return 'default_avatars/default_avatar_{0}.jpg'.format(num)
-### end helper functions
+# end helper functions
 
 
-### START AVATARS
+# START AVATARS
 
 class Avatar(models.Model):
     image_file = models.ImageField(upload_to=user_directory_path_avatar)
+
 
 @receiver(pre_save, sender=Avatar)
 def auto_delete_file_on_change(sender, instance, **kwargs):
@@ -57,7 +62,7 @@ def auto_delete_file_on_change(sender, instance, **kwargs):
     except Avatar.DoesNotExist as e:
         logger.warn("unable to get old avatar file : {0}".format(e))
         return False
-    
+
     if 'default_avatars' not in old_avatar.image_file.path:
         new_file = instance.image_file
         if not old_avatar.image_file == new_file:
@@ -65,19 +70,24 @@ def auto_delete_file_on_change(sender, instance, **kwargs):
                 try:
                     delete(old_avatar.image_file)
                 except ObjectDoesNotExist as e:
-                    logger.error("Error, avatar does not exist : {0}".format(e))
-        
-### END AVATARS 
+                    logger.error(
+                        "Error, avatar does not exist : {0}".format(e))
+
+# END AVATARS
 
 
 class ForumProfile(Profile):
-    address_line_1 = models.CharField('address line 1', max_length=30, blank=True, default='')
-    address_line_2 = models.CharField('address line 2', max_length=30, blank=True, default='')
+    address_line_1 = models.CharField(
+        'address line 1', max_length=30, blank=True, default='')
+    address_line_2 = models.CharField(
+        'address line 2', max_length=30, blank=True, default='')
     parish = models.CharField('parish', max_length=30, blank=True, default='')
-    postcode = models.CharField('postcode', max_length=6, blank=True, default='')
-    avatar = models.OneToOneField(Avatar, on_delete=models.CASCADE, related_name='user_profile')
+    postcode = models.CharField(
+        'postcode', max_length=6, blank=True, default='')
+    avatar = models.OneToOneField(
+        Avatar, on_delete=models.CASCADE, related_name='user_profile')
     rules_agreed = models.BooleanField(default='False')
-    
+
     def username(self):
         return self.profile_user.username
 
@@ -93,13 +103,20 @@ post_save.disconnect(save_user_profile, sender=User)
 """
     Custom signals to create and update user profile
 """
+
+
 @receiver(post_save, sender=User)
 def create_user_forum_profile(sender, instance, created, **kwargs):
     if created:
-        ForumProfile.objects.create(profile_user=instance, 
-                                    avatar=Avatar.objects.create(
-                                    image_file=default_avatar(randint(1,4))))
+        ForumProfile.objects.create(
+            profile_user=instance,
+            avatar=Avatar.objects.create(
+                image_file=default_avatar(
+                    randint(
+                        1,
+                        4))))
     instance.profile.save()
+
 
 @receiver(post_save, sender=User)
 def save_user_forum_profile(sender, instance, **kwargs):
@@ -108,10 +125,11 @@ def save_user_forum_profile(sender, instance, **kwargs):
     except (ObjectDoesNotExist, FieldError) as e:
         logger.error("Error saving forum profile : {0}".format(e))
 
+
 @receiver(pre_delete, sender=ForumProfile)
 def auto_delete_avatar_on_delete(sender, instance, **kwargs):
     """
-    Deletes Avatar from filesystem  
+    Deletes Avatar from filesystem
     when corresponding `ForumProfile` object is deleted.
     """
     fp = instance.avatar.image_file.path
@@ -124,22 +142,25 @@ def auto_delete_avatar_on_delete(sender, instance, **kwargs):
                 if len(os.listdir(fd)) == 0:
                     os.rmdir(fd)
                 fdu1 = settings.MEDIA_ROOT + \
-                                    'uploads/users/' + \
-                                    instance.display_name
+                    'uploads/users/' + \
+                    instance.display_name
                 if os.path.isdir(fdu1):
                     if len(os.listdir(fdu1)) == 0:
                         os.rmdir(fdu1)
             except ObjectDoesNotExist as e:
                 logger.error("unable to delete avatar : {0}".format(e))
 
-### START POST AND COMMENTS
+# START POST AND COMMENTS
+
+
 class ForumPost(Post):
     author = models.CharField(default='', max_length=40)
     active = models.BooleanField(default=True)
     moderation = models.DateField(null=True, default=None, blank=True)
     pinned = models.SmallIntegerField(default=0)
-    subscribed_users = models.ManyToManyField(User, blank=True, related_name="subscribed_posts")
-    
+    subscribed_users = models.ManyToManyField(
+        User, blank=True, related_name="subscribed_posts")
+
     class Meta:
         ordering = ['-date_created']
         permissions = [('approve_post', 'Approve Post')]
@@ -157,7 +178,9 @@ class ForumPost(Post):
     )
 
     def get_absolute_url(self):
-        return reverse_lazy('django_forum_app:post_view', args=(self.id, self.slug,))
+        return reverse_lazy(
+            'django_forum_app:post_view', args=(
+                self.id, self.slug,))
 
     def __str__(self):
         return f"Post by {self.author}"
@@ -168,15 +191,18 @@ class ForumPost(Post):
     def location_label(self):
         return settings.LOCATION(self.location).label
 
+
 @receiver(post_save, sender=ForumPost)
 def save_author_on_post_creation(sender, instance, created, **kwargs):
     if created:
         instance.author = instance.post_author()
         instance.save()
 
+
 class ForumComment(Comment):
     author = models.CharField(default='', max_length=40)
-    forum_post = models.ForeignKey(ForumPost, on_delete=models.CASCADE, related_name="forum_comments")
+    forum_post = models.ForeignKey(
+        ForumPost, on_delete=models.CASCADE, related_name="forum_comments")
     active = models.BooleanField(default='True')
     moderation = models.DateField(null=True, default=None, blank=True)
     title = models.SlugField()
@@ -184,7 +210,7 @@ class ForumComment(Comment):
     class Meta:
         ordering = ['date_created']
         permissions = [('approve_comment', 'Approve Comment')]
-    
+
     def save(self, **kwargs):
         super().save(post=self.forum_post, **kwargs)
 
@@ -194,11 +220,13 @@ class ForumComment(Comment):
     def get_category_display(self):
         return 'Comment'
 
+
 @receiver(post_save, sender=ForumComment)
 def save_author_on_comment_creation(sender, instance, created, **kwargs):
     if created:
         instance.author = instance.comment_author()
-        instance.title = slugify(instance.text[:10] + str(dateformat.format(instance.date_created, 'Y-m-d H:i:s')))
+        instance.title = slugify(
+            instance.text[:10] + str(dateformat.format(instance.date_created, 'Y-m-d H:i:s')))
         instance.save()
-        
-### END POSTS AND COMMENTS
+
+# END POSTS AND COMMENTS

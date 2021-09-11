@@ -17,9 +17,21 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Profile',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('display_name', models.CharField(blank=True, max_length=30)),
-                ('profile_user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='profile', to=settings.AUTH_USER_MODEL)),
+                ('id',
+                 models.AutoField(
+                     auto_created=True,
+                     primary_key=True,
+                     serialize=False,
+                     verbose_name='ID')),
+                ('display_name',
+                 models.CharField(
+                     blank=True,
+                     max_length=30)),
+                ('profile_user',
+                 models.OneToOneField(
+                     on_delete=django.db.models.deletion.CASCADE,
+                     related_name='profile',
+                     to=settings.AUTH_USER_MODEL)),
             ],
         ),
     ]

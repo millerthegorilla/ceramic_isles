@@ -19,6 +19,9 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='forumpost',
             name='subscribed_users',
-            field=models.ManyToManyField(blank=True, related_name='subscribed_posts', to=settings.AUTH_USER_MODEL),
+            field=models.ManyToManyField(
+                blank=True,
+                related_name='subscribed_posts',
+                to=settings.AUTH_USER_MODEL),
         ),
     ]

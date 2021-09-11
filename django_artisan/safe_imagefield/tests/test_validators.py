@@ -5,7 +5,7 @@ import pytest
 from django.core.exceptions import ValidationError
 from django.test import override_settings
 
-from safe_filefield import clamav
+from safe_imagefield import clamav
 from .utils import get_extras_file, get_uploaded_file
 from ..validators import AntiVirusValidator, FileContentTypeValidator, \
     FileExtensionValidator

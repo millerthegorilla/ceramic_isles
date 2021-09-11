@@ -21,29 +21,32 @@ class Post(SoftDeletionModel):
     """
     text = models.TextField(max_length=2000)
     title = models.CharField(max_length=100, default='')
-    slug = models.SlugField(unique=True, db_index=True, max_length=80)    # added unique and index but not tested.
+    # added unique and index but not tested.
+    slug = models.SlugField(unique=True, db_index=True, max_length=80)
     date_created = models.DateTimeField(auto_now_add=True)
-    user_profile = models.ForeignKey(Profile, null=True, on_delete=models.SET_NULL, related_name="posts")
+    user_profile = models.ForeignKey(
+        Profile, null=True, on_delete=models.SET_NULL, related_name="posts")
 
     class Meta:
         UniqueConstraint(fields=['title', 'date_created'], name='unique_post')
-    
+
     def post_author(self):
         return self.user_profile.display_name
 
     def get_absolute_url(self):
-        return reverse_lazy('django_posts_and_comments:post_view', args=(self.id, self.slug,))
+        return reverse_lazy(
+            'django_posts_and_comments:post_view', args=(
+                self.id, self.slug,))
 
     def delete(self):
         super().delete()
-        breakpoint()
         for comment in self.comments.all():
             comment.delete()
         # schedule(schedule_hard_delete, name="sd_timeout_" + str(uuid.uuid4()),
         #                                schedule_type="O",
         #                                repeats=-1,
         #                                next_run=timezone.now() + settings.DELETION_TIMEOUT,
-        #                                kwargs={'post_slug': self.post.slug, 
+        #                                kwargs={'post_slug': self.post.slug,
         #                                        'deleted_at': str(self.deleted_at),
         #                                        'type': 'Post',
         #                                        'id': self.id })
@@ -51,14 +54,17 @@ class Post(SoftDeletionModel):
     def __str__(self):
         return "Post : " + f"{self.title}"
 
+
 class Comment(SoftDeletionModel):
     """
         a post can have many comments
     """
     text = models.TextField(max_length=500)
-    post = models.ForeignKey(Post, null=True, on_delete=models.SET_NULL, related_name="comments")
+    post = models.ForeignKey(
+        Post, null=True, on_delete=models.SET_NULL, related_name="comments")
     date_created = models.DateTimeField(auto_now_add=True)
-    user_profile = models.ForeignKey(Profile, null=True, on_delete=models.SET_NULL, related_name="comments")
+    user_profile = models.ForeignKey(
+        Profile, null=True, on_delete=models.SET_NULL, related_name="comments")
 
     def save(self, post=None, **kwargs):
         if post is not None:
@@ -69,18 +75,20 @@ class Comment(SoftDeletionModel):
         return self.user_profile.display_name
 
     def __str__(self):
-        return "Comment for " + f"{self.post.title}"  ## TODO check for query - fetch_related...
-    
+        # TODO check for query - fetch_related...
+        return "Comment for " + f"{self.post.title}"
+
     # def delete(self):
     #     super().delete()
     #     schedule(schedule_hard_delete, name="sd_timeout_" + str(uuid.uuid4()),
     #                                    schedule_type="O",
     #                                    repeats=-1,
     #                                    next_run=timezone.now() + settings.DELETION_TIMEOUT,
-    #                                    kwargs={'post_slug': self.post.slug, 
+    #                                    kwargs={'post_slug': self.post.slug,
     #                                            'deleted_at': str(self.deleted_at),
     #                                            'type': 'Comment',
     #                                            'id': self.id })
+
 
 def schedule_hard_delete(post_slug=None, deleted_at=None, type=None, id=None):
     if type == 'Comment':

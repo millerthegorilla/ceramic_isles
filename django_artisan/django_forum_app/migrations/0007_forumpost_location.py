@@ -13,6 +13,19 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='forumpost',
             name='location',
-            field=models.CharField(choices=[('AI', 'Any'), ('AY', 'Alderney'), ('GY', 'Guernsey'), ('JE', 'Jersey'), ('SK', 'Sark')], default='AI', max_length=2),
+            field=models.CharField(
+                choices=[
+                    ('AI',
+                     'Any'),
+                    ('AY',
+                     'Alderney'),
+                    ('GY',
+                     'Guernsey'),
+                    ('JE',
+                     'Jersey'),
+                    ('SK',
+                     'Sark')],
+                default='AI',
+                max_length=2),
         ),
     ]

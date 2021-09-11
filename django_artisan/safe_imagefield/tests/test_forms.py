@@ -2,12 +2,12 @@ import pytest
 from django.core.exceptions import ValidationError
 
 from .utils import get_extras_file, get_uploaded_file
-from ..forms import SafeFileField
+from ..forms import SafeImageField
 
 
-class TestSafeFileField:
+class TestSafeImageField:
     def test_valid_file(self):
-        field = SafeFileField(allowed_extensions=('jpg',),
+        field = SafeImageField(allowed_extensions=('jpg',),
                               allow_empty_file=True)
 
         f = get_uploaded_file(get_extras_file('sample.jpg'))
@@ -17,7 +17,7 @@ class TestSafeFileField:
         assert True
 
     def test_not_allowed_extension(self):
-        field = SafeFileField(allowed_extensions=('png',),
+        field = SafeImageField(allowed_extensions=('png',),
                               allow_empty_file=True)
 
         f = get_uploaded_file(get_extras_file('sample.jpg'))
@@ -28,7 +28,7 @@ class TestSafeFileField:
         assert err_info.value.error_list[0].code == 'invalid_extension'
 
     def test_invalid_content_type(self):
-        field = SafeFileField(allowed_extensions=('jpg',),
+        field = SafeImageField(allowed_extensions=('jpg',),
                               allow_empty_file=True)
 
         f = get_uploaded_file(get_extras_file('sample.jpg'),

@@ -13,11 +13,12 @@ def callback(sender, **kwargs):
             current_site.domain = settings.SITE_DOMAIN
             current_site.name = settings.SITE_NAME
             current_site.id = settings.SITE_ID
-            current_site.save() 
+            current_site.save()
         elif current_site.domain != settings.SITE_DOMAIN:
-            raise ImproperlyConfigured("SITE_ID does not match SITE_DOMAIN") 
+            raise ImproperlyConfigured("SITE_ID does not match SITE_DOMAIN")
     except Site.DoesNotExist:
-        Site.objects.create(domain=settings.SITE_DOMAIN, name=settings.SITE_NAME, id=settings.SITE_ID)
+        Site.objects.create(domain=settings.SITE_DOMAIN,
+                            name=settings.SITE_NAME, id=settings.SITE_ID)
 
 
 class DjangoArtisanConfig(AppConfig):

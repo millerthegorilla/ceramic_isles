@@ -16,19 +16,20 @@ class ReauthenticateMiddleware:
         # the view (and later middleware) are called.
         if request.user.is_superuser:
             match = re.match(r'/admin/', request.path)
-            if len(self.pages) and self.pages[-1] is not None and match is not None:
+            if len(
+                    self.pages) and self.pages[-1] is not None and match is not None:
                 referred = re.match(r'/admin/', self.pages[-1])
                 if referred is None and match is not None:
-                    messages.add_message(request, messages.INFO, 'You must reauthenticate')
+                    messages.add_message(
+                        request, messages.INFO, 'You must reauthenticate')
                     logout(request)
                     self.pages = []
                     return redirect('/admin/login/')
-            
+
             if request.path[-1] == '/':
                 self.pages.append(request.path)
-        
+
         response = self.get_response(request)
-    
 
         # Code to be executed for each request/response after
         # the view is called.

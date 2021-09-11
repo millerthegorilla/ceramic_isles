@@ -16,8 +16,8 @@ from django_forum_app.views import CustomRegisterView
 
 logger = logging.getLogger('django')
 
-sitemaps = { 'main': StaticViewSitemap,
-             'personalpage': PersonalPageSiteMap }
+sitemaps = {'main': StaticViewSitemap,
+            'personalpage': PersonalPageSiteMap}
 
 urlpatterns = [
     path('users/accounts/register/', CustomRegisterView.as_view(), name='register'),
@@ -36,10 +36,12 @@ try:
 except NameError:
     logger.info("settings.DEBUG is not defined")
 else:
-    if settings.DEBUG == True:
+    if settings.DEBUG:
         logger.info("Django is in debug mode")
-        urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-        urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+        urlpatterns += static(settings.MEDIA_URL,
+                              document_root=settings.MEDIA_ROOT)
+        urlpatterns += static(settings.STATIC_URL,
+                              document_root=settings.STATIC_ROOT)
         import debug_toolbar
         urlpatterns = [
             path('__debug__/', include(debug_toolbar.urls)),

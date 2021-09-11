@@ -25,13 +25,13 @@ def callback(sender, **kwargs):
     try:
         current_site = Site.objects.get(id=settings.SITE_ID)
         if current_site.domain != settings.SITE_DOMAIN:
-            raise ImproperlyConfigured("SITE_ID does not match SITE_DOMAIN") 
+            raise ImproperlyConfigured("SITE_ID does not match SITE_DOMAIN")
     except Site.DoesNotExist:
-        logger.info("Creating Site Model with domain={0}, name={1}, id={2}".format(settings.SITE_DOMAIN,
-                                                                                   settings.SITE_NAME,
-                                                                                   settings.SITE_ID))
-        Site.objects.create(domain=settings.SITE_DOMAIN, name=settings.SITE_NAME, id=settings.SITE_ID)
-    
+        logger.info("Creating Site Model with domain={0}, name={1}, id={2}".format(
+            settings.SITE_DOMAIN, settings.SITE_NAME, settings.SITE_ID))
+        Site.objects.create(domain=settings.SITE_DOMAIN,
+                            name=settings.SITE_NAME, id=settings.SITE_ID)
+
 
 class DjangoArtisanConfig(AppConfig):
     name = 'django_artisan'
@@ -61,14 +61,15 @@ class ImageAdmin(admin.ModelAdmin):
     def approve_image(self, request, queryset):
         updated = queryset.update(active=True)
         self.message_user(
-            request, 
+            request,
             ngettext(
-                    '%d image was approved.',
-                    '%d images were approved.',
-                    updated,
-            ) % updated, 
+                '%d image was approved.',
+                '%d images were approved.',
+                updated,
+            ) % updated,
             messages.SUCCESS
         )
+
 
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
@@ -84,24 +85,25 @@ class EventAdmin(admin.ModelAdmin):
         self.message_user(
             request,
             ngettext(
-                    '%d event was approved.',
-                    '%d events were approved.',
-                    updated,
-            ) % updated, 
+                '%d event was approved.',
+                '%d events were approved.',
+                updated,
+            ) % updated,
             messages.SUCCESS
         )
 
     def disapprove_event(self, request, queryset):
-        updated = queryset.update(active=False)       
+        updated = queryset.update(active=False)
         self.message_user(
-            request, 
+            request,
             ngettext(
-                    '%d event was disapproved.',
-                    '%d events were disapproved.',
-                    updated,
-            ) % updated, 
+                '%d event was disapproved.',
+                '%d events were disapproved.',
+                updated,
+            ) % updated,
             messages.SUCCESS
         )
+
 
 # #admin.site.unregister(UserPasswordHistoryConfig)
 admin.site.unregister(PasswordHistory)
@@ -109,11 +111,13 @@ admin.site.unregister(PasswordHistory)
 admin.site.unregister(ForumProfile)
 
 # Register your models here.
+
+
 @admin.register(ArtisanForumProfile)
 class ArtisanForumProfileAdmin(admin.ModelAdmin):
     list_display = [
         'display_name', 'bio',
-        'image_file', 'shop_web_address', 
+        'image_file', 'shop_web_address',
         'outlets', 'listed_member',
         'display_personal_page', 'address_line_1',
         'address_line_2', 'parish',
@@ -134,12 +138,14 @@ class ArtisanForumProfileAdmin(admin.ModelAdmin):
         return super().get_queryset(request).exclude(profile_user__is_superuser=True)
 
 
-## TODO switch from dbbackup to runrestic to use restic - https://restic.net/
+# TODO switch from dbbackup to runrestic to use restic - https://restic.net/
 class tasks:
     def db_backup():
-        # clear existing backups first - dbbackup --clean doesn't work with dropbox.
+        # clear existing backups first - dbbackup --clean doesn't work with
+        # dropbox.
         try:
-            dbx = dropbox.Dropbox(settings.DBBACKUP_STORAGE_OPTIONS['oauth2_access_token'])
+            dbx = dropbox.Dropbox(
+                settings.DBBACKUP_STORAGE_OPTIONS['oauth2_access_token'])
         except dropbox.exceptions.AuthError as e:
             logger.error("Dropbox Auth Issue : {0}".format(e))
         except dropbox.exceptions.HttpError as e:

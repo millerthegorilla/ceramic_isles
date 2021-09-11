@@ -5,28 +5,28 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 from . import clamav
 from .utils import detect_content_type, \
-                   pil_check, \
-                   ffmpeg_check, \
-                   convert_size
+    pil_check, \
+    ffmpeg_check, \
+    convert_size
 
 
 logger = logging.getLogger('django')
 
 
-#class FileNameValidator(object):
-    ## TODO: check filename for double extensions
-    # https://owasp.org/www-community/vulnerabilities/Unrestricted_File_Upload
-    # lowercase all chars in filename
-    # check for hacks in filename as mentioned in link above
-    # ie check for double extensions or special chars in filename or strings such as 'php' 
-    #  from the link :
-    #     All the control characters and Unicode ones should be removed from the filenames 
-    #       and their extensions without any exception. Also, the special characters such as 
-    #        “;”, “:”, “>”, “<”, “/” ,”\”, additional “.”, “*”, “%”, “$”, and so on should 
-    #       be discarded as well.
-    #     It is recommended to use an algorithm to determine the filenames. 
-    #       For instance, a filename can be a MD5 hash of the name of file plus the date 
-    #       of the day.
+# class FileNameValidator(object):
+# TODO: check filename for double extensions
+# https://owasp.org/www-community/vulnerabilities/Unrestricted_File_Upload
+# lowercase all chars in filename
+# check for hacks in filename as mentioned in link above
+# ie check for double extensions or special chars in filename or strings such as 'php'
+#  from the link :
+#     All the control characters and Unicode ones should be removed from the filenames
+#       and their extensions without any exception. Also, the special characters such as
+#        “;”, “:”, “>”, “<”, “/” ,”\”, additional “.”, “*”, “%”, “$”, and so on should
+#       be discarded as well.
+#     It is recommended to use an algorithm to determine the filenames.
+#       For instance, a filename can be a MD5 hash of the name of file plus the date
+#       of the day.
 
 
 class FileExtensionValidator(object):
@@ -78,12 +78,13 @@ class FileContentTypeValidator:
     def __call__(self, file):
         __, ext = os.path.splitext(file.name)
 
-        ###  TODO:  Update below code to match imagefile. 
+        # TODO:  Update below code to match imagefile.
         detected_content_type = detect_content_type(file)
         if getattr(file, 'content_type', None) is not None:
             is_valid_content_type = bool(
                 (
-                    ext in mimetypes.guess_all_extensions(detected_content_type)
+                    ext in mimetypes.guess_all_extensions(
+                        detected_content_type)
                     and ext in mimetypes.guess_all_extensions(file.content_type)
                 ) or (
                     detected_content_type == 'application/CDFV2-unknown'
@@ -91,7 +92,7 @@ class FileContentTypeValidator:
                     and ext == "doc"
                 )
             )
-            params={
+            params = {
                 'extension': ext,
                 'content_type': file.content_type,
                 'detected_content_type': detected_content_type
@@ -99,18 +100,18 @@ class FileContentTypeValidator:
         else:
             is_valid_content_type = bool(
                 (
-                    ext in mimetypes.guess_all_extensions(detected_content_type)
+                    ext in mimetypes.guess_all_extensions(
+                        detected_content_type)
                 ) or (
                     detected_content_type == 'application/CDFV2-unknown'
                     and ext == "doc"
                 )
             )
-            params={
+            params = {
                 'extension': ext,
                 'content_type': None,
                 'detected_content_type': detected_content_type
             }
-
 
         if not is_valid_content_type:
             raise ValidationError(
@@ -146,7 +147,7 @@ class AntiVirusValidator:
 
 
 class MediaIntegrityValidator:
-    ## error_detect can be 'default' or 'strict'
+    # error_detect can be 'default' or 'strict'
     message = _('File failed integrity check! %(error)s')
 
     error_code = 'integrity_failure'
@@ -157,7 +158,7 @@ class MediaIntegrityValidator:
 
         if error_code is not None:
             self.error_code = error_code
-        
+
         self.error_detect = error_detect
 
     def __call__(self, file):
@@ -169,8 +170,8 @@ class MediaIntegrityValidator:
                 pil_check(file)
             except Exception as e:
                 logger.error("PIL CHECK ERROR : {0}".format(e))
-                raise ValidationError(self.message, self.error_code, params={'error': str(e)})
-
+                raise ValidationError(
+                    self.message, self.error_code, params={'error': str(e)})
 
 
 class MaxSizeValidator:
@@ -190,5 +191,8 @@ class MaxSizeValidator:
 
     def __call__(self, file):
         if file.size > self.max_size:
-            raise ValidationError(self.message, self.error_code, params={'max_size': str(convert_size(self.max_size))})
-
+            raise ValidationError(
+                self.message, self.error_code, params={
+                    'max_size': str(
+                        convert_size(
+                            self.max_size))})

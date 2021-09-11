@@ -8,16 +8,17 @@ from crispy_forms.layout import Layout, Submit, Row, Column, Field, Fieldset, Di
 from crispy_bootstrap5.bootstrap5 import FloatingField
 
 from .models import Profile
-from safe_imagefield.forms import SafeImageField    ## TODO: need to setup clamav.conf properly
+# TODO: need to setup clamav.conf properly
+from safe_imagefield.forms import SafeImageField
 
 
 class ProfileUserForm(ModelForm):
-    # def clean_username(self, *args, **kwargs):    
+    # def clean_username(self, *args, **kwargs):
     #     username = self.cleaned_data['username']
     #     if User.objects.filter(username=username):
     #         self.add_error('username', 'Error, That username already exists!')
     #     return username
-   
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         try:
@@ -28,12 +29,12 @@ class ProfileUserForm(ModelForm):
             self.fields[fieldname].help_text = None
         self.helper = FormHelper()
         self.helper.form_tag = False
-        self.helper.css_class =''
+        self.helper.css_class = ''
         self.helper.layout = Layout(
-                FloatingField('username'),
-                FloatingField('email'),
-                FloatingField('first_name'),
-                FloatingField('last_name'),
+            FloatingField('username'),
+            FloatingField('email'),
+            FloatingField('first_name'),
+            FloatingField('last_name'),
         )
 
     def clean_username(self, *args, **kwargs):
@@ -60,14 +61,13 @@ class ProfileUserForm(ModelForm):
             except IntegrityError as e:
                 error_message = e.__cause__
                 messages.error(None, error_message)
-            self.valid = False 
+            self.valid = False
             self.add_error('email', 'Error! That email already exists!')
         return email
 
     class Meta:
         model = User
         fields = ['username', 'email', 'first_name', 'last_name']
-    
 
 
 class ProfileDetailForm(ModelForm):
@@ -79,8 +79,8 @@ class ProfileDetailForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
-        self.helper.css_class =''
+        self.helper.css_class = ''
         self.helper.form_tag = False
         self.helper.layout = Layout(
-                FloatingField('display_name'),
+            FloatingField('display_name'),
         )

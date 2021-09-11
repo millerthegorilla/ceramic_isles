@@ -12,10 +12,12 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AlterModelOptions(
             name='forumcomment',
-            options={'ordering': ['date_created'], 'permissions': [('approve_comment', 'Approve Comment')]},
+            options={'ordering': ['date_created'], 'permissions': [
+                ('approve_comment', 'Approve Comment')]},
         ),
         migrations.AlterModelOptions(
             name='forumpost',
-            options={'ordering': ['-date_created'], 'permissions': [('approve_post', 'Approve Post')]},
+            options={'ordering': ['-date_created'],
+                     'permissions': [('approve_post', 'Approve Post')]},
         ),
     ]

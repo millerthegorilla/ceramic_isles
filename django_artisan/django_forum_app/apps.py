@@ -10,4 +10,3 @@ class DjangoForumAppConfig(AppConfig):
     # 	# connect all subclasses of base content item too
     # 	for subclass in ParentClass.__subclasses__():
     # 	    post_save.connect(my_handler, subclass)
-

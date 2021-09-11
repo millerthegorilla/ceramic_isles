@@ -18,18 +18,23 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Avatar',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('image_file', models.ImageField(upload_to=django_forum_app.models.user_directory_path_avatar)),
+                ('id', models.AutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
+                ('image_file', models.ImageField(
+                    upload_to=django_forum_app.models.user_directory_path_avatar)),
             ],
         ),
         migrations.CreateModel(
             name='ForumPost',
             fields=[
-                ('post_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='django_posts_and_comments.post')),
+                ('post_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE,
+                 parent_link=True, primary_key=True, serialize=False, to='django_posts_and_comments.post')),
                 ('author', models.CharField(default='', max_length=40)),
                 ('active', models.BooleanField(default=True)),
-                ('moderation', models.DateField(blank=True, default=None, null=True)),
-                ('category', models.CharField(choices=[('EV', 'Event'), ('QN', 'Question'), ('GL', 'General'), ('PS', 'Pictures'), ('FS', 'For Sale')], default='GL', max_length=2)),
+                ('moderation', models.DateField(
+                    blank=True, default=None, null=True)),
+                ('category', models.CharField(choices=[('EV', 'Event'), ('QN', 'Question'), (
+                    'GL', 'General'), ('PS', 'Pictures'), ('FS', 'For Sale')], default='GL', max_length=2)),
             ],
             options={
                 'ordering': ['-date_created'],
@@ -39,25 +44,34 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='ForumProfile',
             fields=[
-                ('profile_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='django_profile.profile')),
-                ('address_line_1', models.CharField(blank=True, default='', max_length=30, verbose_name='address line 1')),
-                ('address_line_2', models.CharField(blank=True, default='', max_length=30, verbose_name='address line 2')),
-                ('parish', models.CharField(blank=True, default='', max_length=30, verbose_name='parish')),
-                ('postcode', models.CharField(blank=True, default='', max_length=6, verbose_name='postcode')),
+                ('profile_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE,
+                 parent_link=True, primary_key=True, serialize=False, to='django_profile.profile')),
+                ('address_line_1', models.CharField(blank=True, default='',
+                 max_length=30, verbose_name='address line 1')),
+                ('address_line_2', models.CharField(blank=True, default='',
+                 max_length=30, verbose_name='address line 2')),
+                ('parish', models.CharField(blank=True, default='',
+                 max_length=30, verbose_name='parish')),
+                ('postcode', models.CharField(blank=True,
+                 default='', max_length=6, verbose_name='postcode')),
                 ('rules_agreed', models.BooleanField(default='False')),
-                ('avatar', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='user_profile', to='django_forum_app.avatar')),
+                ('avatar', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE,
+                 related_name='user_profile', to='django_forum_app.avatar')),
             ],
             bases=('django_profile.profile',),
         ),
         migrations.CreateModel(
             name='ForumComment',
             fields=[
-                ('comment_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='django_posts_and_comments.comment')),
+                ('comment_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE,
+                 parent_link=True, primary_key=True, serialize=False, to='django_posts_and_comments.comment')),
                 ('author', models.CharField(default='', max_length=40)),
                 ('active', models.BooleanField(default='True')),
-                ('moderation', models.DateField(blank=True, default=None, null=True)),
+                ('moderation', models.DateField(
+                    blank=True, default=None, null=True)),
                 ('title', models.SlugField()),
-                ('forum_post', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='forum_comments', to='django_forum_app.forumpost')),
+                ('forum_post', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
+                 related_name='forum_comments', to='django_forum_app.forumpost')),
             ],
             options={
                 'ordering': ['date_created'],

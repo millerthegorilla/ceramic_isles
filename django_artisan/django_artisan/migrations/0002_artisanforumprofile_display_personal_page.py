@@ -13,6 +13,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='artisanforumprofile',
             name='display_personal_page',
-            field=models.BooleanField(default=False, verbose_name='Display personal page'),
+            field=models.BooleanField(
+                default=False, verbose_name='Display personal page'),
         ),
     ]

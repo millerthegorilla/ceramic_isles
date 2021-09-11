@@ -1,15 +1,15 @@
 from django.db import models
 
 from . import forms
-from .validators import AntiVirusValidator, FileContentTypeValidator, \
-    FileExtensionValidator
+from .validators import ( AntiVirusValidator, FileContentTypeValidator,
+                          FileExtensionValidator, MaxSizeValidator,
+                          MediaIntegrityValidator )
 from django.utils.deconstruct import deconstructible
 
 
-
 class SafeImageField(models.ImageField):
-    def __init__(self, allowed_extensions=None, check_content_type=False, 
-                       scan_viruses=False, media_integrity=False, *args, **kwargs):
+    def __init__(self, allowed_extensions=None, check_content_type=False,
+                 scan_viruses=False, media_integrity=False, *args, **kwargs):
         self.allowed_extensions = kwargs.pop('allowed_extensions', None)
         self.check_content_type = kwargs.pop('check_content_type', False)
         self.scan_viruses = kwargs.pop('scan_viruses', False)
@@ -32,7 +32,8 @@ class SafeImageField(models.ImageField):
             default_validators.append(MediaIntegrityValidator())
 
         if self.max_size_limit:
-            default_validators.append(MaxSizeValidator(max_size=self.max_size_limit))
+            default_validators.append(
+                MaxSizeValidator(max_size=self.max_size_limit))
 
         self.default_validators = default_validators + self.default_validators
 
@@ -45,9 +46,9 @@ class SafeImageField(models.ImageField):
 
     def __eq__(self, other):
         if self.allowed_extensions == other.allowed_extensions and \
-            self.check_content_type == other.check_content_type and \
-            self.scan_viruses == other.scan_viruses:
-                return True
+                self.check_content_type == other.check_content_type and \
+                self.scan_viruses == other.scan_viruses:
+            return True
         else:
             return False
 

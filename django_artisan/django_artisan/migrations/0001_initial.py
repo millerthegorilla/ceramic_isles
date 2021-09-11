@@ -18,19 +18,26 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='ArtisanForumProfile',
             fields=[
-                ('forumprofile_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='django_forum_app.forumprofile')),
-                ('bio', models.TextField(blank=True, default='', help_text='This is the biographical information that will be presented on your personal page', max_length=500, verbose_name='biographical information, max 500 chars')),
-                ('image_file', models.ImageField(null=True, upload_to=django_artisan.models.user_directory_path, verbose_name='A single image for your personal page')),
-                ('shop_web_address', models.CharField(blank=True, default='', max_length=50, verbose_name='shop link')),
-                ('outlets', models.CharField(blank=True, default='', max_length=400, verbose_name='places that sell my stuff, comma separated')),
-                ('listed_member', models.BooleanField(default=False, verbose_name='List me on about page')),
+                ('forumprofile_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE,
+                 parent_link=True, primary_key=True, serialize=False, to='django_forum_app.forumprofile')),
+                ('bio', models.TextField(blank=True, default='', help_text='This is the biographical information that will be presented on your personal page',
+                 max_length=500, verbose_name='biographical information, max 500 chars')),
+                ('image_file', models.ImageField(null=True, upload_to=django_artisan.models.user_directory_path,
+                 verbose_name='A single image for your personal page')),
+                ('shop_web_address', models.CharField(blank=True,
+                 default='', max_length=50, verbose_name='shop link')),
+                ('outlets', models.CharField(blank=True, default='', max_length=400,
+                 verbose_name='places that sell my stuff, comma separated')),
+                ('listed_member', models.BooleanField(
+                    default=False, verbose_name='List me on about page')),
             ],
             bases=('django_forum_app.forumprofile',),
         ),
         migrations.CreateModel(
             name='Event',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
                 ('title', models.CharField(max_length=50)),
                 ('text', models.CharField(max_length=400)),
                 ('time', models.TimeField()),
@@ -43,15 +50,22 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='UserProductImage',
             fields=[
-                ('image_file', models.ImageField(upload_to=django_artisan.models.user_directory_path)),
-                ('image_text', models.CharField(blank=True, default='', max_length=400)),
-                ('image_title', models.CharField(blank=True, default='', max_length=30)),
-                ('image_shop_link', models.CharField(blank=True, default='', max_length=50)),
-                ('image_shop_link_title', models.CharField(blank=True, default='', max_length=30)),
+                ('image_file', models.ImageField(
+                    upload_to=django_artisan.models.user_directory_path)),
+                ('image_text', models.CharField(
+                    blank=True, default='', max_length=400)),
+                ('image_title', models.CharField(
+                    blank=True, default='', max_length=30)),
+                ('image_shop_link', models.CharField(
+                    blank=True, default='', max_length=50)),
+                ('image_shop_link_title', models.CharField(
+                    blank=True, default='', max_length=30)),
                 ('active', models.BooleanField(default=False)),
-                ('image_id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ('image_id', models.UUIDField(default=uuid.uuid4,
+                 editable=False, primary_key=True, serialize=False)),
                 ('id', models.PositiveIntegerField(default=0, editable=False)),
-                ('user_profile', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='forum_images', to='django_artisan.artisanforumprofile')),
+                ('user_profile', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
+                 related_name='forum_images', to='django_artisan.artisanforumprofile')),
             ],
         ),
     ]

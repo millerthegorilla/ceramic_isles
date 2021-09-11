@@ -4,8 +4,11 @@ from django_elasticsearch_dsl.registries import registry
 from .models import ForumPost, ForumComment
 
 
-sugg_analyzer = analyzer('sugg_analyzer',
-    tokenizer=tokenizer('trigram', 'ngram', min_gram=3, max_gram=3),
+sugg_analyzer = analyzer(
+    'sugg_analyzer',
+    tokenizer=tokenizer(
+        'trigram', 'ngram', min_gram=3, max_gram=3
+    ),
     filter=['lowercase']
 )
 
@@ -16,15 +19,16 @@ html_strip = analyzer(
     char_filter=["html_strip"]
 )
 
+
 @registry.register_document
 class ForumCommentDocument(Document):
 
     class Index:
-            # Name of the Elasticsearch index
-            name = 'forum_comments_index'
-            # See Elasticsearch Indices API reference for available settings
-            settings = {'number_of_shards': 1,
-                        'number_of_replicas': 0}
+        # Name of the Elasticsearch index
+        name = 'forum_comments_index'
+        # See Elasticsearch Indices API reference for available settings
+        settings = {'number_of_shards': 1,
+                    'number_of_replicas': 0}
 
     class Django:
         """
@@ -65,20 +69,19 @@ class ForumPostDocument(Document):
     )
 
     class Index:
-            # Name of the Elasticsearch index
-            name = 'forum_posts_index'
-            # See Elasticsearch Indices API reference for available settings
-            settings = {'number_of_shards': 1,
-                        'number_of_replicas': 0}
+        # Name of the Elasticsearch index
+        name = 'forum_posts_index'
+        # See Elasticsearch Indices API reference for available settings
+        settings = {'number_of_shards': 1,
+                    'number_of_replicas': 0}
 
     class Django:
         """
             I no longer have an autocomplete defined as the amount of requests goes
             through the roof.
         """
-
         model = ForumPost
         fields = [
-             'title',
-             'author',
+            'title',
+            'author',
         ]

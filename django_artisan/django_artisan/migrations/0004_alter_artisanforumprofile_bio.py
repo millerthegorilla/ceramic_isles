@@ -13,6 +13,10 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='artisanforumprofile',
             name='bio',
-            field=models.TextField(blank=True, default='', max_length=500, verbose_name='biographical information, max 500 chars'),
+            field=models.TextField(
+                blank=True,
+                default='',
+                max_length=500,
+                verbose_name='biographical information, max 500 chars'),
         ),
     ]

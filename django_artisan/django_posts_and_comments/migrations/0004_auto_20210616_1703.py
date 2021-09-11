@@ -15,16 +15,28 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='comment',
             name='post',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='comments', to='django_posts_and_comments.post'),
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name='comments',
+                to='django_posts_and_comments.post'),
         ),
         migrations.AlterField(
             model_name='comment',
             name='user_profile',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='comments', to='django_profile.profile'),
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name='comments',
+                to='django_profile.profile'),
         ),
         migrations.AlterField(
             model_name='post',
             name='user_profile',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='posts', to='django_profile.profile'),
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name='posts',
+                to='django_profile.profile'),
         ),
     ]
