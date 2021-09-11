@@ -15,7 +15,7 @@ class PostCreateForm(ModelForm):
             'text': '',
         }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.layout = Layout(
@@ -42,7 +42,7 @@ class CommentForm(ModelForm):
         model = Comment
         fields = ['text']
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.layout = Layout(

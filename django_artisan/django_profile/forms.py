@@ -10,6 +10,7 @@ from crispy_bootstrap5.bootstrap5 import FloatingField
 from .models import Profile
 # TODO: need to setup clamav.conf properly
 from safe_imagefield.forms import SafeImageField
+from typing import Any
 
 
 class ProfileUserForm(ModelForm):
@@ -19,7 +20,7 @@ class ProfileUserForm(ModelForm):
     #         self.add_error('username', 'Error, That username already exists!')
     #     return username
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         try:
             self.initial = kwargs['initial']
@@ -37,7 +38,7 @@ class ProfileUserForm(ModelForm):
             FloatingField('last_name'),
         )
 
-    def clean_username(self, *args, **kwargs):
+    def clean_username(self, *args, **kwargs) -> Any:
         username = self.cleaned_data['username']
         if username != self.initial['username']:
             try:
@@ -51,7 +52,7 @@ class ProfileUserForm(ModelForm):
             self.add_error('username', 'Error, That username already exists!')
         return username
 
-    def clean_email(self):
+    def clean_email(self) -> Any:
         email = self.cleaned_data['email']
         if email != self.initial['email']:
             try:
@@ -76,7 +77,7 @@ class ProfileDetailForm(ModelForm):
         fields = ['profile_user', 'display_name']
         exclude = ['profile_user']
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.css_class = ''

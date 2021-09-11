@@ -6,7 +6,7 @@ from ..forms import SafeImageField
 
 
 class TestSafeImageField:
-    def test_valid_file(self):
+    def test_valid_file(self) -> None:
         field = SafeImageField(allowed_extensions=('jpg',),
                               allow_empty_file=True)
 
@@ -16,7 +16,7 @@ class TestSafeImageField:
 
         assert True
 
-    def test_not_allowed_extension(self):
+    def test_not_allowed_extension(self) -> None:
         field = SafeImageField(allowed_extensions=('png',),
                               allow_empty_file=True)
 
@@ -27,7 +27,7 @@ class TestSafeImageField:
 
         assert err_info.value.error_list[0].code == 'invalid_extension'
 
-    def test_invalid_content_type(self):
+    def test_invalid_content_type(self) -> None:
         field = SafeImageField(allowed_extensions=('jpg',),
                               allow_empty_file=True)
 

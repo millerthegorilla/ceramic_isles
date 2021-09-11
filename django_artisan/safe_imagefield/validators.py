@@ -8,6 +8,9 @@ from .utils import detect_content_type, \
     pil_check, \
     ffmpeg_check, \
     convert_size
+from typing import Any
+
+_: Any
 
 
 logger = logging.getLogger('django')
@@ -36,7 +39,7 @@ class FileExtensionValidator(object):
     )
     error_code = 'invalid_extension'
 
-    def __init__(self, allowed_extensions=None, message=None, error_code=None):
+    def __init__(self, allowed_extensions=None, message=None, error_code=None) -> None:
         self.allowed_extensions = allowed_extensions
 
         if message is not None:
@@ -68,7 +71,7 @@ class FileContentTypeValidator:
 
     error_code = 'invalid_content_type'
 
-    def __init__(self, message=None, error_code=None):
+    def __init__(self, message=None, error_code=None) -> None:
         if message is not None:
             self.message = message
 
@@ -126,7 +129,7 @@ class AntiVirusValidator:
 
     error_code = 'infected'
 
-    def __init__(self, message=None, error_code=None):
+    def __init__(self, message=None, error_code=None) -> None:
         if message is not None:
             self.message = message
 
@@ -152,7 +155,7 @@ class MediaIntegrityValidator:
 
     error_code = 'integrity_failure'
 
-    def __init__(self, message=None, error_code=None, error_detect='default'):
+    def __init__(self, message=None, error_code=None, error_detect='default') -> None:
         if message is not None:
             self.message = message
 
@@ -179,7 +182,7 @@ class MaxSizeValidator:
 
     error_code = 'max_size_error'
 
-    def __init__(self, message=None, error_code=None, max_size=None):
+    def __init__(self, message=None, error_code=None, max_size=None) -> None:
         if message is not None:
             self.message = message
 

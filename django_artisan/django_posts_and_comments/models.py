@@ -13,6 +13,7 @@ from django.conf import settings
 from django_q.tasks import schedule
 
 from .soft_deletion import SoftDeletionModel
+from typing import Any
 
 
 class Post(SoftDeletionModel):
@@ -30,15 +31,15 @@ class Post(SoftDeletionModel):
     class Meta:
         UniqueConstraint(fields=['title', 'date_created'], name='unique_post')
 
-    def post_author(self):
+    def post_author(self) -> Any:
         return self.user_profile.display_name
 
-    def get_absolute_url(self):
+    def get_absolute_url(self) -> Any:
         return reverse_lazy(
             'django_posts_and_comments:post_view', args=(
                 self.id, self.slug,))
 
-    def delete(self):
+    def delete(self) -> None:
         super().delete()
         for comment in self.comments.all():
             comment.delete()
@@ -66,12 +67,12 @@ class Comment(SoftDeletionModel):
     user_profile = models.ForeignKey(
         Profile, null=True, on_delete=models.SET_NULL, related_name="comments")
 
-    def save(self, post=None, **kwargs):
+    def save(self, post=None, **kwargs) -> None:
         if post is not None:
             self.post = post
         super().save(**kwargs)
 
-    def comment_author(self):
+    def comment_author(self) -> Any:
         return self.user_profile.display_name
 
     def __str__(self):
@@ -90,7 +91,7 @@ class Comment(SoftDeletionModel):
     #                                            'id': self.id })
 
 
-def schedule_hard_delete(post_slug=None, deleted_at=None, type=None, id=None):
+def schedule_hard_delete(post_slug=None, deleted_at=None, type=None, id=None) -> None:
     if type == 'Comment':
         Comment.objects.get(id=id).hard_delete()
     else:

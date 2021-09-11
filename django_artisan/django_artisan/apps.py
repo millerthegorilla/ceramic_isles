@@ -5,7 +5,7 @@ from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
 
-def callback(sender, **kwargs):
+def callback(sender, **kwargs) -> None:
     from django.contrib.sites.models import Site
     try:
         current_site = Site.objects.get(id=settings.SITE_ID)
@@ -24,5 +24,5 @@ def callback(sender, **kwargs):
 class DjangoArtisanConfig(AppConfig):
     name = 'django_artisan'
 
-    def ready(self):
+    def ready(self) -> None:
         post_migrate.connect(callback, sender=self)

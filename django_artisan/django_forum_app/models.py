@@ -24,6 +24,9 @@ from django_posts_and_comments.models import Post, Comment
 from safe_imagefield.models import SafeImageField
 from sorl.thumbnail.fields import ImageField
 from sorl.thumbnail import delete
+from typing import Any
+
+_: Any
 
 logger = logging.getLogger('django')
 
@@ -31,12 +34,12 @@ logger = logging.getLogger('django')
 # helper functions
 
 
-def user_directory_path_avatar(instance, filename):
+def user_directory_path_avatar(instance, filename) -> str:
     return 'uploads/users/{0}/avatar/{1}'.format(
         instance.user_profile.display_name, filename)
 
 
-def default_avatar(num):
+def default_avatar(num) -> str:
     return 'default_avatars/default_avatar_{0}.jpg'.format(num)
 # end helper functions
 
@@ -88,7 +91,7 @@ class ForumProfile(Profile):
         Avatar, on_delete=models.CASCADE, related_name='user_profile')
     rules_agreed = models.BooleanField(default='False')
 
-    def username(self):
+    def username(self) -> Any:
         return self.profile_user.username
 
     # def delete(self, *args, **kwargs):
@@ -177,7 +180,7 @@ class ForumPost(Post):
         default=settings.LOCATION.ANY_ISLE,
     )
 
-    def get_absolute_url(self):
+    def get_absolute_url(self) -> Any:
         return reverse_lazy(
             'django_forum_app:post_view', args=(
                 self.id, self.slug,))
@@ -185,10 +188,10 @@ class ForumPost(Post):
     def __str__(self):
         return f"Post by {self.author}"
 
-    def category_label(self):
+    def category_label(self) -> Any:
         return settings.CATEGORY(self.category).label
 
-    def location_label(self):
+    def location_label(self) -> Any:
         return settings.LOCATION(self.location).label
 
 
@@ -211,13 +214,13 @@ class ForumComment(Comment):
         ordering = ['date_created']
         permissions = [('approve_comment', 'Approve Comment')]
 
-    def save(self, **kwargs):
+    def save(self, **kwargs) -> None:
         super().save(post=self.forum_post, **kwargs)
 
-    def get_absolute_url(self):
+    def get_absolute_url(self) -> Any:
         return self.forum_post.get_absolute_url() + '#' + self.title
 
-    def get_category_display(self):
+    def get_category_display(self) -> str:
         return 'Comment'
 
 

@@ -6,7 +6,7 @@ import re
 
 
 class ReauthenticateMiddleware:
-    def __init__(self, get_response):
+    def __init__(self, get_response) -> None:
         self.get_response = get_response
         self.pages = []
         # One-time configuration and initialization.

@@ -3,15 +3,16 @@ from django.contrib.auth import get_user, get_user_model, authenticate, login
 from django.urls import reverse
 import settings
 import re
+from typing import Dict
 
 print("***running django_users_app tests...***")
 
 
 class UserDetails():
-    def __init__(self):
+    def __init__(self) -> None:
         self.id = 0
 
-    def get_user_details(self):
+    def get_user_details(self) -> Dict[str, str]:
         self.id = self.id + 1
         return {"username": "testee" + str(self.id),
                 "email": "testee" + str(self.id) + "@bob.com",
@@ -19,10 +20,10 @@ class UserDetails():
 
 
 class UserModelTests(TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.userDetail = UserDetails()
 
-    def test_user_profile_is_created_when_user_is_created(self):
+    def test_user_profile_is_created_when_user_is_created(self) -> None:
         """
             tests that a profile is created when a user is created
         """
@@ -33,7 +34,7 @@ class UserModelTests(TestCase):
             email=userDetails['email'])
         self.assertIsNotNone(user.profile)
 
-    def test_user_profile_has_personal_statement_field(self):
+    def test_user_profile_has_personal_statement_field(self) -> None:
         """
             tests that the personal_statement field is created in the profile object
         """
@@ -44,7 +45,7 @@ class UserModelTests(TestCase):
             email=userDetails['email'])
         self.assertIsNotNone(user.profile.personal_statement)
 
-    def test_user_is_not_active_when_user_is_created(self):
+    def test_user_is_not_active_when_user_is_created(self) -> None:
         """
             tests that user.is_active is set to false
         """
@@ -55,7 +56,7 @@ class UserModelTests(TestCase):
             email=userDetails['email'])
         self.assertFalse(user.is_active)
 
-    def test_user_is_active_when_user_is_saved(self):
+    def test_user_is_active_when_user_is_saved(self) -> None:
         """
             tests the model signal 'set_is_active_to_false' user.is_active is not
             set to false when user is saved
@@ -71,11 +72,11 @@ class UserModelTests(TestCase):
 
 
 class LoginTests(TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.userDetail = UserDetails()
         self.factory = RequestFactory()
 
-    def test_user_login_redirect_to_dashboard(self):
+    def test_user_login_redirect_to_dashboard(self) -> None:
         userDetails = self.userDetail.get_user_details()
         user = get_user_model().objects.create_user(
             username=userDetails['username'], email=userDetails['email'])
@@ -94,11 +95,11 @@ class LoginTests(TestCase):
 
 
 class DashboardTests(TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.userDetail = UserDetails()
         self.factory = RequestFactory()
 
-    def test_user_logged_out_redirect(self):
+    def test_user_logged_out_redirect(self) -> None:
         """
             A user that isn't logged in should be redirected from dashboard to login
         """
@@ -111,7 +112,7 @@ class DashboardTests(TestCase):
             msg_prefix='',
             fetch_redirect_response=True)
 
-    def test_user_no_access_to_dashboard_if_not_active(self):
+    def test_user_no_access_to_dashboard_if_not_active(self) -> None:
         """
             user should be redirected to login if they try and access
             the dashboard but haven't confirmed their email.
@@ -133,7 +134,7 @@ class DashboardTests(TestCase):
 
 
 class RegisterTests(TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.userDetail = UserDetails()
 
     # following does not work due to failure of settings for captcha

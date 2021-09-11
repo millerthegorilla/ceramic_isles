@@ -8,38 +8,39 @@ from django.utils import timezone
 from django.conf import settings
 
 from django_q.tasks import schedule
+from typing import Any
 # The below is from https://adriennedomingus.com/blog/soft-deletion-in-django
 # with djangoq added... :)
 
 
 class SoftDeletionQuerySet(QuerySet):
-    def delete(self):
+    def delete(self) -> Any:
         return super(
             SoftDeletionQuerySet,
             self).update(
             deleted_at=timezone.now())
 
-    def hard_delete(self):
+    def hard_delete(self) -> Any:
         return super(SoftDeletionQuerySet, self).delete()
 
-    def alive(self):
+    def alive(self) -> Any:
         return self.filter(deleted_at=None)
 
-    def dead(self):
+    def dead(self) -> Any:
         return self.exclude(deleted_at=None)
 
 
 class SoftDeletionManager(models.Manager):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         self.alive_only = kwargs.pop('alive_only', True)
         super(SoftDeletionManager, self).__init__(*args, **kwargs)
 
-    def get_queryset(self):
+    def get_queryset(self) -> Any:
         if self.alive_only:
             return SoftDeletionQuerySet(self.model).filter(deleted_at=None)
         return SoftDeletionQuerySet(self.model)
 
-    def hard_delete(self):
+    def hard_delete(self) -> Any:
         return self.get_queryset().hard_delete()
 
 
@@ -51,7 +52,7 @@ class SoftDeletionModel(models.Model):
     class Meta:
         abstract = True
 
-    def delete(self):
+    def delete(self) -> None:
         self.deleted_at = timezone.now()
         self.save()
         # slack jawed duck type hack
@@ -72,12 +73,12 @@ class SoftDeletionModel(models.Model):
     # TODO : refactor so that a regular schedule is run once every week which hard_deletes all posts/comments
     # that are soft_deleted > than settings.DELETION_TIMEOUT ago.
 
-    def hard_delete(self):
+    def hard_delete(self) -> None:
         super(SoftDeletionModel, self).delete()
 
 
 class SoftDeletionAdmin(admin.ModelAdmin):
-    def get_queryset(self, request):
+    def get_queryset(self, request) -> Any:
         qs = self.model.all_objects
         # The below is copied from the base implementation in BaseModelAdmin to
         # prevent other changes in behavior
@@ -86,5 +87,5 @@ class SoftDeletionAdmin(admin.ModelAdmin):
             qs = qs.order_by(*ordering)
         return qs
 
-    def delete_model(self, request, obj):
+    def delete_model(self, request, obj) -> None:
         obj.hard_delete()

@@ -16,11 +16,12 @@ from django.core.exceptions import ObjectDoesNotExist, FieldError
 
 from django_forum_app.models import ForumProfile, create_user_forum_profile, save_user_forum_profile, Avatar, default_avatar
 from django_forum_app.views import ForumPostView
+from typing import Any
 
 logger = logging.getLogger('django')
 
 
-def user_directory_path(instance, filename):
+def user_directory_path(instance, filename) -> str:
     if isinstance(instance, ArtisanForumProfile):
         return 'uploads/users/{0}/{1}'.format(instance.display_name, filename)
     else:
@@ -139,7 +140,7 @@ class UserProductImage(models.Model):
          https://stackoverflow.com/a/54148942
     """
     @classmethod
-    def get_next(cls):
+    def get_next(cls) -> Any:
         with transaction.atomic():
             cls.objects.update(id=models.F('id') + 1)
             return cls.objects.values_list('id', flat=True)[0]

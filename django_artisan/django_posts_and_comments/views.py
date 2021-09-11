@@ -23,6 +23,7 @@ from django.core.paginator import Paginator
 
 from .models import Post, Comment
 from .forms import PostCreateForm, CommentForm
+from typing import Any
 
 
 logger = logging.getLogger('django')
@@ -118,7 +119,7 @@ class PostCreateView(LoginRequiredMixin, CreateView):
     template_name = 'django_posts_and_comments/post_create_form.html'
     form_class = PostCreateForm
 
-    def form_valid(self, form, **kwargs):
+    def form_valid(self, form, **kwargs) -> Any:
         post = form.save(commit=False)
         post.text = PostCreateView.sanitize_post_text(post.text)
         post.user_profile = self.request.user.profile
@@ -132,13 +133,13 @@ class PostCreateView(LoginRequiredMixin, CreateView):
             post.save()
         return redirect(self.get_success_url(post))
 
-    def get_success_url(self, post, *args, **kwargs):
+    def get_success_url(self, post, *args, **kwargs) -> Any:
         return reverse_lazy(
             'django_posts_and_comments:post_view', args=(
                 post.id, post.slug,))
 
     @staticmethod
-    def sanitize_post_text(text):
+    def sanitize_post_text(text) -> Any:
         return mark_safe(bleach.clean(html.unescape(text),
                                       tags=settings.ALLOWED_TAGS,
                                       attributes=settings.ATTRIBUTES,

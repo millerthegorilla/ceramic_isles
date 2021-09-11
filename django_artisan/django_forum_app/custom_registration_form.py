@@ -13,6 +13,7 @@ from crispy_bootstrap5.bootstrap5 import FloatingField
 from crispy_forms.bootstrap import StrictButton
 
 from .models import ForumProfile
+from typing import Any
 
 
 class CustomUserCreationForm(UserCreationForm):
@@ -22,7 +23,7 @@ class CustomUserCreationForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):
         fields = UserCreationForm.Meta.fields + ('email', 'captcha',)
 
-    def clean_username(self):
+    def clean_username(self) -> Any:
         username = self.cleaned_data['username']
         if fuzz.ratio(username, self['display_name'].value()) > 69:
             self.add_error(
@@ -31,7 +32,7 @@ class CustomUserCreationForm(UserCreationForm):
             self.valid = False
         return username
 
-    def clean_display_name(self):
+    def clean_display_name(self) -> Any:
         displayname = self.cleaned_data['display_name']
         dname = slugify(displayname)
         try:
@@ -43,7 +44,7 @@ class CustomUserCreationForm(UserCreationForm):
         self.valid = False
         return displayname
 
-    def clean_email(self):
+    def clean_email(self) -> Any:
         email = self.cleaned_data['email']
         try:
             User.objects.get(email=email)
@@ -53,7 +54,7 @@ class CustomUserCreationForm(UserCreationForm):
         self.valid = False
         return email
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.fields['display_name'] = fields.CharField(
             label='Display name',)

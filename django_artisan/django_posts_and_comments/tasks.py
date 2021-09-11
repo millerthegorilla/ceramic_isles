@@ -9,7 +9,7 @@ def schedule_hard_delete(
         deleted_at=None,
         type=None,
         id=None,
-        **kwargs):
+        **kwargs) -> None:
     logger.error("type = " + type + " id = " + id)
     if 'Comment' in type:
         Comment.all_objects.get(id=int(id)).hard_delete()

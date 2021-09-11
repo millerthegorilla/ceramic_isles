@@ -14,14 +14,14 @@ from ..validators import AntiVirusValidator, FileContentTypeValidator, \
 class TestFileExtensionValidator:
     cls = FileExtensionValidator
 
-    def test_allowed_extension(self):
+    def test_allowed_extension(self) -> None:
         f = get_uploaded_file(get_extras_file('sample.jpg'))
 
         validator = FileExtensionValidator(('jpg',))
 
         validator(f)
 
-    def test_disallowed_extension(self):
+    def test_disallowed_extension(self) -> None:
         f = get_uploaded_file(get_extras_file('sample.jpg'))
 
         validator = FileExtensionValidator(('png',))
@@ -31,14 +31,14 @@ class TestFileExtensionValidator:
 
 
 class TestFileContentTypeValidator:
-    def test_correct_content_type(self):
+    def test_correct_content_type(self) -> None:
         f = get_uploaded_file(get_extras_file('sample.jpg'))
 
         validator = FileContentTypeValidator()
 
         validator(f)
 
-    def test_no_content_type(self):
+    def test_no_content_type(self) -> None:
         f = get_uploaded_file(get_extras_file('sample.jpg'),
                               content_type=False)
 
@@ -46,7 +46,7 @@ class TestFileContentTypeValidator:
 
         validator(f)
 
-    def test_incorrect_content_type(self):
+    def test_incorrect_content_type(self) -> None:
         f = get_uploaded_file(get_extras_file('sample.jpg'),
                               content_type='image/png')
 
@@ -55,7 +55,7 @@ class TestFileContentTypeValidator:
         with pytest.raises(ValidationError):
             validator(f)
 
-    def test_incorrect_content_type2(self):
+    def test_incorrect_content_type2(self) -> None:
         f = get_uploaded_file(get_extras_file('sample.jpg'),
                               content_type='image/png',
                               upload_name='sample.png')
@@ -65,7 +65,7 @@ class TestFileContentTypeValidator:
         with pytest.raises(ValidationError):
             validator(f)
 
-    def test_incorrect_content_type3(self):
+    def test_incorrect_content_type3(self) -> None:
         f = get_uploaded_file(get_extras_file('sample.jpg'),
                               upload_name='sample.png')
 
@@ -74,7 +74,7 @@ class TestFileContentTypeValidator:
         with pytest.raises(ValidationError):
             validator(f)
 
-    def test_no_content_type_with_bad_ext(self):
+    def test_no_content_type_with_bad_ext(self) -> None:
         f = get_uploaded_file(get_extras_file('sample.jpg'),
                               content_type=False,
                               upload_name='sample.png')

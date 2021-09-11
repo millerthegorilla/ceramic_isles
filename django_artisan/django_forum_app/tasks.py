@@ -5,7 +5,7 @@ from django.core.mail import EmailMessage
 from .models import ForumPost, ForumComment
 
 
-def send_susbcribed_email(post_id=None, comment_id=None, path_info=None):
+def send_susbcribed_email(post_id=None, comment_id=None, path_info=None) -> None:
     post = comment = None
     posts = ForumPost.objects.filter(id=post_id)
     if posts.count():

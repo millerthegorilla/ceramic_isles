@@ -13,7 +13,7 @@ class SafeImageField(forms.ImageField):
             initial=None,
             widget=ClearableFileInput,
             help_text='safe_image_field',
-            **kwargs):
+            **kwargs) -> None:
         self.allowed_extensions = kwargs.pop('allowed_extensions', None)
         self.check_content_type = kwargs.pop('check_content_type', False)
         self.scan_viruses = kwargs.pop('scan_viruses', False)

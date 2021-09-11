@@ -20,7 +20,7 @@ from .models import UserProductImage, Event, ArtisanForumProfile
 logger = logging.getLogger('django')
 
 
-def callback(sender, **kwargs):
+def callback(sender, **kwargs) -> None:
     from django.contrib.sites.models import Site
     try:
         current_site = Site.objects.get(id=settings.SITE_ID)
@@ -36,7 +36,7 @@ def callback(sender, **kwargs):
 class DjangoArtisanConfig(AppConfig):
     name = 'django_artisan'
 
-    def ready(self):
+    def ready(self) -> None:
         post_migrate.connect(callback, sender=self)
 
 
@@ -140,7 +140,7 @@ class ArtisanForumProfileAdmin(admin.ModelAdmin):
 
 # TODO switch from dbbackup to runrestic to use restic - https://restic.net/
 class tasks:
-    def db_backup():
+    def db_backup() -> None:
         # clear existing backups first - dbbackup --clean doesn't work with
         # dropbox.
         try:

@@ -7,7 +7,7 @@ from ..models import SafeImageField
 
 
 class TestSafeFormField:
-    def test_valid_file(self):
+    def test_valid_file(self) -> None:
         field = SafeImageField(allowed_extensions=('jpg',))
 
         f = get_uploaded_file(get_extras_file('sample.jpg'))
@@ -16,7 +16,7 @@ class TestSafeFormField:
 
         assert True
 
-    def test_not_allowed_extension(self):
+    def test_not_allowed_extension(self) -> None:
         field = SafeImageField(allowed_extensions=('png',))
 
         f = get_uploaded_file(get_extras_file('sample.jpg'))
@@ -24,7 +24,7 @@ class TestSafeFormField:
         with pytest.raises(ValidationError):
             field.clean(f, None)
 
-    def test_invalid_content_type(self):
+    def test_invalid_content_type(self) -> None:
         field = SafeImageField(allowed_extensions=('jpg',))
 
         f = get_uploaded_file(get_extras_file('sample.jpg'),
@@ -33,7 +33,7 @@ class TestSafeFormField:
         with pytest.raises(ValidationError):
             field.clean(f, None)
 
-    def test_invalid_content_type2(self):
+    def test_invalid_content_type2(self) -> None:
         field = SafeImageField(allowed_extensions=('png',))
 
         f = get_uploaded_file(get_extras_file('sample.jpg'),
@@ -43,7 +43,7 @@ class TestSafeFormField:
         with pytest.raises(ValidationError):
             field.clean(f, None)
 
-    def test_formfield(self):
+    def test_formfield(self) -> None:
         field = SafeImageField(allowed_extensions=('.jpg',))
 
         form_field = field.formfield()

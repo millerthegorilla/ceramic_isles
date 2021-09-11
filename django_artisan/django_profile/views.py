@@ -14,6 +14,7 @@ from django_users_app.views import RegisterView
 from .custom_registration_form import CustomUserCreationForm
 from .models import Profile
 from .forms import ProfileDetailForm, ProfileUserForm
+from typing import Any
 
 
 class ProfileUpdateView(LoginRequiredMixin, UpdateView):
@@ -23,10 +24,10 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
     success_url = reverse_lazy('django_profile:profile_update_view')
     template_name = 'django_profile/profile_update_form.html'
 
-    def get_object(self):
+    def get_object(self) -> Any:
         return self.model.objects.get(profile_user_id=self.request.user.id)
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, **kwargs) -> Any:
         context = super().get_context_data(**kwargs)
         # if self.request.method == 'GET':
         context['user_form'] = self.user_form_class(
@@ -37,7 +38,7 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
                 'last_name': self.request.user.last_name})
         return context
 
-    def form_valid(self, form, *args, **kwargs):
+    def form_valid(self, form, *args, **kwargs) -> Any:
         user_form = self.user_form_class(self.request.POST)
         user_form.initial = {'username': self.request.user.username,
                              'email': self.request.user.email,
@@ -74,7 +75,7 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
 class CustomRegisterView(RegisterView):
     form_class = CustomUserCreationForm
 
-    def form_valid(self, form):
+    def form_valid(self, form) -> Any:
         user = form.save()
         user.profile.display_name = slugify(form['display_name'].value())
         user.profile.save(update_fields=['display_name'])

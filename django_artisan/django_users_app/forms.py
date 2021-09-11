@@ -11,6 +11,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, Field, Fieldset, HTML, Button, Div
 from crispy_forms.bootstrap import StrictButton
 from crispy_bootstrap5.bootstrap5 import FloatingField
+from typing import Any
 
 
 class CustomUserCreationForm(UserCreationForm):
@@ -20,7 +21,7 @@ class CustomUserCreationForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):
         fields = UserCreationForm.Meta.fields + ('email', 'captcha',)
 
-    def clean_email(self):
+    def clean_email(self) -> Any:
         email = self.cleaned_data['email']
         try:
             user = get_user_model().objects.get(email=email)
@@ -30,7 +31,7 @@ class CustomUserCreationForm(UserCreationForm):
         self.valid = False
         return email
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_method = 'post'
@@ -49,7 +50,7 @@ class CustomUserCreationForm(UserCreationForm):
 class UserPasswordResetForm(PasswordResetForm):
     captcha = ReCaptchaField(label='', widget=ReCaptchaV2Checkbox)
 
-    def clean_email(self):
+    def clean_email(self) -> Any:
         email = self.cleaned_data['email']
         try:
             user = get_user_model().objects.get(email=email)
@@ -67,7 +68,7 @@ class UserPasswordResetForm(PasswordResetForm):
             return email
         return email
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_method = 'post'
@@ -87,7 +88,7 @@ class UserResendConfirmationForm(Form):
     captcha = ReCaptchaField(label='', widget=ReCaptchaV2Checkbox)
     username = CharField(label='Your username here...')
 
-    def clean_username(self, *args, **kwargs):
+    def clean_username(self, *args, **kwargs) -> Any:
         username = self.cleaned_data['username']
         try:
             user = get_user_model().objects.get(username=username)
@@ -104,7 +105,7 @@ class UserResendConfirmationForm(Form):
                 'Hey!  That username does not exist!  Try registering first.')
         return username
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_method = 'post'

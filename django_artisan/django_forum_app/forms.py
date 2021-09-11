@@ -24,7 +24,7 @@ class ForumProfileUserForm(ProfileUserForm):
         fields = ProfileUserForm.Meta.fields
         model = ProfileUserForm.Meta.model
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         if len(args):
             initl = args[0].get('display_name')
@@ -53,7 +53,7 @@ class ForumProfileDetailForm(ProfileDetailForm):
         ]
         exclude = ['profile_user']
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_tag = False
@@ -87,7 +87,7 @@ class ForumPostCreateForm(PostCreateForm):
         labels = {'category': 'Choose a category for your post...',
                   'location': 'Which island...?'}
 
-    def __init__(self, user_name=None, post=None, **kwargs):
+    def __init__(self, user_name=None, post=None, **kwargs) -> None:
         checked_string = ''
         super().__init__(**kwargs)
         if post and user_name and post.subscribed_users.filter(
@@ -116,7 +116,7 @@ class ForumCommentForm(CommentForm):
         model = ForumComment
         fields = CommentForm.Meta.fields + []
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.helper.layout = Layout(
             Fieldset(

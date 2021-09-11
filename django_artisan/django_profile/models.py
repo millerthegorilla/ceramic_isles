@@ -7,9 +7,10 @@ from django.db.models.signals import pre_init, pre_save, post_save, post_delete
 from django.template.defaultfilters import slugify
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
+from typing import Any
 
 
-def default_display_name():
+def default_display_name() -> Any:
     return generate_username()[0]
 
 # Create your models here.

@@ -3,19 +3,20 @@ import magic
 from PIL import Image as ImageP
 import ffmpeg
 from subprocess import Popen, PIPE
+from typing import Any, Optional
 # some of the below code is from https://github.com/ftarlao/check-media-integrity
 # there,the author recommends uninstalling pillow and installing pillow-simd in its place
 # pillow-simd requires that you have a processor that supports MMX, SSE-SSE4, AVX, AVX2, AVX512, NEON
 # or similar
 
 
-def detect_content_type(f):
+def detect_content_type(f) -> Any:
     sample = f.read(2048)
     f.seek(0)
     return magic.from_buffer(sample, mime=True)
 
 
-def ffmpeg_check(filename, error_detect='default', threads=0):
+def ffmpeg_check(filename, error_detect='default', threads=0) -> Optional[str]:
     try:
         if error_detect == 'default':
             stream = ffmpeg.input(filename)
@@ -33,14 +34,14 @@ def ffmpeg_check(filename, error_detect='default', threads=0):
         return str(e)
 
 
-def pil_check(file):
+def pil_check(file) -> None:
     # Image manipulation is mandatory to detect few defects
     # detects truncated file.
     img = ImageP.open(file)
     img.transpose(ImageP.FLIP_LEFT_RIGHT)
 
 
-def convert_size(size_bytes):
+def convert_size(size_bytes) -> str:
     if size_bytes == 0:
         return "0B"
     size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")

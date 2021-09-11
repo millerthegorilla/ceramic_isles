@@ -40,6 +40,7 @@ from .forms import ForumPostCreateForm, ForumPostListSearch, \
 from .custom_registration_form import CustomUserCreationForm
 from .models import create_user_forum_profile, Avatar, default_avatar
 from .tasks import send_susbcribed_email
+from typing import Any
 
 logger = logging.getLogger('django')
 
@@ -50,7 +51,7 @@ class ForumPostCreateView(PostCreateView):
     template_name = "django_forum_app/posts_and_comments/forum_post_create_form.html"
     form_class = ForumPostCreateForm
 
-    def form_valid(self, form):
+    def form_valid(self, form) -> Any:
         post = form.save(commit=False)
         post.user_profile = self.request.user.profile.forumprofile
         post.text = PostCreateView.sanitize_post_text(post.text)
@@ -61,7 +62,7 @@ class ForumPostCreateView(PostCreateView):
             post.subscribed_users.add(self.request.user)
         return redirect(self.get_success_url(post))
 
-    def get_success_url(self, post, *args, **kwargs):
+    def get_success_url(self, post, *args, **kwargs) -> Any:
         return reverse_lazy(
             'django_forum_app:post_view', args=(
                 post.id, post.slug,))
@@ -208,7 +209,7 @@ class ForumPostView(PostView):
                        'site_url': self.request.scheme + '://' + site.domain})
 
 
-def subscribe(request):
+def subscribe(request) -> Any:
 
     # request should be ajax and method should be POST.
     if request.is_ajax and request.method == "POST":
@@ -343,7 +344,7 @@ class ForumProfileUpdateView(ProfileUpdateView):
 class CustomRegisterView(RegisterView):
     form_class = CustomUserCreationForm
 
-    def form_valid(self, form):
+    def form_valid(self, form) -> Any:
         user = form.save()
         user.profile.forumprofile.rules_agreed = form['rules'].value()
         user.profile.forumprofile.save(update_fields=['rules_agreed'])
