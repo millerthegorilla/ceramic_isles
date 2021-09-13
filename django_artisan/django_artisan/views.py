@@ -18,6 +18,7 @@ from django.views.generic.edit import FormView, UpdateView
 from django.core.paginator import Paginator
 from django.conf import settings
 from django.contrib.sitemaps import ping_google
+from django.contrib.sites.models import Site
 
 from django_forum_app.forms import ForumProfileUserForm
 from django_forum_app.views import ForumProfileUpdateView, CustomRegisterView
@@ -66,6 +67,7 @@ class ArtisanForumProfileUpdateView(ForumProfileUpdateView):
 
     def get_context_data(self, **args):
         context = super().get_context_data(**args)
+        site = Site.objects.get_current()
         # context['form'].initial.update(
         #             {'bio':self.request.user.profile.forumprofile.artisanforumprofile.bio,
         #              'image_file':self.request.user.profile.forumprofile.artisanforumprofile.image_file,
@@ -78,6 +80,7 @@ class ArtisanForumProfileUpdateView(ForumProfileUpdateView):
         page_number = self.request.GET.get('page')
         page_obj = paginator.get_page(page_number)
         context['page_obj'] = page_obj
+        context ['site_url'] = self.request.scheme + '://' + site.domain
         return context
 
 
