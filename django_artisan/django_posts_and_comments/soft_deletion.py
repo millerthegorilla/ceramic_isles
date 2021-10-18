@@ -6,6 +6,7 @@ from django.db.models.query import QuerySet
 from django.contrib import admin
 from django.utils import timezone
 from django.conf import settings
+from django.http import HttpRequest
 
 from django_q.tasks import schedule
 from typing import Any
@@ -78,7 +79,7 @@ class SoftDeletionModel(models.Model):
 
 
 class SoftDeletionAdmin(admin.ModelAdmin):
-    def get_queryset(self, request) -> Any:
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
         qs = self.model.all_objects
         # The below is copied from the base implementation in BaseModelAdmin to
         # prevent other changes in behavior
@@ -87,5 +88,5 @@ class SoftDeletionAdmin(admin.ModelAdmin):
             qs = qs.order_by(*ordering)
         return qs
 
-    def delete_model(self, request, obj) -> None:
-        obj.hard_delete()
+    def delete_model(self, request: HttpRequest, qs: SoftDeletionQuerySet) -> QuerySet:
+        qs.hard_delete()

@@ -1,3 +1,5 @@
+from tinymce.widgets import TinyMCE
+
 from django import forms
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
@@ -6,10 +8,9 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, Row, Column, Field, Fieldset, HTML, Div
 from crispy_bootstrap5.bootstrap5 import FloatingField
 
-from tinymce.widgets import TinyMCE
-
 from django_profile.forms import ProfileUserForm, ProfileDetailForm
 from django_posts_and_comments.forms import PostCreateForm, CommentForm
+
 from .models import ForumProfile, ForumPost, ForumComment
 from .fields import FileInput
 
@@ -26,7 +27,7 @@ class ForumProfileUserForm(ProfileUserForm):
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        if len(args):
+        if len(args):   # TODO review this...
             initl = args[0].get('display_name')
         else:
             initl = ForumProfile.objects.get(
@@ -87,7 +88,7 @@ class ForumPostCreateForm(PostCreateForm):
         labels = {'category': 'Choose a category for your post...',
                   'location': 'Which island...?'}
 
-    def __init__(self, user_name=None, post=None, **kwargs) -> None:
+    def __init__(self, user_name: str = None, post: ForumPost = None, **kwargs) -> None:
         checked_string = ''
         super().__init__(**kwargs)
         if post and user_name and post.subscribed_users.filter(

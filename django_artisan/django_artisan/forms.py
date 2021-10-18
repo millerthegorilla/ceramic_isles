@@ -9,6 +9,7 @@ from django.conf import settings
 from django import forms
 from django.utils.translation import ugettext as _
 from django_forum_app.forms import ForumProfileDetailForm
+from django.contrib.auth.models import User
 
 from .models import ArtisanForumProfile, UserProductImage
 from .fields import FileClearInput, FileInput
@@ -84,7 +85,7 @@ class UserProductImageForm(forms.ModelForm):
         fields = ['image_file', 'image_title', 'image_text',
                   'image_shop_link', 'image_shop_link_title']
 
-    def __init__(self, instance=None, user=None, *args, **kwargs) -> None:
+    def __init__(self, instance: UserProductImage = None, user: User = None, *args, **kwargs) -> None:
         self.user = user
         super().__init__(*args, **kwargs)
         self.fields['image_file'].validators.append(self.restrict_amount)
@@ -103,7 +104,7 @@ class UserProductImageForm(forms.ModelForm):
         self.helper.form_method = 'post'
         self.helper.form_class = 'col-auto col-xs-3'
 
-    def restrict_amount(self, value) -> None:
+    def restrict_amount(self, count: int) -> None:
         if self.user is not None:
             if UserProductImage.objects.filter(
                     user_profile=self.user.profile.forumprofile).count() >= MAX_NUMBER_OF_IMAGES:
@@ -123,7 +124,7 @@ class UserProductImagesForm(forms.ModelForm):
         model = UserProductImage
         fields = ['image_file', 'image_text', 'image_shop_link']
 
-    def __init__(self, user=None, *args, **kwargs) -> None:
+    def __init__(self, user: User = None, *args, **kwargs) -> None:
         self.user = user
         super().__init__(*args, **kwargs)
         self.fields['image_file'].validators.append(self.restrict_amount)
@@ -140,7 +141,7 @@ class UserProductImagesForm(forms.ModelForm):
         self.helper.form_method = 'post'
         self.helper.form_class = 'col-12'
 
-    def restrict_amount(self, value) -> None:
+    def restrict_amount(self) -> None:
         if self.user is not None:
             if UserProductImage.objects.filter(
                     user_profile=self.user.profile.forumprofile).count() >= MAX_NUMBER_OF_IMAGES:

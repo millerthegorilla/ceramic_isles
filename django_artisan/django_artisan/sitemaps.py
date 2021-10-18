@@ -16,7 +16,7 @@ class StaticViewSitemap(Sitemap):
             'login',
             'rules_view']
 
-    def location(self, item) -> Any:
+    def location(self, item) -> str:
         return reverse(item)
 
 

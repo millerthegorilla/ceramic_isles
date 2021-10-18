@@ -5,7 +5,13 @@ from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
 
-def callback(sender, **kwargs) -> None:
+class DjangoArtisanConfig(AppConfig):
+    name = 'django_artisan'
+
+    def ready(self) -> None:
+        post_migrate.connect(callback, sender=self)
+
+def callback(sender: DjangoArtisanConfig, **kwargs) -> None:
     from django.contrib.sites.models import Site
     try:
         current_site = Site.objects.get(id=settings.SITE_ID)
@@ -19,10 +25,3 @@ def callback(sender, **kwargs) -> None:
     except Site.DoesNotExist:
         Site.objects.create(domain=settings.SITE_DOMAIN,
                             name=settings.SITE_NAME, id=settings.SITE_ID)
-
-
-class DjangoArtisanConfig(AppConfig):
-    name = 'django_artisan'
-
-    def ready(self) -> None:
-        post_migrate.connect(callback, sender=self)

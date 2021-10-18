@@ -1,20 +1,23 @@
+from typing import Any, Union
+
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.views.generic.edit import UpdateView, FormView
 from django.forms.models import inlineformset_factory
+from django.forms import ModelForm
 from django.urls import reverse_lazy, reverse
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.template.defaultfilters import slugify
+from django.http import HttpResponse, HttpResponseRedirect
 
 from django_users_app.views import RegisterView
 
 from .custom_registration_form import CustomUserCreationForm
 from .models import Profile
 from .forms import ProfileDetailForm, ProfileUserForm
-from typing import Any
 
 
 class ProfileUpdateView(LoginRequiredMixin, UpdateView):
@@ -38,7 +41,7 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
                 'last_name': self.request.user.last_name})
         return context
 
-    def form_valid(self, form, *args, **kwargs) -> Any:
+    def form_valid(self, form: ModelForm, *args, **kwargs) -> Union[HttpResponse, HttpResponseRedirect]:
         user_form = self.user_form_class(self.request.POST)
         user_form.initial = {'username': self.request.user.username,
                              'email': self.request.user.email,
@@ -64,7 +67,7 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
             obj.display_name = slugify(form['display_name'].value())
             obj.save()
         return redirect(self.success_url)
-        # return render(self.request, self.template_name, {'form': form,
+        # return render(self.request: HttpRequest self.template_name, {'form': form,
         # 'user_form': user_form})
 
 

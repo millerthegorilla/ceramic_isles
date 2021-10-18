@@ -23,7 +23,7 @@ class CustomUserCreationForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):
         fields = UserCreationForm.Meta.fields + ('email', 'captcha',)
 
-    def clean_username(self) -> Any:
+    def clean_username(self) -> str:
         username = self.cleaned_data['username']
         if fuzz.ratio(username, self['display_name'].value()) > 69:
             self.add_error(
@@ -32,7 +32,7 @@ class CustomUserCreationForm(UserCreationForm):
             self.valid = False
         return username
 
-    def clean_display_name(self) -> Any:
+    def clean_display_name(self) -> str:
         displayname = self.cleaned_data['display_name']
         dname = slugify(displayname)
         try:
@@ -44,7 +44,7 @@ class CustomUserCreationForm(UserCreationForm):
         self.valid = False
         return displayname
 
-    def clean_email(self) -> Any:
+    def clean_email(self) -> str:
         email = self.cleaned_data['email']
         try:
             User.objects.get(email=email)

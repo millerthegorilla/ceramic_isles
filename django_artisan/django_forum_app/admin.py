@@ -6,6 +6,8 @@ from django.utils.translation import ngettext
 from django.core.mail import EmailMessage
 from django.conf import settings
 from django.contrib.sites.models import Site
+from django.db.models import QuerySet
+from django.http import HttpRequest
 
 from django_posts_and_comments.soft_deletion import SoftDeletionAdmin, SoftDeletionModel
 from django_profile.models import Profile
@@ -29,7 +31,7 @@ class ForumCommentAdmin(admin.ModelAdmin):  # SoftDeletionAdmin):
                    'post', 'author', 'deleted_at')
     search_fields = ('author', 'text')
 
-    def post_str(self, obj: ForumComment):
+    def post_str(self, obj: ForumComment) -> str:
         link = reverse("admin:django_forum_app_forumpost_change",
                        args=[obj.forum_post_id])
         return mark_safe(
@@ -40,13 +42,15 @@ class ForumCommentAdmin(admin.ModelAdmin):  # SoftDeletionAdmin):
 
     actions = ['approve_comment']
 
-    def approve_comment(self, request, queryset):
+    def approve_comment(self, request: HttpRequest, queryset: QuerySet):
         updated = queryset.update(moderation=None)
-        self.message_user(request, ngettext(
-            '%d comment was approved.',
-            '%d comments were approved.',
-            updated,
-        ) % updated, messages.SUCCESS)
+        self.message_user(request,
+                          ngettext(
+                                '%d comment was approved.',
+                                '%d comments were approved.',
+                                updated,
+                          ) % updated, 
+                          messages.SUCCESS)
 
 
 @admin.register(ForumPost)
@@ -59,16 +63,18 @@ class ForumPostAdmin(SoftDeletionAdmin):
 
     actions = ['approve_post']
 
-    def approve_post(self, request, queryset):
+    def approve_post(self, request: HttpRequest, queryset: QuerySet):
         updated = queryset.update(moderation=None)
-        self.message_user(request, ngettext(
-            '%d post was approved.',
-            '%d posts were approved.',
-            updated,
-        ) % updated, messages.SUCCESS)
+        self.message_user(request,
+                          ngettext(
+                            '%d post was approved.',
+                            '%d posts were approved.',
+                            updated,
+                          ) % updated,
+                          messages.SUCCESS)
 
-    # def pin_post(self, request, queryset):
-    #     self.message_user(request, ngettext(
+    # def pin_post(self, request: HttpRequest queryset):
+    #     self.message_user(request: HttpRequest ngettext(
     #                 '%d post was approved.',
     #                 '%d posts were approved.',
     #                 updated,
@@ -91,5 +97,5 @@ class ForumProfileAdmin(admin.ModelAdmin):
     list_filter = ['display_name', 'parish', 'rules_agreed']
     search_fields = ['display_name', 'address_line_1']
 
-    def get_queryset(self, request):
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).exclude(profile_user__is_superuser=True)

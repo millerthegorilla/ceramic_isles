@@ -3,6 +3,7 @@ import uuid
 import logging
 from random import randint
 from pathlib import Path
+from typing import Any
 
 from django_q.tasks import async_task
 from sorl.thumbnail import delete
@@ -16,14 +17,15 @@ from django.core.exceptions import ObjectDoesNotExist, FieldError
 
 from django_forum_app.models import ForumProfile, create_user_forum_profile, save_user_forum_profile, Avatar, default_avatar
 from django_forum_app.views import ForumPostView
-from typing import Any
+from safe_imagefield.models import SafeImageField
 
 logger = logging.getLogger('django')
 
 
-def user_directory_path(instance, filename) -> str:
+def user_directory_path(instance : ForumProfile, filename: str) -> str:
     if isinstance(instance, ArtisanForumProfile):
-        return 'uploads/users/{0}/{1}'.format(instance.display_name, filename)
+        return 'uploads/users/{0}/{1}'.format(
+            instance.display_name, filename)
     else:
         return 'uploads/users/{0}/{1}'.format(
             instance.user_profile.display_name, filename)
@@ -62,7 +64,7 @@ post_save.disconnect(save_user_forum_profile, sender=User)
 
 
 @receiver(post_save, sender=User)
-def create_user_artisan_forum_profile(sender, instance, created, **kwargs):
+def create_user_artisan_forum_profile(sender, instance: User, created: bool, **kwargs):
     if created:
         ArtisanForumProfile.objects.create(
             profile_user=instance,
@@ -75,7 +77,7 @@ def create_user_artisan_forum_profile(sender, instance, created, **kwargs):
 
 
 @receiver(post_save, sender=User)
-def save_user_artisan_forum_profile(sender, instance, **kwargs):
+def save_user_artisan_forum_profile(sender, instance: User, **kwargs):
     try:
         instance.profile.save()
     except (ObjectDoesNotExist, FieldError) as e:
@@ -83,10 +85,10 @@ def save_user_artisan_forum_profile(sender, instance, **kwargs):
 
 
 @receiver(pre_delete, sender=ArtisanForumProfile)
-def auto_delete_image_file_on_delete(sender, instance, **kwargs):
+def auto_delete_image_file_on_delete(sender, instance: SafeImageField, **kwargs):
     """
     Deletes file from filesystem
-    when corresponding `MediaFile` object is deleted.
+    when corresponding `MediaFile` object is deleted.  Typed to SafeImageField as a test (should be ImageField)
     """
     if instance.image_file:
         fp = instance.image_file.path
@@ -134,20 +136,23 @@ class UserProductImage(models.Model):
     # f"Profile_image:user={self.user_profile.profile_user.username},active={self.active}"
 
     """
-         because I made the primary key a uuid field, I need a way of returning the next logical
+         because I made the primary key a uuid field, I need a way of returning the next sequential
          post, as django doesn't allow auto-incrementing integers.  The below method uses transaction.atomic
          with F strings to return a record in a way that won't go wrong even if the database fails.
          https://stackoverflow.com/a/54148942
+         TODO (returning to code at later date) - 
+         - what if primary key returned by get_next refers to an existing object
+         https://docs.djangoproject.com/en/3.2/ref/models/instances/ 
     """
     @classmethod
-    def get_next(cls) -> Any:
+    def get_next(cls) -> int:
         with transaction.atomic():
             cls.objects.update(id=models.F('id') + 1)
             return cls.objects.values_list('id', flat=True)[0]
 
 
 @receiver(post_delete, sender=UserProductImage)
-def auto_delete_file_on_delete(sender, instance, **kwargs):
+def auto_delete_file_on_delete(sender: UserProductImage, instance: UserProductImage, **kwargs):
     """
     Deletes file from filesystem
     when corresponding `MediaFile` object is deleted.
@@ -184,7 +189,7 @@ def auto_delete_file_on_delete(sender, instance, **kwargs):
 
 
 @receiver(post_save, sender=UserProductImage)
-def send_email_when_image_uploaded(sender, instance, **kwargs):
+def send_email_when_image_uploaded(sender: UserProductImage, instance: UserProductImage, **kwargs):
     """
        Send email to moderators
     """

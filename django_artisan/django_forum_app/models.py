@@ -1,6 +1,7 @@
 import os
 import logging
 from random import randint
+from typing import Any, Union
 
 from django.db.models import Max
 from django.core.files import File
@@ -24,7 +25,6 @@ from django_posts_and_comments.models import Post, Comment
 from safe_imagefield.models import SafeImageField
 from sorl.thumbnail.fields import ImageField
 from sorl.thumbnail import delete
-from typing import Any
 
 _: Any
 
@@ -33,13 +33,13 @@ logger = logging.getLogger('django')
 # START PROFILE
 # helper functions
 
-
-def user_directory_path_avatar(instance, filename) -> str:
+## TODO see if Union below is necessary...
+def user_directory_path_avatar(instance: Union['ForumPost','ForumComment'], filename: str) -> str:
     return 'uploads/users/{0}/avatar/{1}'.format(
         instance.user_profile.display_name, filename)
 
 
-def default_avatar(num) -> str:
+def default_avatar(num: int) -> str:
     return 'default_avatars/default_avatar_{0}.jpg'.format(num)
 # end helper functions
 
@@ -51,7 +51,7 @@ class Avatar(models.Model):
 
 
 @receiver(pre_save, sender=Avatar)
-def auto_delete_file_on_change(sender, instance, **kwargs):
+def auto_delete_file_on_change(sender: Avatar, instance: Avatar, **kwargs):
     """
     Deletes old file from filesystem
     when corresponding `MediaFile` object is updated
@@ -91,7 +91,7 @@ class ForumProfile(Profile):
         Avatar, on_delete=models.CASCADE, related_name='user_profile')
     rules_agreed = models.BooleanField(default='False')
 
-    def username(self) -> Any:
+    def username(self) -> str:
         return self.profile_user.username
 
     # def delete(self, *args, **kwargs):
@@ -109,7 +109,7 @@ post_save.disconnect(save_user_profile, sender=User)
 
 
 @receiver(post_save, sender=User)
-def create_user_forum_profile(sender, instance, created, **kwargs):
+def create_user_forum_profile(sender: User, instance: User, created: bool, **kwargs) -> None:
     if created:
         ForumProfile.objects.create(
             profile_user=instance,
@@ -122,7 +122,7 @@ def create_user_forum_profile(sender, instance, created, **kwargs):
 
 
 @receiver(post_save, sender=User)
-def save_user_forum_profile(sender, instance, **kwargs):
+def save_user_forum_profile(sender: User, instance: User, **kwargs) -> None:
     try:
         instance.profile.save()
     except (ObjectDoesNotExist, FieldError) as e:
@@ -130,7 +130,7 @@ def save_user_forum_profile(sender, instance, **kwargs):
 
 
 @receiver(pre_delete, sender=ForumProfile)
-def auto_delete_avatar_on_delete(sender, instance, **kwargs):
+def auto_delete_avatar_on_delete(sender: ForumProfile, instance: ForumProfile, **kwargs) -> None:
     """
     Deletes Avatar from filesystem
     when corresponding `ForumProfile` object is deleted.
@@ -155,6 +155,7 @@ def auto_delete_avatar_on_delete(sender, instance, **kwargs):
 
 # START POST AND COMMENTS
 
+## TODO Post and Comment should probably have common superclass somewhere.
 
 class ForumPost(Post):
     author = models.CharField(default='', max_length=40)
@@ -180,23 +181,23 @@ class ForumPost(Post):
         default=settings.LOCATION.ANY_ISLE,
     )
 
-    def get_absolute_url(self) -> Any:
+    def get_absolute_url(self) -> str:
         return reverse_lazy(
             'django_forum_app:post_view', args=(
                 self.id, self.slug,))
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Post by {self.author}"
 
-    def category_label(self) -> Any:
+    def category_label(self) -> str:
         return settings.CATEGORY(self.category).label
 
-    def location_label(self) -> Any:
+    def location_label(self) -> str:
         return settings.LOCATION(self.location).label
 
 
 @receiver(post_save, sender=ForumPost)
-def save_author_on_post_creation(sender, instance, created, **kwargs):
+def save_author_on_post_creation(sender: ForumPost, instance: ForumPost, created, **kwargs) -> None:
     if created:
         instance.author = instance.post_author()
         instance.save()
@@ -217,7 +218,7 @@ class ForumComment(Comment):
     def save(self, **kwargs) -> None:
         super().save(post=self.forum_post, **kwargs)
 
-    def get_absolute_url(self) -> Any:
+    def get_absolute_url(self) -> str:
         return self.forum_post.get_absolute_url() + '#' + self.title
 
     def get_category_display(self) -> str:
@@ -225,7 +226,7 @@ class ForumComment(Comment):
 
 
 @receiver(post_save, sender=ForumComment)
-def save_author_on_comment_creation(sender, instance, created, **kwargs):
+def save_author_on_comment_creation(sender: ForumComment, instance: ForumComment, created, **kwargs) -> None:
     if created:
         instance.author = instance.comment_author()
         instance.title = slugify(

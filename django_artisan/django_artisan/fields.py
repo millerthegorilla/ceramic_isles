@@ -1,3 +1,4 @@
+from django.forms import Form
 from crispy_forms.layout import Field
 from typing import Any
 
@@ -11,11 +12,11 @@ class FileClearInput(Field):
 
     def render(
             self,
-            form,
-            form_style,
-            context,
+            form: Form,
+            form_style: str,
+            context: object,
             template_pack='bootstrap4',
-            extra_context=None,
+            extra_context: object = None,
             **kwargs) -> Any:
         context['path'] = str(form['image_file'].value()).split('/')[-1]
         return super().render(

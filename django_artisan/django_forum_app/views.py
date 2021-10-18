@@ -4,6 +4,7 @@ import logging
 from uuid import uuid4
 from elasticsearch_dsl import Q
 from random import randint
+from typing import Union
 
 from django_q.tasks import schedule
 
@@ -12,6 +13,7 @@ from django.urls import reverse_lazy
 from django.template.defaultfilters import slugify
 from django.http import JsonResponse, HttpResponseServerError
 from django.forms.models import model_to_dict
+from django.forms import ModelForm
 from django.core.paginator import Paginator
 from django.utils import timezone
 from django.utils import dateformat
@@ -25,6 +27,7 @@ from django.views.generic.base import TemplateView
 from django.core.mail import send_mail
 from django.db.models.signals import post_save
 from django.contrib.sites.models import Site
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 
 # Create your views here.
 from django_posts_and_comments.models import Post
@@ -51,7 +54,7 @@ class ForumPostCreateView(PostCreateView):
     template_name = "django_forum_app/posts_and_comments/forum_post_create_form.html"
     form_class = ForumPostCreateForm
 
-    def form_valid(self, form) -> Any:
+    def form_valid(self, form: ModelForm) -> HttpResponseRedirect:
         post = form.save(commit=False)
         post.user_profile = self.request.user.profile.forumprofile
         post.text = PostCreateView.sanitize_post_text(post.text)
@@ -62,7 +65,7 @@ class ForumPostCreateView(PostCreateView):
             post.subscribed_users.add(self.request.user)
         return redirect(self.get_success_url(post))
 
-    def get_success_url(self, post, *args, **kwargs) -> Any:
+    def get_success_url(self, post: ForumPost, *args, **kwargs) -> str:
         return reverse_lazy(
             'django_forum_app:post_view', args=(
                 post.id, post.slug,))
@@ -84,7 +87,7 @@ class ForumPostView(PostView):
     comment_form_class = ForumCommentForm
     #extra_context = { 'site_url':Site.objects.get_current().domain }
 
-    def post(self, *args, **kwargs):
+    def post(self, *args, **kwargs) -> Union[HttpResponseRedirect, HttpResponseRedirect]:
         post = ForumPost.objects.get(pk=kwargs['pk'])
         if self.request.POST['type'] == 'post' and self.request.user.profile.display_name == post.author:
             post.delete()
@@ -149,7 +152,7 @@ class ForumPostView(PostView):
             return redirect('django_forum_app:post_list_view')
 
     @staticmethod
-    def send_mod_mail(type):
+    def send_mod_mail(type: str) -> None:
         send_mail(
             'Moderation for {0}'.format(type),
             'A {0} has been created and requires moderation.  Please visit the {1} AdminPanel, and inspect the {0}'.format(
@@ -164,7 +167,7 @@ class ForumPostView(PostView):
             fail_silently=False,
         )
 
-    def get(self, *args, **kwargs):
+    def get(self, *args, **kwargs) -> HttpResponse:
         site = Site.objects.get_current()
         post = ForumPost.objects.get(pk=kwargs['pk'])
         form = self.form_class(user_name=self.request.user.username, post=post)
@@ -209,8 +212,7 @@ class ForumPostView(PostView):
                        'site_url': self.request.scheme + '://' + site.domain})
 
 
-def subscribe(request) -> Any:
-
+def subscribe(request) -> JsonResponse:
     # request should be ajax and method should be POST.
     if request.is_ajax and request.method == "POST":
         try:
@@ -223,10 +225,12 @@ def subscribe(request) -> Any:
         except ForumPost.DoesNotExist as e:
             logger.error('There is no post with that slug : {0}'.format(e))
             return JsonResponse(
-                {"error": "no post with that slug"}, status=500)
-
+                {"error": "no post with that slug"}, 
+                status=500)
     else:
-        return JsonResponse({"error": ""}, status=500)
+        return JsonResponse(
+            {"error": ""}, 
+            status=500)
 
 
 @method_decorator(never_cache, name='dispatch')
@@ -240,7 +244,7 @@ class ForumPostListView(PostListView):
        comments.  The search indexes are defined in documents.py.
     """
 
-    def get(self, request, search_slug=None):
+    def get(self, request: HttpRequest, search_slug: str = None) -> HttpResponse:
         site = Site.objects.get_current()
         search = 0
         p_c = None
@@ -285,6 +289,7 @@ class ForumPostListView(PostListView):
             'site_url': request.scheme + '://' + site.domain}
         return render(request, self.template_name, context)
 
+## autocomplete now removed to reduce number of requests
 # def autocomplete(request):
 #     max_items = 5
 #     q = request.GET.get('q')
@@ -310,7 +315,7 @@ class ForumProfileUpdateView(ProfileUpdateView):
     success_url = reverse_lazy('django_forum_app:profile_update_view')
     template_name = 'django_forum_app/profile/forum_profile_update_form.html'
 
-    def form_valid(self, form, **kwargs):
+    def form_valid(self, form: ModelForm, **kwargs) -> Union[HttpResponse, HttpResponseRedirect]:
         if self.request.POST['type'] == 'update-profile':
             if form.has_changed():
                 form.save()
@@ -322,7 +327,7 @@ class ForumProfileUpdateView(ProfileUpdateView):
                 self.request.FILES['avatar'])
             return redirect(self.success_url)
 
-    def get_context_data(self, **args):
+    def get_context_data(self, **args) -> dict:
         context = super().get_context_data(**args)
         context['avatar'] = ForumProfile.objects.get(
             profile_user=self.request.user).avatar
@@ -344,7 +349,7 @@ class ForumProfileUpdateView(ProfileUpdateView):
 class CustomRegisterView(RegisterView):
     form_class = CustomUserCreationForm
 
-    def form_valid(self, form) -> Any:
+    def form_valid(self, form: CustomUserCreationForm) -> HttpResponseRedirect:
         user = form.save()
         user.profile.forumprofile.rules_agreed = form['rules'].value()
         user.profile.forumprofile.save(update_fields=['rules_agreed'])

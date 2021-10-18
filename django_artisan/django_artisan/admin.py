@@ -10,6 +10,8 @@ from django.apps import AppConfig
 from django.db.models.signals import post_migrate
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
+from django.http import HttpRequest
+from django.db.models import QuerySet
 
 from django_password_validators.password_history.models import PasswordHistory
 
@@ -20,7 +22,13 @@ from .models import UserProductImage, Event, ArtisanForumProfile
 logger = logging.getLogger('django')
 
 
-def callback(sender, **kwargs) -> None:
+class DjangoArtisanConfig(AppConfig):
+    name = 'django_artisan'
+
+    def ready(self) -> None:
+        post_migrate.connect(callback, sender=self)
+
+def callback(sender: DjangoArtisanConfig, **kwargs) -> None:
     from django.contrib.sites.models import Site
     try:
         current_site = Site.objects.get(id=settings.SITE_ID)
@@ -31,13 +39,6 @@ def callback(sender, **kwargs) -> None:
             settings.SITE_DOMAIN, settings.SITE_NAME, settings.SITE_ID))
         Site.objects.create(domain=settings.SITE_DOMAIN,
                             name=settings.SITE_NAME, id=settings.SITE_ID)
-
-
-class DjangoArtisanConfig(AppConfig):
-    name = 'django_artisan'
-
-    def ready(self) -> None:
-        post_migrate.connect(callback, sender=self)
 
 
 @admin.register(UserProductImage)
@@ -58,7 +59,7 @@ class ImageAdmin(admin.ModelAdmin):
     )
     actions = ['approve_image']
 
-    def approve_image(self, request, queryset):
+    def approve_image(self, request: HttpRequest, queryset: QuerySet) -> None:
         updated = queryset.update(active=True)
         self.message_user(
             request,
@@ -80,7 +81,7 @@ class EventAdmin(admin.ModelAdmin):
     )
     actions = ['approve_event', 'disapprove_event']
 
-    def approve_event(self, request, queryset):
+    def approve_event(self, request: HttpRequest, queryset: QuerySet) -> None:
         updated = queryset.update(active=True)
         self.message_user(
             request,
@@ -92,7 +93,7 @@ class EventAdmin(admin.ModelAdmin):
             messages.SUCCESS
         )
 
-    def disapprove_event(self, request, queryset):
+    def disapprove_event(self, request: HttpRequest, queryset: QuerySet) -> None:
         updated = queryset.update(active=False)
         self.message_user(
             request,
@@ -134,7 +135,7 @@ class ArtisanForumProfileAdmin(admin.ModelAdmin):
         'parish', 'bio'
     ]
 
-    def get_queryset(self, request):
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).exclude(profile_user__is_superuser=True)
 
 

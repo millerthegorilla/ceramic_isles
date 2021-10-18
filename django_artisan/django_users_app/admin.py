@@ -9,5 +9,5 @@ from django.contrib.auth.admin import UserAdmin
 #     search_fields = ('username', 'email', 'first_name', 'last_name')
 #     actions = ['activate_user']
 
-#     def activate_image(self, request, queryset):
+#     def activate_image(self, request: HttpRequest queryset):
 #         queryset.update(active=True)
