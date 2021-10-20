@@ -15,19 +15,19 @@ from typing import Any
 
 
 class SoftDeletionQuerySet(QuerySet):
-    def delete(self) -> Any:
+    def delete(self) -> int:
         return super(
             SoftDeletionQuerySet,
             self).update(
             deleted_at=timezone.now())
 
-    def hard_delete(self) -> Any:
+    def hard_delete(self) -> tuple[int, dict]:
         return super(SoftDeletionQuerySet, self).delete()
 
-    def alive(self) -> Any:
+    def alive(self) -> QuerySet:
         return self.filter(deleted_at=None)
 
-    def dead(self) -> Any:
+    def dead(self) -> QuerySet:
         return self.exclude(deleted_at=None)
 
 
@@ -36,13 +36,13 @@ class SoftDeletionManager(models.Manager):
         self.alive_only = kwargs.pop('alive_only', True)
         super(SoftDeletionManager, self).__init__(*args, **kwargs)
 
-    def get_queryset(self) -> Any:
+    def get_queryset(self) -> QuerySet:
         if self.alive_only:
             return SoftDeletionQuerySet(self.model).filter(deleted_at=None)
         return SoftDeletionQuerySet(self.model)
 
-    def hard_delete(self) -> Any:
-        return self.get_queryset().hard_delete()
+    def hard_delete(self) -> None:
+        self.get_queryset().hard_delete()
 
 
 class SoftDeletionModel(models.Model):
@@ -61,6 +61,7 @@ class SoftDeletionModel(models.Model):
             post_slug = self.post.slug
         except BaseException:
             post_slug = self.slug
+        
         schedule('django_posts_and_comments.tasks.schedule_hard_delete',
                  name="sd_timeout_" + str(uuid.uuid4()),
                  schedule_type="O",
@@ -70,9 +71,6 @@ class SoftDeletionModel(models.Model):
                  deleted_at=str(self.deleted_at),
                  type=str(self),
                  id=str(self.id))
-
-    # TODO : refactor so that a regular schedule is run once every week which hard_deletes all posts/comments
-    # that are soft_deleted > than settings.DELETION_TIMEOUT ago.
 
     def hard_delete(self) -> None:
         super(SoftDeletionModel, self).delete()

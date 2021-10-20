@@ -31,28 +31,20 @@ class Post(SoftDeletionModel):
     class Meta:
         UniqueConstraint(fields=['title', 'date_created'], name='unique_post')
 
-    def post_author(self) -> Any:
+    def post_author(self) -> str:
         return self.user_profile.display_name
 
-    def get_absolute_url(self) -> Any:
+    def get_absolute_url(self) -> str:
         return reverse_lazy(
             'django_posts_and_comments:post_view', args=(
                 self.id, self.slug,))
 
     def delete(self) -> None:
-        super().delete()
         for comment in self.comments.all():
-            comment.delete()
-        # schedule(schedule_hard_delete, name="sd_timeout_" + str(uuid.uuid4()),
-        #                                schedule_type="O",
-        #                                repeats=-1,
-        #                                next_run=timezone.now() + settings.DELETION_TIMEOUT,
-        #                                kwargs={'post_slug': self.post.slug,
-        #                                        'deleted_at': str(self.deleted_at),
-        #                                        'type': 'Post',
-        #                                        'id': self.id })
-
-    def __str__(self):
+            comment.delete()   ## -> calls softdeletionModel.delete
+        super().delete() ## so does this...   SoftDeletionModel.delete sets field on model and schedules
+                         ## a hard delete
+    def __str__(self) -> str:
         return "Post : " + f"{self.title}"
 
 
@@ -72,27 +64,15 @@ class Comment(SoftDeletionModel):
             self.post = post
         super().save(**kwargs)
 
-    def comment_author(self) -> Any:
+    def comment_author(self) -> str:
         return self.user_profile.display_name
 
-    def __str__(self):
+    def __str__(self) -> str:
         # TODO check for query - fetch_related...
         return "Comment for " + f"{self.post.title}"
 
-    # def delete(self):
-    #     super().delete()
-    #     schedule(schedule_hard_delete, name="sd_timeout_" + str(uuid.uuid4()),
-    #                                    schedule_type="O",
-    #                                    repeats=-1,
-    #                                    next_run=timezone.now() + settings.DELETION_TIMEOUT,
-    #                                    kwargs={'post_slug': self.post.slug,
-    #                                            'deleted_at': str(self.deleted_at),
-    #                                            'type': 'Comment',
-    #                                            'id': self.id })
-
-
-def schedule_hard_delete(post_slug=None, deleted_at=None, type=None, id=None) -> None:
-    if type == 'Comment':
-        Comment.objects.get(id=id).hard_delete()
-    else:
-        Post.objects.get(id=id).hard_delete()
+# def scheduled_hard_delete(post_slug=None, deleted_at=None, type=None, id=None) -> None:
+#     if type == 'Comment':
+#         Comment.objects.get(id=id).hard_delete()
+#     else:
+#         Post.objects.get(id=id).hard_delete()

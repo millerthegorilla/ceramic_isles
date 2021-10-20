@@ -10,7 +10,7 @@ from django.contrib.contenttypes.models import ContentType
 from typing import Any
 
 
-def default_display_name() -> Any:
+def default_display_name() -> str:
     return generate_username()[0]
 
 # Create your models here.
@@ -25,7 +25,7 @@ class Profile(models.Model):
     display_name = models.CharField(
         max_length=37, blank=True, unique=True, default=default_display_name)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self._meta.get_fields(include_hidden=True))
 
 
@@ -35,13 +35,13 @@ class Profile(models.Model):
 
 
 @receiver(post_save, sender=User)
-def create_user_profile(sender, instance, created, **kwargs):
+def create_user_profile(sender, instance, created, **kwargs) -> None:
     if created:
         Profile.objects.create(profile_user=instance)
     instance.profile.save()
 
 
 @receiver(post_save, sender=User)
-def save_user_profile(sender, instance, **kwargs):
+def save_user_profile(sender, instance, **kwargs) -> None:
     if hasattr(instance, 'profile'):
         instance.profile.save()

@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 
 
 @receiver(pre_save, sender=User)
-def set_is_active_to_false(sender, instance, created=False, **kwargs):
+def set_is_active_to_false(sender: User, instance: User, created: bool = False, **kwargs) -> None:
     if created and instance.is_superuser is not True:
         instance.is_active = False
         instance.save()

@@ -1,9 +1,10 @@
-from django.test import TestCase, RequestFactory
-from django.contrib.auth import get_user, get_user_model, authenticate, login
-from django.urls import reverse
 import settings
 import re
 from typing import Dict
+
+from django.test import TestCase, RequestFactory
+from django.contrib.auth import get_user, get_user_model, authenticate, login
+from django.urls import reverse
 
 print("***running django_users_app tests...***")
 
@@ -12,7 +13,7 @@ class UserDetails():
     def __init__(self) -> None:
         self.id = 0
 
-    def get_user_details(self) -> Dict[str, str]:
+    def get_user_details(self) -> dict[str, str]:
         self.id = self.id + 1
         return {"username": "testee" + str(self.id),
                 "email": "testee" + str(self.id) + "@bob.com",

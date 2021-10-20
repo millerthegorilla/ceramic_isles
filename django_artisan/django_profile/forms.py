@@ -38,7 +38,7 @@ class ProfileUserForm(ModelForm):
             FloatingField('last_name'),
         )
 
-    def clean_username(self, *args, **kwargs) -> Any:
+    def clean_username(self, *args, **kwargs) -> str:
         username = self.cleaned_data['username']
         if username != self.initial['username']:
             try:
@@ -52,7 +52,7 @@ class ProfileUserForm(ModelForm):
             self.add_error('username', 'Error, That username already exists!')
         return username
 
-    def clean_email(self) -> Any:
+    def clean_email(self) -> str:
         email = self.cleaned_data['email']
         if email != self.initial['email']:
             try:

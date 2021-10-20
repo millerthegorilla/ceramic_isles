@@ -27,10 +27,10 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
     success_url = reverse_lazy('django_profile:profile_update_view')
     template_name = 'django_profile/profile_update_form.html'
 
-    def get_object(self) -> Any:
+    def get_object(self) -> Profile:
         return self.model.objects.get(profile_user_id=self.request.user.id)
 
-    def get_context_data(self, **kwargs) -> Any:
+    def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
         # if self.request.method == 'GET':
         context['user_form'] = self.user_form_class(
@@ -78,7 +78,7 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
 class CustomRegisterView(RegisterView):
     form_class = CustomUserCreationForm
 
-    def form_valid(self, form) -> Any:
+    def form_valid(self, form: ModelForm) -> HttpResponseRedirect:
         user = form.save()
         user.profile.display_name = slugify(form['display_name'].value())
         user.profile.save(update_fields=['display_name'])

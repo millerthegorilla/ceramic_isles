@@ -8,11 +8,12 @@ from django.views.generic import FormView
 from django.urls import reverse_lazy
 from django.template.defaultfilters import slugify
 from django.conf import settings
+from django.forms import ModelForm
+from django.http import HttpResponseRedirect, HttpResponse
 
 from django_email_verification import send_email
 
 from .forms import CustomUserCreationForm, UserResendConfirmationForm
-from typing import Any
 
 
 class RegisterView(CreateView):
@@ -22,7 +23,7 @@ class RegisterView(CreateView):
     success_url = reverse_lazy("password_reset_done")
     model = get_user_model()
 
-    def form_valid(self, form, user=None) -> Any:
+    def form_valid(self, form: ModelForm, user=None) -> HttpResponseRedirect:
         super().form_valid(form)
         if user is None:
             user = form.save()
@@ -39,7 +40,7 @@ class ResendConfirmationView(FormView):
     form_class = UserResendConfirmationForm
     success_url = 'django_users_app/registration_confirmation_sent.html'
 
-    def form_valid(self, form, **kwargs) -> Any:
+    def form_valid(self, form, **kwargs) -> HttpResponse:
         super().form_valid(form)
         try:
             user = get_user_model().objects.get(

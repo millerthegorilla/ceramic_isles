@@ -2,6 +2,7 @@ import bleach
 import html
 import logging
 from uuid import uuid4
+from typing import Any, Union
 
 from django.urls import reverse_lazy
 from django.core.exceptions import ObjectDoesNotExist
@@ -9,7 +10,7 @@ from django.views.generic.edit import CreateView
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.template.defaultfilters import slugify
-from django.utils.safestring import mark_safe
+from django.utils.safestring import mark_safe, SafeString
 from django.utils import timezone
 from django.utils import dateformat
 from django.conf import settings
@@ -20,10 +21,10 @@ from django.views.decorators.cache import never_cache
 from django.shortcuts import render, redirect
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
+from django.http import HttpResponse, HttpResponseRedirect, HttpRequest
 
 from .models import Post, Comment
 from .forms import PostCreateForm, CommentForm
-from typing import Any
 
 
 logger = logging.getLogger('django')
@@ -43,7 +44,7 @@ class PostView(LoginRequiredMixin, DetailView):
     template_name = 'django_posts_and_comments/post_detail.html'
     form_class = CommentForm
 
-    def post(self, *args, **kwargs):
+    def post(self, *args, **kwargs) -> Union[HttpResponse, HttpResponseRedirect]:
         post = Post.objects.get(pk=kwargs['pk'])
         if self.request.POST['type'] == 'post' and self.request.user.profile.display_name == post.post_author(
         ):
@@ -85,7 +86,7 @@ class PostView(LoginRequiredMixin, DetailView):
             logger.warn("request has no processable type")
             return redirect('django_posts_and_comments:post_list_view')
 
-    def get(self, *args, **kwargs):
+    def get(self, *args, **kwargs) -> HttpResponse:
         post = Post.objects.get(pk=kwargs['pk'])
         new_comment_form = self.form_class()
         comments = Comment.objects.filter(post=post)
@@ -104,7 +105,7 @@ class PostListView(LoginRequiredMixin, ListView):
     template_name = 'django_posts_and_comments/post_list.html'
     paginate_by = 6
 
-    def get(self, request):
+    def get(self, request: HttpRequest) -> HttpResponse:
         queryset = Post.objects.all()
         paginator = Paginator(queryset, 6)
         page_number = request.GET.get('page')
@@ -119,7 +120,7 @@ class PostCreateView(LoginRequiredMixin, CreateView):
     template_name = 'django_posts_and_comments/post_create_form.html'
     form_class = PostCreateForm
 
-    def form_valid(self, form, **kwargs) -> Any:
+    def form_valid(self, form, **kwargs) -> HttpResponseRedirect:
         post = form.save(commit=False)
         post.text = PostCreateView.sanitize_post_text(post.text)
         post.user_profile = self.request.user.profile
@@ -133,13 +134,13 @@ class PostCreateView(LoginRequiredMixin, CreateView):
             post.save()
         return redirect(self.get_success_url(post))
 
-    def get_success_url(self, post, *args, **kwargs) -> Any:
+    def get_success_url(self, post, *args, **kwargs) -> str:
         return reverse_lazy(
             'django_posts_and_comments:post_view', args=(
                 post.id, post.slug,))
 
     @staticmethod
-    def sanitize_post_text(text) -> Any:
+    def sanitize_post_text(text: str) -> SafeString:
         return mark_safe(bleach.clean(html.unescape(text),
                                       tags=settings.ALLOWED_TAGS,
                                       attributes=settings.ATTRIBUTES,

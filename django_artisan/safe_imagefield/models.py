@@ -1,11 +1,13 @@
+from typing import Any, Tuple
+
 from django.db import models
+from django.utils.deconstruct import deconstructible
+from django.forms import Field
 
 from . import forms
 from .validators import ( AntiVirusValidator, FileContentTypeValidator,
                           FileExtensionValidator, MaxSizeValidator,
                           MediaIntegrityValidator )
-from django.utils.deconstruct import deconstructible
-from typing import Any, Tuple
 
 
 class SafeImageField(models.ImageField):
@@ -40,12 +42,12 @@ class SafeImageField(models.ImageField):
 
         super().__init__(**kwargs)
 
-    def formfield(self, **kwargs) -> Any:
+    def formfield(self, **kwargs) -> Field:
         return super().formfield(
             form_class=forms.SafeImageField
         )
 
-    def __eq__(self, other):
+    def __eq__(self, other: 'SafeImageField'):
         if self.allowed_extensions == other.allowed_extensions and \
                 self.check_content_type == other.check_content_type and \
                 self.scan_viruses == other.scan_viruses:
@@ -53,9 +55,9 @@ class SafeImageField(models.ImageField):
         else:
             return False
 
-    def deconstruct(self) -> Tuple[Any, Any, Any, Any]:
+    def deconstruct(self) -> Tuple[str, str, list[Any], dict[str, Any]]:
         name, path, args, kwargs = super().deconstruct()
         kwargs['allowed_extensions'] = self.allowed_extensions
         kwargs['check_content_type'] = self.check_content_type
         kwargs['scan_viruses'] = self.scan_viruses
-        return name, path, args, kwargs
+        return (name, path, args, kwargs)

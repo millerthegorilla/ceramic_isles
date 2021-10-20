@@ -21,7 +21,7 @@ class CustomUserCreationForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):
         fields = UserCreationForm.Meta.fields + ('email', 'captcha',)
 
-    def clean_email(self) -> Any:
+    def clean_email(self) -> str:
         email = self.cleaned_data['email']
         try:
             user = get_user_model().objects.get(email=email)
@@ -50,7 +50,7 @@ class CustomUserCreationForm(UserCreationForm):
 class UserPasswordResetForm(PasswordResetForm):
     captcha = ReCaptchaField(label='', widget=ReCaptchaV2Checkbox)
 
-    def clean_email(self) -> Any:
+    def clean_email(self) -> str:
         email = self.cleaned_data['email']
         try:
             user = get_user_model().objects.get(email=email)
@@ -88,7 +88,7 @@ class UserResendConfirmationForm(Form):
     captcha = ReCaptchaField(label='', widget=ReCaptchaV2Checkbox)
     username = CharField(label='Your username here...')
 
-    def clean_username(self, *args, **kwargs) -> Any:
+    def clean_username(self, *args, **kwargs) -> str:
         username = self.cleaned_data['username']
         try:
             user = get_user_model().objects.get(username=username)
