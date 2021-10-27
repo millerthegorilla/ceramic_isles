@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.urls import reverse
-from django.utils.html import escape, mark_safe
+from django.utils.html import escape
+from django.utils.safestring import mark_safe
 from django.contrib import messages
 from django.utils.translation import ngettext
 from django.core.mail import EmailMessage

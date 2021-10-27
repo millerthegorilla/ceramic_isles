@@ -73,6 +73,9 @@ class SoftDeletionModel(models.Model):
                  id=str(self.id))
 
     def hard_delete(self) -> None:
+        '''
+             called by posts_and_comments.tasks.schedule_hard_delete
+        '''
         super(SoftDeletionModel, self).delete()
 
 

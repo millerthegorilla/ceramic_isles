@@ -1,4 +1,6 @@
 from fuzzywuzzy import fuzz
+from itertools import chain
+
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
 from django.forms import ModelForm, EmailField, fields, PasswordInput
@@ -21,7 +23,7 @@ class CustomUserCreationForm(UserCreationForm):
     email = EmailField()
 
     class Meta(UserCreationForm.Meta):
-        fields = UserCreationForm.Meta.fields + ('email', 'captcha',)
+        fields = (*UserCreationForm.Meta.fields, 'email', 'captcha',)
 
     def clean_username(self) -> str:
         username = self.cleaned_data['username']

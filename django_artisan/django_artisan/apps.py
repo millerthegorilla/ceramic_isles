@@ -1,3 +1,5 @@
+import importlib.util
+
 from django.utils import log
 from django.apps import AppConfig
 from django.db.models.signals import post_migrate
@@ -9,7 +11,13 @@ class DjangoArtisanConfig(AppConfig):
     name = 'django_artisan'
 
     def ready(self) -> None:
+        #breakpoint()
         post_migrate.connect(callback, sender=self)
+        mypy_package = importlib.util.find_spec("mypy")
+        if mypy_package:
+            from .checks import mypy
+            #MP = mypy(self.apps.get_app_configs)
+
 
 def callback(sender: DjangoArtisanConfig, **kwargs) -> None:
     from django.contrib.sites.models import Site

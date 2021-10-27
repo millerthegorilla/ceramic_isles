@@ -20,7 +20,7 @@ from django.core.paginator import Paginator
 from django.conf import settings
 from django.contrib.sitemaps import ping_google
 from django.contrib.sites.models import Site
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, HttpResponsePermanentRedirect
 from django.forms import ModelForm
 
 from django_forum_app.forms import ForumProfileUserForm
@@ -231,14 +231,14 @@ class UserProductImageDeleteView(LoginRequiredMixin, UpdateView):
         UserProductImage.objects.get(image_id=self.kwargs['unique_id']).delete()
         return redirect(self.success_url)
 
-    def get_object(self, queryset=None, *args, **kwargs) -> Union[UserProductImage, HttpResponseRedirect]:
+    def get_object(self, queryset=None, *args, **kwargs) -> Union[UserProductImage, HttpResponseRedirect, HttpResponsePermanentRedirect]:
         try:
             image = UserProductImage.objects.get(id=self.kwargs['unique_id'])
         except UserProductImage.DoesNotExist as e:
             logger.error("Unable to get UserProductImage when deleting : {0}".format(e))
             image = None
         if image is None:
-            redirect(self.success_url)
+            return redirect(self.success_url)
         else:
             return image
 

@@ -9,6 +9,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.views.generic.edit import CreateView
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
+from django.views.generic import FormView
 from django.template.defaultfilters import slugify
 from django.utils.safestring import mark_safe, SafeString
 from django.utils import timezone
@@ -32,7 +33,7 @@ logger = logging.getLogger('django')
 
 @method_decorator(never_cache, name='dispatch')
 @method_decorator(never_cache, name='get')
-class PostView(LoginRequiredMixin, DetailView):
+class PostView(LoginRequiredMixin, FormView):
     """
         TODO: replace the single view/many form processing with separate urls for
               each form action, pointing to individual views, each with its own form class,
@@ -46,8 +47,8 @@ class PostView(LoginRequiredMixin, DetailView):
 
     def post(self, *args, **kwargs) -> Union[HttpResponse, HttpResponseRedirect]:
         post = Post.objects.get(pk=kwargs['pk'])
-        if self.request.POST['type'] == 'post' and self.request.user.profile.display_name == post.post_author(
-        ):
+        if self.request.POST['type'] == 'post' and \
+           self.request.user.profile.display_name == post.post_author():
             post.delete()
             return redirect(
                 reverse_lazy('django_posts_and_comments:post_list_view'))
@@ -82,6 +83,7 @@ class PostView(LoginRequiredMixin, DetailView):
                 return redirect(post)
             except ObjectDoesNotExist as e:
                 logger.error("Error accessing comment : {0}".format(e))
+                return redirect(post)
         else:
             logger.warn("request has no processable type")
             return redirect('django_posts_and_comments:post_list_view')

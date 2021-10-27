@@ -84,7 +84,7 @@ class LoginTests(TestCase):
         user.is_active = True
         user.save()
         request = self.factory.get(reverse('login'))
-        authenticate(request: HttpRequest username=user.username, password=user.password)
+        authenticate(request, username=user.username, password=user.password)
         logged_in = self.client.force_login(user)
         response = self.client.get(reverse('login'))
         self.assertRedirects(response=response,

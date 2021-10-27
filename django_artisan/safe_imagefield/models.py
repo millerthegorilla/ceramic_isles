@@ -60,4 +60,6 @@ class SafeImageField(models.ImageField):
         kwargs['allowed_extensions'] = self.allowed_extensions
         kwargs['check_content_type'] = self.check_content_type
         kwargs['scan_viruses'] = self.scan_viruses
+        kwargs['media_integrity'] = self.media_integrity
+        kwargs['max_size_limit'] = self.max_size_limit
         return (name, path, args, kwargs)
