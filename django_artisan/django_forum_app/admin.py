@@ -34,12 +34,13 @@ class ForumCommentAdmin(admin.ModelAdmin):  # SoftDeletionAdmin):
 
     def post_str(self, obj: ForumComment) -> str:
         link = reverse("admin:django_forum_app_forumpost_change",
-                       args=[obj.forum_post_id])
+                       args=[obj.forum_post.id])
         return mark_safe(
             f'<a href="{link}">{escape(obj.forum_post.__str__())}</a>')
 
-    post_str.short_description = 'ForumPost'
-    post_str.admin_order_field = 'forumpost'  # Make row sortable
+    post_str.short_description = 'ForumPost' # type: ignore
+    # make row sortable
+    post_str.admin_order_field = 'forumpost'  # type: ignore
 
     actions = ['approve_comment']
 

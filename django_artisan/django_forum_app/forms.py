@@ -137,7 +137,7 @@ class ForumCommentForm(CommentForm):
         self.helper.form_class = 'col-auto'
         self.helper.form_action = 'django_forum_app:post_view'
 
-
+## TODO add choices field to search page
 class ForumPostListSearch(forms.Form):
     PUBLISHED_ANY = ''
     PUBLISHED_TODAY = '1'

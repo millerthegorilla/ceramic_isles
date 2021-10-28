@@ -79,15 +79,15 @@ class ForumPostView(PostView):
               and overload them individually here, where necessary, instead of redefining
               the whole if clause.
     """
-    model = ForumPost
-    slug_url_kwarg = 'post_slug'
-    slug_field = 'slug'
-    template_name = 'django_forum_app/posts_and_comments/forum_post_detail.html'
-    form_class = ForumPostCreateForm
-    comment_form_class = ForumCommentForm
+    model: ForumPost = ForumPost
+    slug_url_kwarg: str = 'post_slug'
+    slug_field: str = 'slug'
+    template_name: str = 'django_forum_app/posts_and_comments/forum_post_detail.html'
+    form_class: ForumPostCreateForm = ForumPostCreateForm
+    comment_form_class: ForumCommentForm = ForumCommentForm
     #extra_context = { 'site_url':Site.objects.get_current().domain }
 
-    def post(self, *args, **kwargs) -> Union[HttpResponseRedirect, HttpResponseRedirect]:
+    def post(self, *args, **kwargs) -> Union[HttpResponse, HttpResponseRedirect]:
         post = ForumPost.objects.get(pk=kwargs['pk'])
         if self.request.POST['type'] == 'post' and self.request.user.profile.display_name == post.author:
             post.delete()
@@ -170,14 +170,14 @@ class ForumPostView(PostView):
     def get(self, *args, **kwargs) -> HttpResponse:
         site = Site.objects.get_current()
         post = ForumPost.objects.get(pk=kwargs['pk'])
-        form = self.form_class(user_name=self.request.user.username, post=post)
+        form = self.form_class(user_name=self.request.user.username, post=post) # type: ignore
         subscribed = ''
         try:
-            if post.subscribed_users.get(username=self.request.user.username):
+            if post.subscribed_users.get(username=self.request.user.username): # type: ignore
                 subscribed = 'checked'
         except get_user_model().DoesNotExist:
             subscribed = ''
-        new_comment_form = self.comment_form_class()
+        new_comment_form = self.comment_form_class() # type: ignore
         comments = ForumComment.objects.filter(post=post)
         user_display_name = self.request.user.profile.display_name
         category = post.get_category_display()
@@ -209,7 +209,7 @@ class ForumPostView(PostView):
                        'comments': comments,
                        'comment_form': new_comment_form,
                        'user_display_name': user_display_name,
-                       'site_url': self.request.scheme + '://' + site.domain})
+                       'site_url': (self.request.scheme or 'https') + '://' + site.domain})
 
 
 def subscribe(request) -> JsonResponse:
@@ -245,6 +245,7 @@ class ForumPostListView(PostListView):
     """
 
     def get(self, request: HttpRequest, search_slug: str = None) -> HttpResponse:
+        breakpoint()
         site = Site.objects.get_current()
         search = 0
         p_c = None
@@ -252,6 +253,7 @@ class ForumPostListView(PostListView):
         if search_slug == 'search':
             is_a_search = True
             form = ForumPostListSearch(request.GET)
+            breakpoint()
             if form.is_valid():
                 terms = form.cleaned_data['q'].split(' ')
                 if len(terms) > 1:

@@ -20,9 +20,9 @@ class Profile(models.Model):
     """
         user profile
     """
-    profile_user = models.OneToOneField(
+    profile_user: models.OneToOneField = models.OneToOneField(
         User, on_delete=models.CASCADE, related_name='profile')
-    display_name = models.CharField(
+    display_name: models.CharField = models.CharField(
         max_length=37, blank=True, unique=True, default=default_display_name)
 
     def __str__(self) -> str:

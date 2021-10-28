@@ -1,4 +1,5 @@
 import importlib.util
+import sys
 
 from django.utils import log
 from django.apps import AppConfig
@@ -13,10 +14,15 @@ class DjangoArtisanConfig(AppConfig):
     def ready(self) -> None:
         #breakpoint()
         post_migrate.connect(callback, sender=self)
-        mypy_package = importlib.util.find_spec("mypy")
-        if mypy_package:
-            from .checks import mypy
-            #MP = mypy(self.apps.get_app_configs)
+        try:
+            settings.DEBUG
+        except NameError:
+            logger.info("settings.DEBUG is not defined")
+        else:
+            if settings.DEBUG and 'runserver' in sys.argv:
+                mypy_package = importlib.util.find_spec("mypy")
+                # if mypy_package:
+                  #  from .checks import mypy
 
 
 def callback(sender: DjangoArtisanConfig, **kwargs) -> None:

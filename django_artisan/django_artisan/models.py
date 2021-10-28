@@ -3,7 +3,7 @@ import uuid
 import logging
 from random import randint
 from pathlib import Path
-from typing import Any
+from typing import Any, Union
 
 from django_q.tasks import async_task
 from sorl.thumbnail import delete
@@ -15,6 +15,7 @@ from django.db.models.signals import pre_save, post_save, post_delete, pre_delet
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist, FieldError
 
+from django_profile.models import Profile
 from django_forum_app.models import ForumProfile, create_user_forum_profile, save_user_forum_profile, Avatar, default_avatar
 from django_forum_app.views import ForumPostView
 from safe_imagefield.models import SafeImageField
@@ -22,7 +23,7 @@ from safe_imagefield.models import SafeImageField
 logger = logging.getLogger('django')
 
 
-def user_directory_path(instance : ForumProfile, filename: str) -> str:
+def user_directory_path(instance : Union['ArtisanForumProfile', 'UserProductImage'], filename: str) -> str:
     if isinstance(instance, ArtisanForumProfile):
         return 'uploads/users/{0}/{1}'.format(
             instance.display_name, filename)
@@ -32,24 +33,24 @@ def user_directory_path(instance : ForumProfile, filename: str) -> str:
 
 
 class ArtisanForumProfile(ForumProfile):
-    bio = models.TextField('biographical information, max 500 chars',
+    bio: models.TextField = models.TextField('biographical information, max 500 chars',
                            max_length=500,
                            blank=True,
                            default='')
-    image_file = models.ImageField(
+    image_file: models.ImageField = models.ImageField(
         'A single image for your personal page',
         upload_to=user_directory_path,
         null=True,
         blank=True)
-    shop_web_address = models.CharField(
+    shop_web_address: models.CharField = models.CharField(
         'shop link', max_length=50, blank=True, default='')
-    outlets = models.CharField(
+    outlets: models.CharField = models.CharField(
         'places that sell my stuff, comma separated',
         max_length=400,
         blank=True,
         default='')
-    listed_member = models.BooleanField('List me on about page', default=False)
-    display_personal_page = models.BooleanField(
+    listed_member: models.BooleanField = models.BooleanField('List me on about page', default=False)
+    display_personal_page: models.BooleanField = models.BooleanField(
         'Display personal page', default=False)
 
 
@@ -116,20 +117,20 @@ class UserProductImage(models.Model):
     class Meta:
         permissions = [('approve_image', 'Approve Image')]
 
-    image_file = models.ImageField(upload_to=user_directory_path)
-    image_text = models.CharField(max_length=400, default='', blank=True)
-    image_title = models.CharField(max_length=30, default='', blank=True)
-    image_shop_link = models.CharField(max_length=50, default='', blank=True)
-    image_shop_link_title = models.CharField(
+    image_file: SafeImageField = SafeImageField(upload_to=user_directory_path)
+    image_text: models.CharField = models.CharField(max_length=400, default='', blank=True)
+    image_title: models.CharField = models.CharField(max_length=30, default='', blank=True)
+    image_shop_link: models.CharField = models.CharField(max_length=50, default='', blank=True)
+    image_shop_link_title: models.CharField = models.CharField(
         max_length=30, default='', blank=True)
-    active = models.BooleanField(default=False)
-    user_profile = models.ForeignKey(
+    active: models.BooleanField = models.BooleanField(default=False)
+    user_profile: models.ForeignKey = models.ForeignKey(
         ArtisanForumProfile,
         on_delete=models.CASCADE,
         related_name="forum_images")
-    image_id = models.UUIDField(
+    image_id: models.UUIDField = models.UUIDField(
         primary_key=True, default=uuid.uuid4, editable=False)
-    id = models.PositiveIntegerField(default=0, editable=False)
+    id: models.PositiveIntegerField = models.PositiveIntegerField(default=0, editable=False)
 
     # def __str__(self):
     # return
@@ -137,7 +138,7 @@ class UserProductImage(models.Model):
 
     """
          because I made the primary key a uuid field, I need a way of returning the next sequential
-         post, as django doesn't allow auto-incrementing integers.  The below method uses transaction.atomic
+         image, as django doesn't allow auto-incrementing integers.  The below method uses transaction.atomic
          with F strings to return a record in a way that won't go wrong even if the database fails.
          https://stackoverflow.com/a/54148942
          TODO (returning to code at later date) - 
@@ -197,10 +198,10 @@ def send_email_when_image_uploaded(sender: UserProductImage, instance: UserProdu
 
 
 class Event(models.Model):
-    title = models.CharField(max_length=50)
-    text = models.CharField(max_length=400)
-    time = models.TimeField(auto_now_add=False)
-    every = models.CharField(max_length=40, blank=True, null=True)
-    date = models.DateField(auto_now_add=False, blank=True, null=True)
-    repeating = models.BooleanField(default=False)
-    active = models.BooleanField(default=True)
+    title: models.CharField = models.CharField(max_length=50)
+    text: models.CharField = models.CharField(max_length=400)
+    time: models.TimeField = models.TimeField(auto_now_add=False)
+    every: models.CharField = models.CharField(max_length=40, blank=True, null=True)
+    date: models.DateField = models.DateField(auto_now_add=False, blank=True, null=True)
+    repeating: models.BooleanField = models.BooleanField(default=False)
+    active:models.BooleanField = models.BooleanField(default=True)

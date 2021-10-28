@@ -6,7 +6,7 @@ from typing import Any, Union
 from django.db.models import Max
 from django.core.files import File
 from django.core.exceptions import ObjectDoesNotExist, FieldError
-from django.db import models
+from django.db import models, DEFAULT_DB_ALIAS
 from django.dispatch import receiver
 from django.db.models.signals import pre_init, post_save, pre_save, post_delete, pre_delete
 from django.contrib.auth.models import User
@@ -26,7 +26,7 @@ from safe_imagefield.models import SafeImageField
 from sorl.thumbnail.fields import ImageField
 from sorl.thumbnail import delete
 
-_: Any
+# _: Any
 
 logger = logging.getLogger('django')
 
@@ -80,16 +80,16 @@ def auto_delete_file_on_change(sender: Avatar, instance: Avatar, **kwargs):
 
 
 class ForumProfile(Profile):
-    address_line_1 = models.CharField(
+    address_line_1: models.CharField = models.CharField(
         'address line 1', max_length=30, blank=True, default='')
-    address_line_2 = models.CharField(
+    address_line_2: models.CharField = models.CharField(
         'address line 2', max_length=30, blank=True, default='')
-    parish = models.CharField('parish', max_length=30, blank=True, default='')
-    postcode = models.CharField(
+    parish: models.CharField = models.CharField('parish', max_length=30, blank=True, default='')
+    postcode: models.CharField = models.CharField(
         'postcode', max_length=6, blank=True, default='')
-    avatar = models.OneToOneField(
+    avatar: models.OneToOneField = models.OneToOneField(
         Avatar, on_delete=models.CASCADE, related_name='user_profile')
-    rules_agreed = models.BooleanField(default='False')
+    rules_agreed: models.BooleanField = models.BooleanField(default='False')
 
     def username(self) -> str:
         return self.profile_user.username
@@ -169,13 +169,13 @@ class ForumPost(Post):
         ordering = ['-date_created']
         permissions = [('approve_post', 'Approve Post')]
 
-    category = models.CharField(
+    category: models.CharField = models.CharField(
         max_length=2,
         choices=settings.CATEGORY.choices,
         default=settings.CATEGORY.GENERAL,
     )
 
-    location = models.CharField(
+    location: models.CharField = models.CharField(
         max_length=2,
         choices=settings.LOCATION.choices,
         default=settings.LOCATION.ANY_ISLE,
@@ -184,7 +184,7 @@ class ForumPost(Post):
     def get_absolute_url(self) -> str:
         return reverse_lazy(
             'django_forum_app:post_view', args=(
-                self.id, self.slug,))
+                self.id, self.slug,)) # type: ignore
 
     def __str__(self) -> str:
         return f"Post by {self.author}"
@@ -204,26 +204,26 @@ def save_author_on_post_creation(sender: ForumPost, instance: ForumPost, created
 
 
 class ForumComment(Comment):
-    author = models.CharField(default='', max_length=40)
-    forum_post = models.ForeignKey(
+    author: models.CharField = models.CharField(default='', max_length=40)
+    forum_post: models.ForeignKey = models.ForeignKey(
         ForumPost, on_delete=models.CASCADE, related_name="forum_comments")
-    active = models.BooleanField(default='True')
-    moderation = models.DateField(null=True, default=None, blank=True)
-    title = models.SlugField()
+    active: models.BooleanField = models.BooleanField(default='True')
+    moderation: models.DateField = models.DateField(null=True, default=None, blank=True)
+    title: models.SlugField = models.SlugField()
 
     class Meta:
         ordering = ['date_created']
         permissions = [('approve_comment', 'Approve Comment')]
 
-    def save(self, **kwargs) -> None:
-        super().save(post=self.forum_post, **kwargs)
+    def save(self, force_insert=False, force_update=False, using=DEFAULT_DB_ALIAS, update_fields=None) -> None:
+        self.post = Post(self.forum_post)
+        super().save()
 
     def get_absolute_url(self) -> str:
         return self.forum_post.get_absolute_url() + '#' + self.title
 
     def get_category_display(self) -> str:
         return 'Comment'
-
 
 @receiver(post_save, sender=ForumComment)
 def save_author_on_comment_creation(sender: ForumComment, instance: ForumComment, created, **kwargs) -> None:

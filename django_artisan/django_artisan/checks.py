@@ -59,7 +59,7 @@ def mypy(app_configs, **kwargs) -> List:
             print(f"Unrecognized mypy level: {mypy_level}")
         if (code in ['import']
                 or location in ['opt/ceramic_isles_dev/django_artisan/fields.py:21']
-                or message.strip() in ['"User" has no attribute "profile"']) == False:
+                or any(x in message.strip() for x in ['has no attribute "profile"'])) == False:
             errors.append(CheckMessage(level, message, code, obj=MyPyErrorLocation(location)))
 
     return errors

@@ -20,12 +20,12 @@ class Post(SoftDeletionModel):
     """
         post class contains category  TODO: sanitize field init parameters
     """
-    text = models.TextField(max_length=2000)
-    title = models.CharField(max_length=100, default='')
+    text: models.TextField = models.TextField(max_length=2000)
+    title: models.CharField = models.CharField(max_length=100, default='')
     # added unique and index but not tested.
-    slug = models.SlugField(unique=True, db_index=True, max_length=80)
-    date_created = models.DateTimeField(auto_now_add=True)
-    user_profile = models.ForeignKey(
+    slug: models.SlugField = models.SlugField(unique=True, db_index=True, max_length=80)
+    date_created: models.DateTimeField = models.DateTimeField(auto_now_add=True)
+    user_profile: models.ForeignKey = models.ForeignKey(
         Profile, null=True, on_delete=models.SET_NULL, related_name="posts")
 
     class Meta:
@@ -52,17 +52,15 @@ class Comment(SoftDeletionModel):
     """
         a post can have many comments
     """
-    text = models.TextField(max_length=500)
-    post = models.ForeignKey(
+    text: models.TextField = models.TextField(max_length=500)
+    post: models.ForeignKey = models.ForeignKey(
         Post, null=True, on_delete=models.SET_NULL, related_name="comments")
-    date_created = models.DateTimeField(auto_now_add=True)
-    user_profile = models.ForeignKey(
+    date_created: models.DateTimeField = models.DateTimeField(auto_now_add=True)
+    user_profile: models.ForeignKey = models.ForeignKey(
         Profile, null=True, on_delete=models.SET_NULL, related_name="comments")
 
-    def save(self, post=None, **kwargs) -> None:
-        if post is not None:
-            self.post = post
-        super().save(**kwargs)
+    # def save(self, **kwargs) -> None:
+    #     super().save(**kwargs)
 
     def comment_author(self) -> str:
         return self.user_profile.display_name
