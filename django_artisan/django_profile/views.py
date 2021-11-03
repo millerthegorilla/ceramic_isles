@@ -41,7 +41,7 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
                 'last_name': self.request.user.last_name})
         return context
 
-    def form_valid(self, form: ModelForm, *args, **kwargs) -> Union[HttpResponse, HttpResponseRedirect]:
+    def form_valid(self, form: ModelForm) -> Union[HttpResponse, HttpResponseRedirect]: 
         user_form = self.user_form_class(self.request.POST)
         user_form.initial = {'username': self.request.user.username,
                              'email': self.request.user.email,

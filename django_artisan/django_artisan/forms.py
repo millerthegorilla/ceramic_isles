@@ -13,9 +13,9 @@ from django.contrib.auth.models import User
 
 from .models import ArtisanForumProfile, UserProductImage
 from .fields import FileClearInput, FileInput
-from typing import Any
+from typing import Any, Dict
 
-_: Any
+# _: Any
 
 
 MAX_NUMBER_OF_IMAGES = settings.MAX_USER_IMAGES
@@ -148,5 +148,6 @@ class UserProductImagesForm(forms.ModelForm):
                 raise ValidationError(_('User already has {0} images'.format(
                     MAX_NUMBER_OF_IMAGES)), code='max_image_limit', params={'value': '3'})
 
-    def clean(self, *args, **kwargs) -> None:
+    def clean(self) -> Dict[str, Any]:
         cleaned_data = super().clean()
+        return cleaned_data

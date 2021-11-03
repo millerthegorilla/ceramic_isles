@@ -86,7 +86,7 @@ def save_user_artisan_forum_profile(sender, instance: User, **kwargs):
 
 
 @receiver(pre_delete, sender=ArtisanForumProfile)
-def auto_delete_image_file_on_delete(sender, instance: SafeImageField, **kwargs):
+def auto_delete_image_file_on_delete(sender: ArtisanForumProfile, instance: ArtisanForumProfile, **kwargs):
     """
     Deletes file from filesystem
     when corresponding `MediaFile` object is deleted.  Typed to SafeImageField as a test (should be ImageField)
@@ -165,28 +165,29 @@ def auto_delete_file_on_delete(sender: UserProductImage, instance: UserProductIm
         if len(os.listdir(fd)) == 0:
             os.rmdir(fd)
 
-# @receiver(pre_save, sender=UserProductImage)
-# def auto_delete_file_on_change(sender, instance, **kwargs):
-#     """
-#     Deletes old file from filesystem
-#     when corresponding `MediaFile` object is updated
-#     with new file.
-#     """
-#     if not instance.pk:
-#         return False
+# the below function was commented out
+@receiver(pre_save, sender=UserProductImage)
+def auto_delete_file_on_change(sender: UserProductImage, instance:UserProductImage, **kwargs):
+    """
+    Deletes old file from filesystem
+    when corresponding `MediaFile` object is updated
+    with new file.
+    """
+    if not instance.pk:
+        return False
 
-#     try:
-#         breakpoint()
-#         old_image_field = UserProductImage.objects.get(pk=instance.pk)
-#     except UserProductImage.DoesNotExist as e:
-#         logger.info("New UserProductImage being installed?: {0}".format(e))
-#         return False
+    try:
+        breakpoint()
+        old_image_field = UserProductImage.objects.get(pk=instance.pk)
+    except UserProductImage.DoesNotExist as e:
+        logger.info("New UserProductImage being installed?: {0}".format(e))
+        return False
 
-#     new_file = instance.image_file
-#     if not old_image_field.file == new_file:
-#         if os.path.isfile(old_image_field.file.path):
-#             delete(old_image_field) # clear thumbs from cache
-#             os.remove(old_image_field.file.path)
+    new_file = instance.image_file
+    if not old_image_field.file == new_file:
+        if os.path.isfile(old_image_field.file.path):
+            delete(old_image_field) # clear thumbs from cache
+            os.remove(old_image_field.file.path)
 
 
 @receiver(post_save, sender=UserProductImage)

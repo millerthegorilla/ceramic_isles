@@ -244,52 +244,59 @@ class ForumPostListView(PostListView):
        comments.  The search indexes are defined in documents.py.
     """
 
-    def get(self, request: HttpRequest, search_slug: str = None) -> HttpResponse:
-        breakpoint()
+    def get(self, request: HttpRequest, search_slug: str = None) -> HttpResponse: # type: ignore
+        '''
+            I had a function that tested for the existence of a search slug
+            and then performed the search if necessary.  I have refactored that
+            to the below, that uses duck typing (type coercion) to performs the 
+            logic to the search.  It is probably a lot slower, but seems more pythonic.
+            So, TODO profile this method vs the original from commit id
+            1d5cbccde9f7b183e4d886d7e644712b79db60cd 
+        '''
         site = Site.objects.get_current()
         search = 0
         p_c = None
         is_a_search = False
-        if search_slug == 'search':
+        form = ForumPostListSearch(request.GET)
+        if form.is_valid():
             is_a_search = True
-            form = ForumPostListSearch(request.GET)
-            breakpoint()
-            if form.is_valid():
-                terms = form.cleaned_data['q'].split(' ')
-                if len(terms) > 1:
-                    t = 'terms'
-                else:
-                    t = 'match'
-                    terms = terms[0]
-                queryset_p = ForumPostDocument.search().query(
-                    Q(t, text=terms) |
-                    Q(t, author=terms) |
-                    Q(t, title=terms) |
-                    Q(t, category=terms) |
-                    Q(t, location=terms)).to_queryset()
-                queryset_c = ForumCommentDocument.search().query(
-                    Q(t, text=terms) | Q(t, author=terms)).to_queryset()
-                p_c = list(queryset_p) + list(queryset_c)
-                search = len(p_c)
-                if search == 0:
-                    queryset = ForumPost.objects.all()
+            terms = form.cleaned_data['q'].split(' ')
+            if len(terms) > 1:
+                t = 'terms'
             else:
-                # TODO: show form errors?
-                return render(request, self.template_name, {'form': form})
+                t = 'match'
+                terms = terms[0]
+            queryset_p = ForumPostDocument.search().query(
+                Q(t, text=terms) |
+                Q(t, author=terms) |
+                Q(t, title=terms) |
+                Q(t, category=terms) |
+                Q(t, location=terms)).to_queryset()
+            queryset_c = ForumCommentDocument.search().query(
+                Q(t, text=terms) | Q(t, author=terms)).to_queryset()
+            p_c = list(queryset_p) + list(queryset_c)
+            search = len(p_c)
+            if search == 0:
+               # queryset = ForumPost.objects.all()
+                queryset = ForumPost.objects.order_by('-pinned')
+                paginator = Paginator(queryset, self.paginate_by)
+            else:
+                paginator = Paginator(p_c, self.paginate_by)
         else:
             queryset = ForumPost.objects.order_by('-pinned')
-        if search:
-            paginator = Paginator(p_c, self.paginate_by)
-        else:
             paginator = Paginator(queryset, self.paginate_by)
+
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
         context = {
             'page_obj': page_obj,
             'search': search,
             'is_a_search': is_a_search,
-            'site_url': request.scheme + '://' + site.domain}
+            'site_url': (request.scheme or 'https') + '://' + site.domain}
         return render(request, self.template_name, context)
+            # # TODO: show form errors?
+            # breakpoint()
+            # return render(request, self.template_name, {'form': form, 'is_a_search': False })
 
 ## autocomplete now removed to reduce number of requests
 # def autocomplete(request):
@@ -317,7 +324,8 @@ class ForumProfileUpdateView(ProfileUpdateView):
     success_url = reverse_lazy('django_forum_app:profile_update_view')
     template_name = 'django_forum_app/profile/forum_profile_update_form.html'
 
-    def form_valid(self, form: ModelForm, **kwargs) -> Union[HttpResponse, HttpResponseRedirect]:
+    def form_valid(self, form: ModelForm) -> Union[HttpResponse, HttpResponseRedirect]: # type: ignore
+    # mypy can't handle inheritance properly, and grumbles about a missing return statement
         if self.request.POST['type'] == 'update-profile':
             if form.has_changed():
                 form.save()

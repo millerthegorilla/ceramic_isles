@@ -141,7 +141,7 @@ class ArtisanForumProfileAdmin(admin.ModelAdmin):
 
 # TODO switch from dbbackup to runrestic to use restic - https://restic.net/
 class tasks:
-    def db_backup() -> None:
+    def db_backup(self) -> None:
         # clear existing backups first - dbbackup --clean doesn't work with
         # dropbox.
         try:

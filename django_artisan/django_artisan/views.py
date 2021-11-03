@@ -53,7 +53,8 @@ class ArtisanForumProfileUpdateView(ForumProfileUpdateView):
 
     ## TODO type form to correct type of Form - probably ArtisanForumProfileDetailForm
     ##  and do the same in superclasses
-    def form_valid(self, form: ModelForm, **kwargs) -> Union[HttpResponse, HttpResponseRedirect]:
+    def form_valid(self, form: ModelForm, **kwargs) -> Union[HttpResponse, HttpResponseRedirect]: # type: ignore
+    # - mypy grumbles about missing return statement coz it can't handle inheritance
         if self.request.POST['type'] == 'update-profile':
             if form.has_changed():
                 if 'display_personal_page' in form.changed_data or \
@@ -85,7 +86,7 @@ class ArtisanForumProfileUpdateView(ForumProfileUpdateView):
         page_number = self.request.GET.get('page')
         page_obj = paginator.get_page(page_number)
         context['page_obj'] = page_obj
-        context ['site_url'] = self.request.scheme + '://' + site.domain
+        context ['site_url'] = (self.request.scheme or 'https') + '://' + site.domain
         return context
 
 

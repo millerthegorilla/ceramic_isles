@@ -21,8 +21,8 @@ class DjangoArtisanConfig(AppConfig):
         else:
             if settings.DEBUG and 'runserver' in sys.argv:
                 mypy_package = importlib.util.find_spec("mypy")
-                # if mypy_package:
-                  #  from .checks import mypy
+                if settings.MYPY and mypy_package:
+                    from .checks import mypy
 
 
 def callback(sender: DjangoArtisanConfig, **kwargs) -> None:
