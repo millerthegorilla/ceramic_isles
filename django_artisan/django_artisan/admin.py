@@ -19,7 +19,7 @@ from django_forum_app.models import ForumProfile
 from .models import UserProductImage, Event, ArtisanForumProfile
 
 
-logger = logging.getLogger('django')
+logger = logging.getLogger('django_artisan')
 
 
 class DjangoArtisanConfig(AppConfig):

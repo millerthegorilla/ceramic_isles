@@ -1,4 +1,4 @@
-from typing import Any, Tuple
+from typing import Any, Tuple, cast
 
 from django.db import models
 from django.utils.deconstruct import deconstructible
@@ -22,21 +22,21 @@ class SafeImageField(models.ImageField):
 
         if self.allowed_extensions:
             default_validators.append(
-                FileExtensionValidator(self.allowed_extensions)
+                cast(object, FileExtensionValidator(self.allowed_extensions))
             )
 
         if self.check_content_type:
-            default_validators.append(FileContentTypeValidator())
+            default_validators.append(cast(object, FileContentTypeValidator()))
 
         if self.scan_viruses:
-            default_validators.append(AntiVirusValidator())
+            default_validators.append(cast(object, AntiVirusValidator()))
 
         if self.media_integrity:
-            default_validators.append(MediaIntegrityValidator())
+            default_validators.append(cast(object, MediaIntegrityValidator()))
 
         if self.max_size_limit:
             default_validators.append(
-                MaxSizeValidator(max_size=self.max_size_limit))
+                cast(object, MaxSizeValidator(max_size=self.max_size_limit)))
 
         self.default_validators = default_validators + self.default_validators
 

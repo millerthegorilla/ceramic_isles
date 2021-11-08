@@ -10,10 +10,10 @@ from .utils import detect_content_type, \
     convert_size
 from typing import Any
 
-_: Any
+# _: Any
 
 
-logger = logging.getLogger('django')
+logger = logging.getLogger('safe_imagefield')
 
 
 # class FileNameValidator(object):
@@ -31,6 +31,7 @@ logger = logging.getLogger('django')
 #       For instance, a filename can be a MD5 hash of the name of file plus the date
 #       of the day.
 
+# TODO do I need to call the superclass of object in each validator init??
 
 class FileExtensionValidator(object):
     message = _(
@@ -63,7 +64,7 @@ class FileExtensionValidator(object):
             )
 
 
-class FileContentTypeValidator:
+class FileContentTypeValidator(object):
     message = _(
         'File has invalid content-type. '
         'Maybe the file extension does not match the file content?'
@@ -124,7 +125,7 @@ class FileContentTypeValidator:
             )
 
 
-class AntiVirusValidator:
+class AntiVirusValidator(object):
     message = _('File is infected with %(virus)s.')
 
     error_code = 'infected'
@@ -149,7 +150,7 @@ class AntiVirusValidator:
             )
 
 
-class MediaIntegrityValidator:
+class MediaIntegrityValidator(object):
     # error_detect can be 'default' or 'strict'
     message = _('File failed integrity check! %(error)s')
 
@@ -177,7 +178,7 @@ class MediaIntegrityValidator:
                     self.message, self.error_code, params={'error': str(e)})
 
 
-class MaxSizeValidator:
+class MaxSizeValidator(object):
     message = _('File is greater than %(max_size)s')
 
     error_code = 'max_size_error'

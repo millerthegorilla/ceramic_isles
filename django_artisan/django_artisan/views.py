@@ -31,7 +31,7 @@ from .models import Event, UserProductImage, ArtisanForumProfile
 from .forms import ArtisanForumProfileDetailForm, UserProductImageForm
 
 
-logger = logging.getLogger('django')
+logger = logging.getLogger('django_artisan')
 
 def ping_google_func() -> None:
     try:
@@ -123,7 +123,7 @@ class LandingPageView(TemplateView):
         context = super().get_context_data(**kwargs)
         context['images'] = UserProductImage.objects.filter(active=True).order_by('?')
         context['image_size'] = "1024x768"
-        context['username'] = self.request.user.username
+        context['username'] = self.request.user.username # type: ignore
         return context
 
 # class PeopleDirectoryView(TemplateView):

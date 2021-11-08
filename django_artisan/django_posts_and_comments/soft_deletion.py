@@ -89,5 +89,5 @@ class SoftDeletionAdmin(admin.ModelAdmin):
             qs = qs.order_by(*ordering)
         return qs
 
-    def delete_model(self, request: HttpRequest, qs: SoftDeletionQuerySet) -> QuerySet:
+    def delete_model(self, request: HttpRequest, qs: SoftDeletionQuerySet) -> None:
         qs.hard_delete()

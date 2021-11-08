@@ -45,7 +45,7 @@ from .models import create_user_forum_profile, Avatar, default_avatar
 from .tasks import send_susbcribed_email
 from typing import Any
 
-logger = logging.getLogger('django')
+logger = logging.getLogger('django_artisan')
 
 
 # START POSTS AND COMMENTS
@@ -137,6 +137,7 @@ class ForumPostView(PostView):
                 return redirect(post)
             except ObjectDoesNotExist as e:
                 logger.error("Error accessing comment : {0}".format(e))
+                return HttpResponse(status=500)
         elif self.request.POST['type'] == 'post-report':
             post.moderation = timezone.now()
             post.save(update_fields=['moderation'])

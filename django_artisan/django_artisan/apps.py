@@ -32,7 +32,7 @@ def callback(sender: DjangoArtisanConfig, **kwargs) -> None:
         if current_site.domain == "example.com":
             current_site.domain = settings.SITE_DOMAIN
             current_site.name = settings.SITE_NAME
-            current_site.id = settings.SITE_ID
+            #current_site.id = settings.SITE_ID
             current_site.save()
         elif current_site.domain != settings.SITE_DOMAIN:
             raise ImproperlyConfigured("SITE_ID does not match SITE_DOMAIN")

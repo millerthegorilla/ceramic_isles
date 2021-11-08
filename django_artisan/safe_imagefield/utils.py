@@ -1,7 +1,8 @@
+import ffmpeg
+import logging
 import math
 import magic
 from PIL import Image as ImageP
-import ffmpeg
 from subprocess import Popen, PIPE
 from typing import Any, Optional
 # some of the below code is from https://github.com/ftarlao/check-media-integrity
@@ -9,6 +10,7 @@ from typing import Any, Optional
 # pillow-simd requires that you have a processor that supports MMX, SSE-SSE4, AVX, AVX2, AVX512, NEON
 # or similar
 
+logger = logging.getLogger('safe_imagefield')
 
 def detect_content_type(f) -> Any:
     sample = f.read(2048)
@@ -16,7 +18,7 @@ def detect_content_type(f) -> Any:
     return magic.from_buffer(sample, mime=True)
 
 
-def ffmpeg_check(filename, error_detect='default', threads=0) -> Optional[str]:
+def ffmpeg_check(filename, error_detect='default', threads=0) -> None:
     try:
         if error_detect == 'default':
             stream = ffmpeg.input(filename)
@@ -31,7 +33,7 @@ def ffmpeg_check(filename, error_detect='default', threads=0) -> Optional[str]:
         stream = stream.output('pipe:', format="null")
         stream.run(capture_stdout=True, capture_stderr=True)
     except Exception as e:
-        return str(e)
+        logger.info('error when checking ffmpeg')
 
 
 def pil_check(file) -> None:

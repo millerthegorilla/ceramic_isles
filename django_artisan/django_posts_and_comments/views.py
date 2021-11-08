@@ -28,7 +28,7 @@ from .models import Post, Comment
 from .forms import PostCreateForm, CommentForm
 
 
-logger = logging.getLogger('django')
+logger = logging.getLogger('django_artisan')
 
 
 @method_decorator(never_cache, name='dispatch')

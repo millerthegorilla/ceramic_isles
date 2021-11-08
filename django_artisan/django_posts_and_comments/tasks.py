@@ -1,7 +1,7 @@
 import logging
 from .models import Comment, Post
 
-logger = logging.getLogger('django')
+logger = logging.getLogger('django_artisan')
 
 
 def schedule_hard_delete(post_slug=None,

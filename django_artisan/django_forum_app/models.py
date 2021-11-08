@@ -28,7 +28,7 @@ from sorl.thumbnail import delete
 
 # _: Any
 
-logger = logging.getLogger('django')
+logger = logging.getLogger('django_artisan')
 
 # START PROFILE
 # helper functions

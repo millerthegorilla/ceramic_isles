@@ -20,7 +20,7 @@ from django_forum_app.models import ForumProfile, create_user_forum_profile, sav
 from django_forum_app.views import ForumPostView
 from safe_imagefield.models import SafeImageField
 
-logger = logging.getLogger('django')
+logger = logging.getLogger('django_artisan')
 
 
 def user_directory_path(instance : Union['ArtisanForumProfile', 'UserProductImage'], filename: str) -> str:

@@ -35,7 +35,7 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
         # if self.request.method == 'GET':
         context['user_form'] = self.user_form_class(
             initial={
-                'username': self.request.user.username,
+                'username': self.request.user.username, # type: ignore
                 'email': self.request.user.email,
                 'first_name': self.request.user.first_name,
                 'last_name': self.request.user.last_name})
@@ -43,7 +43,7 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
 
     def form_valid(self, form: ModelForm) -> Union[HttpResponse, HttpResponseRedirect]: 
         user_form = self.user_form_class(self.request.POST)
-        user_form.initial = {'username': self.request.user.username,
+        user_form.initial = {'username': self.request.user.username, # type: ignore
                              'email': self.request.user.email,
                              'first_name': self.request.user.first_name,
                              'last_name': self.request.user.last_name}

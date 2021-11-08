@@ -1,3 +1,5 @@
+import logging
+
 from django.forms import ModelForm
 from django.contrib.auth.models import User
 from django.db import IntegrityError
@@ -12,6 +14,7 @@ from .models import Profile
 from safe_imagefield.forms import SafeImageField
 from typing import Any
 
+logger = logging.getLogger('django_artisan')
 
 class ProfileUserForm(ModelForm):
     # def clean_username(self, *args, **kwargs):
@@ -47,7 +50,7 @@ class ProfileUserForm(ModelForm):
                 return username
             except IntegrityError as e:
                 error_message = e.__cause__
-                messages.error(None, error_message)
+                logger.error(error_message)
             self.valid = False
             self.add_error('username', 'Error, That username already exists!')
         return username
@@ -61,7 +64,7 @@ class ProfileUserForm(ModelForm):
                 return email
             except IntegrityError as e:
                 error_message = e.__cause__
-                messages.error(None, error_message)
+                logger.error(error_message)
             self.valid = False
             self.add_error('email', 'Error! That email already exists!')
         return email

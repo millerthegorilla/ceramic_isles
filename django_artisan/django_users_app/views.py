@@ -49,7 +49,7 @@ class ResendConfirmationView(FormView):
                 send_email(user)
                 return render(self.request, self.success_url, {form: form})
             else:
-                return render(self.template_name, self.request, {form: form})
+                return render(self.request, self.template_name, {form: form})
         except get_user_model().DoesNotExist:
             form.errors = [
                 {'username': 'Hey you haven\'t registered yet.  Register first!'}]

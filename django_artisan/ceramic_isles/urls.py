@@ -14,7 +14,7 @@ from django.contrib.sitemaps.views import sitemap
 from django_artisan.sitemaps import StaticViewSitemap, PersonalPageSiteMap
 from django_forum_app.views import CustomRegisterView
 
-logger = logging.getLogger('django')
+logger = logging.getLogger('django_artisan')
 
 sitemaps = {'main': StaticViewSitemap,
             'personalpage': PersonalPageSiteMap}
