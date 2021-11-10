@@ -13,7 +13,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.template.defaultfilters import slugify
 from django.http import HttpResponse, HttpResponseRedirect
 
-from django_users_app.views import RegisterView
+from django_users.views import RegisterView
 
 from .custom_registration_form import CustomUserCreationForm
 from .models import Profile

@@ -2,7 +2,7 @@ from django.conf import settings
 from django.contrib import admin
 from django.urls import path, include
 
-from django_forum_app.views import ForumPostView, ForumPostListView
+from django_forum.views import ForumPostView, ForumPostListView
 
 from .views import AboutPageView, LandingPageView, PersonalPageView, \
     UserProductImageUploadView, UserProductImageDeleteView, \

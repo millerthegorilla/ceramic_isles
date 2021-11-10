@@ -15,7 +15,7 @@ from django.db.models import QuerySet
 
 from django_password_validators.password_history.models import PasswordHistory
 
-from django_forum_app.models import ForumProfile
+from django_forum.models import ForumProfile
 from .models import UserProductImage, Event, ArtisanForumProfile
 
 

@@ -16,8 +16,8 @@ from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist, FieldError
 
 from django_profile.models import Profile
-from django_forum_app.models import ForumProfile, create_user_forum_profile, save_user_forum_profile, Avatar, default_avatar
-from django_forum_app.views import ForumPostView
+from django_forum.models import ForumProfile, create_user_forum_profile, save_user_forum_profile, Avatar, default_avatar
+from django_forum.views import ForumPostView
 from safe_imagefield.models import SafeImageField
 
 logger = logging.getLogger('django_artisan')

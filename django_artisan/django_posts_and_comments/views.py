@@ -55,6 +55,7 @@ class PostView(LoginRequiredMixin, FormView):
         elif self.request.POST['type'] == 'comment':
             comment_form = self.form_class(data=self.request.POST)
             if comment_form.is_valid():
+                breakpoint()
                 new_comment = comment_form.save(commit=False)
                 new_comment.text = bleach.clean(
                     html.unescape(new_comment.text), strip=True)

@@ -36,7 +36,7 @@ def mypy(app_configs, **kwargs) -> List:
     #pattern = re.compile("^(.+\d+): (\w+): (.+)")
     pattern = re.compile("^(.+\d+): (\w+): (.*?) \[([^]]+)\]")
 
-    errors = []
+    errors = [] 
     for message in error_messages.rstrip().split("\n"):
         parsed = re.match(pattern, message)
         if not parsed:
@@ -59,15 +59,15 @@ def mypy(app_configs, **kwargs) -> List:
             print(f"Unrecognized mypy level: {mypy_level}")
         
         # negative search
-        # if (code in ['import']
-        #         or location in ['opt/ceramic_isles_dev/django_artisan/fields.py:21']
-        #         or any(x in message.strip() for x in ['has no attribute "profile"'])) == False:
-        #     errors.append(CheckMessage(level, message, code, obj=MyPyErrorLocation(location)))
+        if (code in ['import']
+                or location in ['opt/ceramic_isles_dev/django_artisan/fields.py:21']
+                or any(x in message.strip() for x in ['has no attribute "profile"'])) == False:
+            errors.append(CheckMessage(level, message, code, obj=MyPyErrorLocation(location)))
         
         #positive search
         # any(x in message.strip() for x in ['Name "_" already defined'])
-        if (code in ['attr-defined']) == True and \
-            any(x in message.strip() for x in ['has no attribute "profile"']) == False:
-            errors.append(CheckMessage(level, message, code, obj=MyPyErrorLocation(location)))
+        # if (code in ['attr-defined']) == True and \
+        #     any(x in message.strip() for x in ['has no attribute "profile"']) == False:
+        #     errors.append(CheckMessage(level, message, code, obj=MyPyErrorLocation(location)))
 
     return errors

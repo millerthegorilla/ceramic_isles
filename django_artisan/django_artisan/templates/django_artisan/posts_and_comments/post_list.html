@@ -20,7 +20,7 @@
                                             <a href="/people/{{post.user_profile.display_name}}"><img src="{{ im.url }}" height="{{ im.height }}" width="{{ im.width }}" class="rounded-circle" id="image-{{ post.user_profile.display_name }}_avatar-image" title="{{post.user_profile.display_name}}" /></a>
                                         {% endthumbnail %}
                                         {% if post.pinned %}
-                                        {% thumbnail 'http://127.0.0.1:8000/static/django_forum_app/images/yellow-pin.png' "40x40" format='PNG' as im %}
+                                        {% thumbnail 'http://127.0.0.1:8000/static/django_forum/images/yellow-pin.png' "40x40" format='PNG' as im %}
                                             <img src="{{ im.url }}" width='30' height='30' title="This post is pinned!">
                                         {% endthumbnail %}
                                         {% endif %}

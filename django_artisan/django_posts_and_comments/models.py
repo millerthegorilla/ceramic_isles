@@ -1,14 +1,16 @@
 import uuid
 
 from django.db import models
+from django.dispatch import receiver
 from django.contrib.auth.models import User
-from django.urls import reverse_lazy
 from django.template.defaultfilters import slugify
 from django_profile.models import Profile
 from django.contrib.contenttypes import fields
 from django.db.models.constraints import UniqueConstraint
+from django.db.models.signals import post_save
 from django.utils import timezone
 from django.conf import settings
+from django.urls import reverse, reverse_lazy
 
 from django_q.tasks import schedule
 
@@ -52,6 +54,7 @@ class Comment(SoftDeletionModel):
     """
         a post can have many comments
     """
+    author: models.CharField = models.CharField(default='', max_length=40)
     text: models.TextField = models.TextField(max_length=500)
     post: models.ForeignKey = models.ForeignKey(
         Post, null=True, on_delete=models.SET_NULL, related_name="comments")
@@ -62,12 +65,24 @@ class Comment(SoftDeletionModel):
     # def save(self, **kwargs) -> None:
     #     super().save(**kwargs)
 
+    # class Meta:
+    #     ordering = ['date_created']
+
     def comment_author(self) -> str:
         return self.user_profile.display_name
 
     def __str__(self) -> str:
         # TODO check for query - fetch_related...
         return "Comment for " + f"{self.post.title}"
+
+
+@receiver(post_save, sender=Comment)
+def save_author_on_comment_creation(sender: Comment, instance: Comment, created, **kwargs) -> None:
+    if created:
+        instance.author = instance.comment_author()
+        instance.title = slugify(
+            instance.text[:10] + str(dateformat.format(instance.date_created, 'Y-m-d H:i:s')))
+        #         instance.save()
 
 # def scheduled_hard_delete(post_slug=None, deleted_at=None, type=None, id=None) -> None:
 #     if type == 'Comment':

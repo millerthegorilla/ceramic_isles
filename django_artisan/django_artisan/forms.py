@@ -8,7 +8,7 @@ from crispy_bootstrap5.bootstrap5 import FloatingField
 from django.conf import settings
 from django import forms
 from django.utils.translation import ugettext as _
-from django_forum_app.forms import ForumProfileDetailForm
+from django_forum.forms import ForumProfileDetailForm
 from django.contrib.auth.models import User
 
 from .models import ArtisanForumProfile, UserProductImage

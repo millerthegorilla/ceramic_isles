@@ -23,9 +23,9 @@ from django.contrib.sites.models import Site
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, HttpResponsePermanentRedirect
 from django.forms import ModelForm
 
-from django_forum_app.forms import ForumProfileUserForm
-from django_forum_app.views import ForumProfileUpdateView, CustomRegisterView
-from django_forum_app.models import ForumPost
+from django_forum.forms import ForumProfileUserForm
+from django_forum.views import ForumProfileUpdateView, CustomRegisterView
+from django_forum.models import ForumPost
 
 from .models import Event, UserProductImage, ArtisanForumProfile
 from .forms import ArtisanForumProfileDetailForm, UserProductImageForm
@@ -127,7 +127,7 @@ class LandingPageView(TemplateView):
         return context
 
 # class PeopleDirectoryView(TemplateView):
-#     template_name = 'django_forum_app/people.html'
+#     template_name = 'django_forum/people.html'
 
 #     def get_context_data(self):
 #         """ couldn't get the values() to pass back an appropriate queryset, and since

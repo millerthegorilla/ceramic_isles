@@ -4,7 +4,7 @@
     {% if page_obj.object_list.count == 0 and is_a_search is False %}
         <div class="row">
             <div class="col-auto mx-auto mt-5">
-                <p><h3>There are currently no posts in the forum.  Why not <a href="{% url 'django_forum_app:post_create_view' %}" class="tinfo">add</a> one...?</h3></p>
+                <p><h3>There are currently no posts in the forum.  Why not <a href="{% url 'django_forum:post_create_view' %}" class="tinfo">add</a> one...?</h3></p>
             </div>
         </div>
     {% else %}
@@ -16,7 +16,7 @@
                 <p class="col-auto">Search the posts for content, author or category.</p>
             </div>
             <div class="row justify-content-center">
-                <form class="mb-2 col-auto d-flex flex-wrap justify-content-center" action="{% url 'django_forum_app:post_list_view' 'search' %}" class="form-autocomplete">
+                <form class="mb-2 col-auto d-flex flex-wrap justify-content-center" action="{% url 'django_forum:post_list_view' 'search' %}" class="form-autocomplete">
                     <input class="me-2 mb-2 mb-sm-0 mb-lg-0" id="q" name="q" type="text" list="datalistOptions" class="autocomplete" autocomplete="on">
                     <input type="submit" value="Search!">
                 </form>
@@ -34,7 +34,7 @@
             {% include './post_list.html' %}
             {% if is_a_search is True and search > 0 %}
             <div class="row justify-content-center">
-                <a href='{% url "django_forum_app:post_list_view" %}' class="btn btn-primary mb-4 col-auto">Clear Search Results</a>
+                <a href='{% url "django_forum:post_list_view" %}' class="btn btn-primary mb-4 col-auto">Clear Search Results</a>
             </div>
             {% endif %}
         </div>
