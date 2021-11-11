@@ -7,7 +7,7 @@ from django import forms
 from . import models as posts_and_comments_models
 
 
-class PostCreateForm(forms.ModelForm):
+class Post(forms.ModelForm):
     class Meta:
         model = posts_and_comments_models.Post
         widgets = {'text': widgets.TinyMCE()}
@@ -38,7 +38,7 @@ class PostCreateForm(forms.ModelForm):
         self.helper.form_action = 'django_posts_and_comments:post_create_view'
 
 
-class CommentForm(forms.ModelForm):
+class Comment(forms.ModelForm):
     class Meta:
         model = posts_and_comments_models.Comment
         fields = ['text']

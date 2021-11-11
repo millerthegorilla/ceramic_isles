@@ -7,14 +7,14 @@ from django.template import defaultfilters
 
 import django_users.views as users_views
 
-from . import custom_registration_form
+from . import custom_registration
 from . import models as profile_models
 from . import forms as profile_forms
 
 
-class ProfileUpdateView(mixins.LoginRequiredMixin, generic.edit.UpdateView):
-    form_class = profile_forms.ProfileDetailForm
-    user_form_class = profile_forms.ProfileUserForm
+class ProfileUpdate(mixins.LoginRequiredMixin, generic.edit.UpdateView):
+    form_class = profile_forms.Profile
+    user_form_class = profile_forms.ProfileUser
     model = profile_models.Profile
     success_url = urls.reverse_lazy('django_profile:profile_update_view')
     template_name = 'django_profile/profile_update_form.html'
@@ -65,10 +65,10 @@ class ProfileUpdateView(mixins.LoginRequiredMixin, generic.edit.UpdateView):
 
 # NEEDED FOR ADDITION OF DISPLAY_NAME
 # the following goes in the project top level urls.py
-# from django_profile.views import CustomRegisterView
-# path('users/accounts/register/', CustomRegisterView.as_view(), name='register'),
-class CustomRegisterView(users_views.RegisterView):
-    form_class = custom_registration_form.CustomUserCreationForm
+# from django_profile.views import CustomRegister
+# path('users/accounts/register/', CustomRegister.as_view(), name='register'),
+class CustomRegister(users_views.Register):
+    form_class = custom_registration.CustomUserCreation
 
     def form_valid(self, form: forms.ModelForm) -> http.HttpResponseRedirect:
         user = form.save()

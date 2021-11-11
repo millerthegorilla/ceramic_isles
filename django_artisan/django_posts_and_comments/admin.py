@@ -5,7 +5,7 @@ from django.contrib import admin
 
 
 # @admin.register(Comment)
-# class CommentAdmin(admin.ModelAdmin):  # SoftDeletionAdmin):
+# class CommentAdmin(admin.ModelAdmin):  # Admin):
 #     #fields = ('moderation', 'active', 'author', 'title', 'text', 'date_created', 'deleted_at', 'user_profile')
 #     # fieldsets = [
 #     #     ('Moderation', {'fields': ['moderation']}),

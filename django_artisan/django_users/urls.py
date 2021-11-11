@@ -13,17 +13,17 @@ urlpatterns = [
         'accounts/password_reset/',
         auth_views.PasswordResetView.as_view(
             template_name='django_users/resend_form.html',
-            form_class=users_forms.UserPasswordResetForm,
+            form_class=users_forms.UserPasswordReset,
             extra_context={
                 'instructions': 'Send a password reset link...'}),
         name='password_reset'),
     urls.path(
         'accounts/resend_confirmation/',
-        users_views.ResendConfirmationView.as_view(),
+        users_views.ResendConfirmation.as_view(),
         name='resend_confirmation'),
     urls.path(
         'accounts/register/',
-        users_views.RegisterView.as_view(),
+        users_views.Register.as_view(),
         name='register'),
     urls.path(
         'accounts/',

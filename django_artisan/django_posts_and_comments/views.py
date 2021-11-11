@@ -18,7 +18,7 @@ logger = logging.getLogger('django_artisan')
 
 @utils.decorators.method_decorator(cache.never_cache, name='dispatch')
 @utils.decorators.method_decorator(cache.never_cache, name='get')
-class PostView(mixins.LoginRequiredMixin, generic.FormView):
+class Post(mixins.LoginRequiredMixin, generic.FormView):
     """
         TODO: replace the single view/many form processing with separate urls for
               each form action, pointing to individual views, each with its own form class,
@@ -28,7 +28,7 @@ class PostView(mixins.LoginRequiredMixin, generic.FormView):
     slug_url_kwarg = 'post_slug'
     slug_field = 'slug'
     template_name = 'django_posts_and_comments/post_detail.html'
-    form_class = posts_and_comments_forms.CommentForm
+    form_class = posts_and_comments_forms.Comment
 
     def post(self, *args, **kwargs) -> typing.Union[http.HttpResponse, http.HttpResponseRedirect]:
         post = posts_and_comments_models.Post.objects.get(pk=kwargs['pk'])
@@ -88,7 +88,7 @@ class PostView(mixins.LoginRequiredMixin, generic.FormView):
 
 
 @utils.decorators.method_decorator(cache.never_cache, name='dispatch')
-class PostListView(mixins.LoginRequiredMixin, generic.list.ListView):
+class PostList(mixins.LoginRequiredMixin, generic.list.ListView):
     model = posts_and_comments_models.Post
     template_name = 'django_posts_and_comments/post_list.html'
     paginate_by = 6
@@ -102,15 +102,15 @@ class PostListView(mixins.LoginRequiredMixin, generic.list.ListView):
         return shortcuts.render(request, self.template_name, context)
 
 
-class PostCreateView(mixins.LoginRequiredMixin, generic.edit.CreateView):
+class PostCreate(mixins.LoginRequiredMixin, generic.edit.CreateView):
     model = posts_and_comments_models.Post
     template_name_suffix = '_create_form'
     template_name = 'django_posts_and_comments/post_create_form.html'
-    form_class = posts_and_comments_forms.PostCreateForm
+    form_class = posts_and_comments_forms.Post
 
     def form_valid(self, form, **kwargs) -> http.HttpResponseRedirect:
         post = form.save(commit=False)
-        post.text = PostCreateView.sanitize_post_text(post.text)
+        post.text = Post.sanitize_post_text(post.text)
         post.user_profile = self.request.user.profile
         post.slug = defaultfilters.slugify(
             post.title + '-' + str(utils.dateformat.format(utils.timezone.now(), 'Y-m-d H:i:s')))

@@ -11,16 +11,16 @@ from django.conf.urls.static import static
 from django.urls import re_path, URLResolver
 from django.contrib.staticfiles import views
 from django.contrib.sitemaps.views import sitemap
-from django_artisan.sitemaps import StaticViewSitemap, PersonalPageSiteMap
-from django_forum.views import CustomRegisterView
+from django_artisan.sitemaps import StaticView, PersonalPage
+from django_forum.views import CustomRegister
 
 logger = logging.getLogger('django_artisan')
 
-sitemaps = {'main': StaticViewSitemap,
-            'personalpage': PersonalPageSiteMap}
+sitemaps = {'main': StaticView,
+            'personalpage': PersonalPage}
 
 urlpatterns = [
-    path('users/accounts/register/', CustomRegisterView.as_view(), name='register'),
+    path('users/accounts/register/', CustomRegister.as_view(), name='register'),
     path('', include(artisan_app_urls)),
     path('forum/', include(forum_app_urls)),
     path('users/', include(users_app_urls)),

@@ -16,13 +16,13 @@ from .models import UserProductImage, Event, ArtisanForumProfile
 logger = logging.getLogger('django_artisan')
 
 
-class DjangoArtisanConfig(apps.AppConfig):
+class DjangoArtisan(apps.AppConfig):
     name = 'django_artisan'
 
     def ready(self) -> None:
         models.signals.post_migrate.connect(callback, sender=self)
 
-def callback(sender: DjangoArtisanConfig, **kwargs) -> None:
+def callback(sender: DjangoArtisan, **kwargs) -> None:
     from django.contrib.sites.models import Site
     try:
         current_site = Site.objects.get(id=conf.settings.SITE_ID)
@@ -36,7 +36,7 @@ def callback(sender: DjangoArtisanConfig, **kwargs) -> None:
 
 
 @admin.register(UserProductImage)
-class ImageAdmin(admin.ModelAdmin):
+class Image(admin.ModelAdmin):
     list_display = (
         'active', 'image_file',
         'image_shop_link',
@@ -67,7 +67,7 @@ class ImageAdmin(admin.ModelAdmin):
 
 
 @admin.register(Event)
-class EventAdmin(admin.ModelAdmin):
+class Event(admin.ModelAdmin):
     list_display = (
         'active', 'title',
         'text', 'date',
@@ -109,7 +109,7 @@ admin.site.unregister(ForumProfile)
 
 
 @admin.register(ArtisanForumProfile)
-class ArtisanForumProfileAdmin(admin.ModelAdmin):
+class ArtisanForumProfile(admin.ModelAdmin):
     list_display = [
         'display_name', 'bio',
         'image_file', 'shop_web_address',

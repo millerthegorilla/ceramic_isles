@@ -10,7 +10,7 @@ from django.contrib.auth import forms as auth_forms, models as auth_models
 from . import models as profile_models
 
 
-class CustomUserCreationForm(auth_forms.UserCreationForm):
+class CustomUserCreation(auth_forms.UserCreationForm):
     captcha = captcha_fields.ReCaptchaField(label='', widget=captcha_widgets.ReCaptchaV2Checkbox)
     email = forms.EmailField()
 

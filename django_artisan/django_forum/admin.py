@@ -14,7 +14,7 @@ logger = logging.getLogger('django_artisan')
 
 
 @admin.register(forum_models.ForumComment)
-class ForumCommentAdmin(soft_deletion.SoftDeletionAdmin):
+class ForumComment(soft_deletion.Admin):
     #fields = ('moderation', 'active', 'author', 'title', 'text', 'date_created', 'deleted_at', 'user_profile')
     # fieldsets = [
     #     ('Moderation', {'fields': ['moderation']}),
@@ -62,7 +62,7 @@ class ForumCommentAdmin(soft_deletion.SoftDeletionAdmin):
 
 
 @admin.register(forum_models.ForumPost)
-class ForumPostAdmin(soft_deletion.SoftDeletionAdmin):
+class ForumPost(soft_deletion.Admin):
     list_display = ('pinned', 'moderation', 'active', 'author',
                     'title', 'text', 'date_created', 'deleted_at')
     list_filter = ('pinned', 'moderation', 'active',
@@ -101,7 +101,7 @@ class ForumPostAdmin(soft_deletion.SoftDeletionAdmin):
 
 # Register your models here.
 @admin.register(forum_models.ForumProfile)
-class ForumProfileAdmin(admin.ModelAdmin):
+class ForumProfile(admin.ModelAdmin):
     list_display = [
         'display_name',
         'address_line_1',

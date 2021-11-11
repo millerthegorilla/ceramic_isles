@@ -12,7 +12,7 @@ from django.template import defaultfilters
 from . import models as forum_models
 
 
-class CustomUserCreationForm(auth.forms.UserCreationForm):
+class CustomUserCreation(auth.forms.UserCreationForm):
     captcha = captcha.fields.ReCaptchaField(label='', widget=captcha.widgets.ReCaptchaV2Checkbox)
     email = forms.EmailField()
 
@@ -52,7 +52,7 @@ class CustomUserCreationForm(auth.forms.UserCreationForm):
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self.fields['display_name'] = forms.fields.CharField(
+        self.fields['display_name'] = forms.CharField(
             label='Display name',)
         #         help_text='<span class="tinfo">Your display name will be shown \
         #                    in the forum and will be part of the link to your personal page.  \
@@ -61,16 +61,16 @@ class CustomUserCreationForm(auth.forms.UserCreationForm):
         #                    It will be converted to an internet friendly name when you save it. \
         #                    You can change it later...</span>',
         #     )
-        self.fields['username'] = forms.fields.CharField(
+        self.fields['username'] = forms.CharField(
             label='Username',
             help_text='<span class="tinfo">Your username is used purely \
                            for logging in, and must be different to your display name. \
                            It must be unique. \
                            No one will see your username. Letters, digits and @/./+/-/_ only.</span>',)
-        self.fields['password2'] = forms.fields.CharField(
+        self.fields['password2'] = forms.CharField(
             label='Password again!',
             widget=forms.PasswordInput,)
-        self.fields['rules'] = forms.fields.BooleanField(
+        self.fields['rules'] = forms.BooleanField(
             label='<span class="tinfo">I have read and agree with the <a class="tinfo" target="blank" href="/forum/rules/">Rules</a></span>')
         self.helper = crispy_forms.helper.FormHelper()
         self.helper.form_method = 'post'

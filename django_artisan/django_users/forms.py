@@ -10,7 +10,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
 
 
-class CustomUserCreationForm(auth.forms.UserCreationForm):
+class CustomUserCreation(auth.forms.UserCreationForm):
     captcha = captcha_fields.ReCaptchaField(label='', widget=captcha_widgets.ReCaptchaV2Checkbox)
     email = forms.EmailField()
 
@@ -43,7 +43,7 @@ class CustomUserCreationForm(auth.forms.UserCreationForm):
         )
 
 
-class UserPasswordResetForm(auth.forms.PasswordResetForm):
+class UserPasswordReset(auth.forms.PasswordResetForm):
     captcha = captcha_fields.ReCaptchaField(label='', widget=captcha_widgets.ReCaptchaV2Checkbox)
 
     def clean_email(self) -> str:
@@ -80,7 +80,7 @@ class UserPasswordResetForm(auth.forms.PasswordResetForm):
         )
 
 
-class UserResendConfirmationForm(forms.Form):
+class UserResendConfirmation(forms.Form):
     captcha = captcha_fields.ReCaptchaField(label='', widget=captcha_widgets.ReCaptchaV2Checkbox)
     username = forms.CharField(label='Your username here...')
 

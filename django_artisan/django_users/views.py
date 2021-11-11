@@ -10,10 +10,10 @@ from django_email_verification import send_email
 from . import forms as users_forms
 
 
-class RegisterView(generic.edit.CreateView):
+class Register(generic.edit.CreateView):
     http_method_names = ['get', 'post']
     template_name = 'django_users/register.html'
-    form_class = users_forms.CustomUserCreationForm
+    form_class = users_forms.CustomUserCreation
     success_url = urls.reverse_lazy("password_reset_done")
     model = auth.get_user_model()
 
@@ -27,11 +27,11 @@ class RegisterView(generic.edit.CreateView):
         return shortcuts.redirect('password_reset_done')
 
 
-class ResendConfirmationView(generic.FormView):
+class ResendConfirmation(generic.FormView):
     http_method_names = ['get', 'post']
     template_name = 'django_users/resend_form.html'
     extra_context = {'instructions': 'Resend confirmation token'}
-    form_class = users_forms.UserResendConfirmationForm
+    form_class = users_forms.UserResendConfirmation
     success_url = 'django_users/registration_confirmation_sent.html'
 
     def form_valid(self, form, **kwargs) -> http.HttpResponse:

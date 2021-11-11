@@ -37,17 +37,17 @@ def ping_google_func() -> None:
         logger.error("unable to ping_google : {0}".format(e))
 
 @method_decorator(never_cache, name='dispatch')
-class ArtisanForumProfileUpdateView(forum_views.ForumProfileUpdateView):
+class ArtisanForumProfile(forum_views.ForumProfile):
     """
-        ForumProfileUpdateView subclasses LoginRequiredMixin
+        ForumProfile subclasses LoginRequiredMixin
     """
     model = artisan_models.ArtisanForumProfile 
-    form_class = artisan_forms.ArtisanForumProfileDetailForm
-    user_form_class = forum_forms.ForumProfileUserForm
+    form_class = artisan_forms.ArtisanForumProfile
+    user_form_class = forum_forms.ForumProfileUser
     success_url = reverse_lazy('django_artisan:profile_update_view')
     template_name = 'django_artisan/profile/forum_profile_update_form.html'
 
-    ## TODO type form to correct type of Form - probably artisan_forms.ArtisanForumProfileDetailForm
+    ## TODO type form to correct type of Form - probably artisan_forms.ArtisanForumProfile
     ##  and do the same in superclasses
     def form_valid(self, form: forms.ModelForm, **kwargs) -> typing.Union[http.HttpResponse, http.HttpResponseRedirect]: # type: ignore
     # - mypy grumbles about missing return statement coz it can't handle inheritance
@@ -86,7 +86,7 @@ class ArtisanForumProfileUpdateView(forum_views.ForumProfileUpdateView):
         return context
 
 
-class AboutPageView(generic.list.ListView):
+class AboutPage(generic.list.ListView):
     model = artisan_models.Event
     template_name = 'django_artisan/about.html'
     
@@ -111,7 +111,7 @@ class AboutPageView(generic.list.ListView):
             return qs_bydate | qs_repeating
 
 
-class LandingPageView(generic.base.TemplateView):
+class LandingPage(generic.base.TemplateView):
     model = artisan_models.UserProductImage
     template_name = 'django_artisan/landing_page.html'
 
@@ -137,7 +137,7 @@ class LandingPageView(generic.base.TemplateView):
 #         data['colours'] = ['text-white', 'text-purple', 'text-warning', 'text-lightgreen', 'text-danger', 'headline-text', 'sub-headline-text']
 #         return data
 
-class PersonalPageView(generic.detail.DetailView):
+class PersonalPage(generic.detail.DetailView):
     model = artisan_models.ArtisanForumProfile
     slug_url_kwarg = 'name_slug'
     slug_field = 'display_name'
@@ -174,9 +174,9 @@ class PersonalPageView(generic.detail.DetailView):
 
 
 
-class UserProductImageUploadView(mixins.LoginRequiredMixin, generic.edit.FormView):
+class UserProductImageUpload(mixins.LoginRequiredMixin, generic.edit.FormView):
     model = artisan_models.UserProductImage
-    form_class = artisan_forms.UserProductImageForm
+    form_class = artisan_forms.UserProductImage
     template_name = 'django_artisan/profile/images/image_update.html'
     success_url = reverse_lazy('django_artisan:image_update')
     
@@ -216,7 +216,7 @@ class UserProductImageUploadView(mixins.LoginRequiredMixin, generic.edit.FormVie
         return kwarg_dict
 
 
-class UserProductImageDeleteView(mixins.LoginRequiredMixin, generic.edit.UpdateView):
+class UserProductImageDelete(mixins.LoginRequiredMixin, generic.edit.UpdateView):
     http_method_names = ['post']
     model = artisan_models.UserProductImage
     slug_url_kwarg = 'unique_id'

@@ -19,21 +19,21 @@ from django_users import views as users_views
 from . import documents as forum_documents
 from . import models as forum_models
 from . import forms as forum_forms
-from . import custom_registration_form as custom_reg_form
+from . import custom_registration as custom_reg_form
 
 logger = logging.getLogger('django_artisan')
 
 
 # START POSTS AND COMMENTS
-class ForumPostCreateView(posts_and_comments_views.PostCreateView):
+class ForumPost(posts_and_comments_views.Post):
     model = forum_models.ForumPost
     template_name = "django_forum/posts_and_comments/forum_post_create_form.html"
-    form_class = forum_forms.ForumPostCreateForm
+    form_class = forum_forms.ForumPost
 
     def form_valid(self, form: forms.ModelForm) -> http.HttpResponseRedirect:
         post = form.save(commit=False)
         post.user_profile = self.request.user.profile.forumprofile
-        post.text = posts_and_comments_views.PostCreateView.sanitize_post_text(post.text)
+        post.text = posts_and_comments_views.Post.sanitize_post_text(post.text)
         post.slug = defaultfilters.slugify(
             post.title[:60] + '-' + str(utils.dateformat.format(utils.timezone.now(), 'Y-m-d H:i:s')))
         post.save()
@@ -49,7 +49,7 @@ class ForumPostCreateView(posts_and_comments_views.PostCreateView):
 
 @utils.decorators.method_decorator(cache.never_cache, name='dispatch')
 @utils.decorators.method_decorator(cache.never_cache, name='get')
-class ForumPostView(posts_and_comments_views.PostView):
+class ForumPostView(posts_and_comments_views.Post):
     """
         TODO: Replace superclass form processing if conditions with separate urls/views
               and overload them individually here, where necessary, instead of redefining
@@ -59,8 +59,8 @@ class ForumPostView(posts_and_comments_views.PostView):
     slug_url_kwarg: str = 'post_slug'
     slug_field: str = 'slug'
     template_name: str = 'django_forum/posts_and_comments/forum_post_detail.html'
-    form_class: forum_forms.ForumPostCreateForm = forum_forms.ForumPostCreateForm
-    comment_form_class: forum_forms.ForumCommentForm = forum_forms.ForumCommentForm
+    form_class: forum_forms.ForumPost = forum_forms.ForumPost
+    comment_form_class: forum_forms.ForumComment = forum_forms.ForumComment
     #extra_context = { 'site_url':Site.objects.get_current().domain }
 
     def post(self, *args, **kwargs) -> typing.Union[http.HttpResponse, http.HttpResponseRedirect]:
@@ -211,7 +211,7 @@ def subscribe(request) -> http.JsonResponse:
 
 
 @utils.decorators.method_decorator(cache.never_cache, name='dispatch')
-class ForumPostListView(posts_and_comments_views.PostListView):
+class ForumPostList(posts_and_comments_views.PostList):
     model = forum_models.ForumPost
     template_name = 'django_forum/posts_and_comments/forum_post_list.html'
     paginate_by = 5
@@ -243,13 +243,13 @@ class ForumPostListView(posts_and_comments_views.PostListView):
             else:
                 t = 'match'
                 terms = terms[0]
-            queryset_p = forum_documents.ForumPostDocument.search().query(
+            queryset_p = forum_documents.ForumPost.search().query(
                 elasticsearch_dsl.Q(t, text=terms) |
                 elasticsearch_dsl.Q(t, author=terms) |
                 elasticsearch_dsl.Q(t, title=terms) |
                 elasticsearch_dsl.Q(t, category=terms) |
                 elasticsearch_dsl.Q(t, location=terms)).to_queryset()
-            queryset_c = forum_documents.ForumCommentDocument.search().query(
+            queryset_c = forum_documents.ForumComment.search().query(
                 elasticsearch_dsl.Q(t, text=terms) | elasticsearch_dsl.Q(t, author=terms)).to_queryset()
             p_c = list(queryset_p) + list(queryset_c)
             search = len(p_c)
@@ -280,7 +280,7 @@ class ForumPostListView(posts_and_comments_views.PostListView):
 #     q = request.GET.get('q')
 #     results = []
 #     if q:
-#         search = ForumPostDocument.search().suggest('results', q, term={'field':'text'})
+#         search = ForumPost.search().suggest('results', q, term={'field':'text'})
 #         result = search.execute()
 #         for idx,item in enumerate(result.suggest['results'][0]['options']):
 #             results.append(item.text)
@@ -293,10 +293,10 @@ class ForumPostListView(posts_and_comments_views.PostListView):
 
 # START PROFILE
 @utils.decorators.method_decorator(cache.never_cache, name='dispatch')
-class ForumProfileUpdateView(profile_views.ProfileUpdateView):
+class ForumProfile(profile_views.ProfileUpdate):
     model = forum_models.ForumProfile
-    form_class = forum_forms.ForumProfileDetailForm
-    user_form_class = forum_forms.ForumProfileUserForm
+    form_class = forum_forms.ForumProfile
+    user_form_class = forum_forms.ForumProfileUser
     success_url = urls.reverse_lazy('django_forum:profile_update_view')
     template_name = 'django_forum/profile/forum_profile_update_form.html'
 
@@ -328,14 +328,14 @@ class ForumProfileUpdateView(profile_views.ProfileUpdateView):
 
 # NEEDED FOR ADDITION OF DISPLAY_NAME AND FORUM RULES
 # the following goes in the project top level urls.py
-# from django_forum.views import CustomRegisterView
-# path('users/accounts/register/', CustomRegisterView.as_view(), name='register'),
+# from django_forum.views import CustomRegister
+# path('users/accounts/register/', CustomRegister.as_view(), name='register'),
 
 
-class CustomRegisterView(users_views.RegisterView):
-    form_class = custom_reg_form.CustomUserCreationForm
+class CustomRegister(users_views.Register):
+    form_class = custom_reg_form.CustomUserCreation
 
-    def form_valid(self, form: custom_reg_form.CustomUserCreationForm) -> http.HttpResponseRedirect:
+    def form_valid(self, form: custom_reg_form.CustomUserCreation) -> http.HttpResponseRedirect:
         user = form.save()
         user.profile.forumprofile.rules_agreed = form['rules'].value()
         user.profile.forumprofile.save(update_fields=['rules_agreed'])

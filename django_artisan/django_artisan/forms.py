@@ -8,29 +8,27 @@ from crispy_bootstrap5 import bootstrap5
 from django.conf import settings
 from django import forms
 from django.utils.translation import ugettext as _
-from django_forum.forms import ForumProfileDetailForm
+from django_forum.forms import ForumProfile
 from django.contrib.auth.models import User
 
 from .models import ArtisanForumProfile, UserProductImage
 from .fields import FileClearInput, FileInput
 from typing import Any, Dict
 
-# _: Any
-
 
 MAX_NUMBER_OF_IMAGES = settings.MAX_USER_IMAGES
 
 
-class ArtisanForumProfileDetailForm(ForumProfileDetailForm):
+class ArtisanForumProfile(ForumProfile):
     image_file = safe_image_forms.SafeImageField(allowed_extensions=('jpg', 'png'),
                                                  check_content_type=True,
                                                  scan_viruses=True,
                                                  media_integrity=True,
                                                  max_size_limit=2621440)
 
-    class Meta(ForumProfileDetailForm.Meta):
+    class Meta(ForumProfile.Meta):
         model = ArtisanForumProfile
-        fields = ForumProfileDetailForm.Meta.fields + [
+        fields = ForumProfile.Meta.fields + [
             'image_file',
             'bio',
             'shop_web_address',
@@ -73,7 +71,7 @@ class ArtisanForumProfileDetailForm(ForumProfileDetailForm):
         self.helper.form_class = 'col-auto tinfo'
 
 
-class UserProductImageForm(forms.ModelForm):
+class UserProductImage(forms.ModelForm):
     image_file = safe_image_forms.SafeImageField(allowed_extensions=('jpg', 'png'),
                                                  check_content_type=True,
                                                  scan_viruses=True,
@@ -112,42 +110,42 @@ class UserProductImageForm(forms.ModelForm):
                     'User already has {} images'.format(MAX_NUMBER_OF_IMAGES))
 
 
-# handles deletion
-class UserProductImagesForm(forms.ModelForm):
-    image_file = safe_image_forms.SafeImageField(allowed_extensions=('jpg', 'png'),
-                                                 check_content_type=True,
-                                                 scan_viruses=True,
-                                                 media_integrity=True,
-                                                 max_size_limit=2621440)
+# handles deletion  ## TODO is this even used?
+# class UserProductImageDelete(forms.ModelForm):
+#     image_file = safe_image_forms.SafeImageField(allowed_extensions=('jpg', 'png'),
+#                                                  check_content_type=True,
+#                                                  scan_viruses=True,
+#                                                  media_integrity=True,
+#                                                  max_size_limit=2621440)
 
-    class Meta:
-        model = UserProductImage
-        fields = ['image_file', 'image_text', 'image_shop_link']
+#     class Meta:
+#         model = UserProductImage
+#         fields = ['image_file', 'image_text', 'image_shop_link']
 
-    def __init__(self, user: User = None, *args, **kwargs) -> None:
-        self.user = user
-        super().__init__(*args, **kwargs)
-        self.fields['image_file'].validators.append(self.restrict_amount)
+#     def __init__(self, user: User = None, *args, **kwargs) -> None:
+#         self.user = user
+#         super().__init__(*args, **kwargs)
+#         self.fields['image_file'].validators.append(self.restrict_amount)
 
-        self.helper = helper.FormHelper()
-        self.helper.layout = layout.Layout(
-            layout.Fieldset(
-                    '',
-                    FileInput('image_file', css_class="col-auto"),
-                    boostrap5.FloatingField('image_text', css_class="col-auto"),
-                    boostrap5.FloatingField('image_shop_link', css_class="col-auto"),),
-        )
-        self.helper.form_id = 'id-upload-form'
-        self.helper.form_method = 'post'
-        self.helper.form_class = 'col-12'
+#         self.helper = helper.FormHelper()
+#         self.helper.layout = layout.Layout(
+#             layout.Fieldset(
+#                     '',
+#                     FileInput('image_file', css_class="col-auto"),
+#                     boostrap5.FloatingField('image_text', css_class="col-auto"),
+#                     boostrap5.FloatingField('image_shop_link', css_class="col-auto"),),
+#         )
+#         self.helper.form_id = 'id-upload-form'
+#         self.helper.form_method = 'post'
+#         self.helper.form_class = 'col-12'
 
-    def restrict_amount(self) -> None:
-        if self.user is not None:
-            if UserProductImage.objects.filter(
-                    user_profile=self.user.profile.forumprofile).count() >= MAX_NUMBER_OF_IMAGES:
-                raise exceptions.ValidationError(_('User already has {0} images'.format(
-                    MAX_NUMBER_OF_IMAGES)), code='max_image_limit', params={'value': '3'})
+#     def restrict_amount(self) -> None:
+#         if self.user is not None:
+#             if UserProductImage.objects.filter(
+#                     user_profile=self.user.profile.forumprofile).count() >= MAX_NUMBER_OF_IMAGES:
+#                 raise exceptions.ValidationError(_('User already has {0} images'.format(
+#                     MAX_NUMBER_OF_IMAGES)), code='max_image_limit', params={'value': '3'})
 
-    def clean(self) -> Dict[str, Any]:
-        cleaned_data = super().clean()
-        return cleaned_data
+#     def clean(self) -> Dict[str, Any]:
+#         cleaned_data = super().clean()
+#         return cleaned_data

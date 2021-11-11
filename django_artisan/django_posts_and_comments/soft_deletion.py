@@ -11,15 +11,15 @@ from django_q import tasks
 # with djangoq added... :)
 
 
-class SoftDeletionQuerySet(models.query.QuerySet):
+class QuerySet(models.query.QuerySet):
     def delete(self) -> int:
         return super(
-            SoftDeletionQuerySet,
+            QuerySet,
             self).update(
             deleted_at=utils.timezone.now())
 
     def hard_delete(self) -> tuple[int, dict]:
-        return super(SoftDeletionQuerySet, self).delete()
+        return super(QuerySet, self).delete()
 
     def alive(self) -> models.query.QuerySet:
         return self.filter(deleted_at=None)
@@ -28,24 +28,24 @@ class SoftDeletionQuerySet(models.query.QuerySet):
         return self.exclude(deleted_at=None)
 
 
-class SoftDeletionManager(models.Manager):
+class Manager(models.Manager):
     def __init__(self, *args, **kwargs) -> None:
         self.alive_only = kwargs.pop('alive_only', True)
-        super(SoftDeletionManager, self).__init__(*args, **kwargs)
+        super(Manager, self).__init__(*args, **kwargs)
 
     def get_queryset(self) -> models.query.QuerySet:
         if self.alive_only:
-            return SoftDeletionQuerySet(self.model).filter(deleted_at=None)
-        return SoftDeletionQuerySet(self.model)
+            return QuerySet(self.model).filter(deleted_at=None)
+        return QuerySet(self.model)
 
     def hard_delete(self) -> None:
         self.get_queryset().hard_delete()
 
 
-class SoftDeletionModel(models.Model):
+class Model(models.Model):
     deleted_at = models.DateTimeField(blank=True, null=True)
-    objects = SoftDeletionManager()
-    all_objects = SoftDeletionManager(alive_only=False)
+    objects = Manager()
+    all_objects = Manager(alive_only=False)
 
     class Meta:
         abstract = True
@@ -73,10 +73,10 @@ class SoftDeletionModel(models.Model):
         '''
              called by posts_and_comments.tasks.schedule_hard_delete
         '''
-        super(SoftDeletionModel, self).delete()
+        super(Model, self).delete()
 
 
-class SoftDeletionAdmin(admin.ModelAdmin):
+class Admin(admin.ModelAdmin):
     def get_queryset(self, request: http.HttpRequest) -> models.query.QuerySet:
         qs = self.model.all_objects
         # The below is copied from the base implementation in BaseModelAdmin to
@@ -86,5 +86,5 @@ class SoftDeletionAdmin(admin.ModelAdmin):
             qs = qs.order_by(*ordering)
         return qs
 
-    def delete_model(self, request: http.HttpRequest, qs: SoftDeletionQuerySet) -> None:
+    def delete_model(self, request: http.HttpRequest, qs: QuerySet) -> None:
         qs.hard_delete()

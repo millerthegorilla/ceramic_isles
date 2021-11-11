@@ -7,7 +7,7 @@ from django.db import models as db_models
 from django_artisan import models as artisan_models
 
 
-class StaticViewSitemap(sitemaps.Sitemap):
+class StaticView(sitemaps.Sitemap):
     priority = 0.5
     changefreq = 'daily'
 
@@ -23,7 +23,7 @@ class StaticViewSitemap(sitemaps.Sitemap):
         return urls.reverse(item)
 
 
-class PersonalPageSiteMap(sitemaps.Sitemap):
+class PersonalPage(sitemaps.Sitemap):
     priority = 0.5
     changefreq = 'daily'
 

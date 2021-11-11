@@ -8,7 +8,7 @@ from django.conf import settings
 from django.core import exceptions
 
 
-class DjangoArtisanConfig(apps.AppConfig):
+class DjangoArtisan(apps.AppConfig):
     name = 'django_artisan'
 
     def ready(self) -> None:
@@ -25,7 +25,7 @@ class DjangoArtisanConfig(apps.AppConfig):
                     from .checks import mypy
 
 
-def callback(sender: DjangoArtisanConfig, **kwargs) -> None:
+def callback(sender: DjangoArtisan, **kwargs) -> None:
     from django.contrib.sites.models import Site
     try:
         current_site = Site.objects.get(id=settings.SITE_ID)

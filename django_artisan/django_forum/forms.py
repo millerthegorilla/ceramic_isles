@@ -18,10 +18,10 @@ from . import models as forum_models
 #     def __init__(*args, **kwargs):
 
 
-class ForumProfileUserForm(profile_forms.ProfileUserForm):
-    class Meta(profile_forms.ProfileUserForm.Meta):
-        fields = profile_forms.ProfileUserForm.Meta.fields
-        model = profile_forms.ProfileUserForm.Meta.model
+class ForumProfileUser(profile_forms.ProfileUser):
+    class Meta(profile_forms.ProfileUser.Meta):
+        fields = profile_forms.ProfileUser.Meta.fields
+        model = profile_forms.ProfileUser.Meta.model
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -41,10 +41,10 @@ class ForumProfileUserForm(profile_forms.ProfileUserForm):
             self.helper.layout)
 
 
-class ForumProfileDetailForm(profile_forms.ProfileDetailForm):
-    class Meta(profile_forms.ProfileDetailForm.Meta):
+class ForumProfile(profile_forms.Profile):
+    class Meta(profile_forms.Profile.Meta):
         model = forum_models.ForumProfile
-        fields = profile_forms.ProfileDetailForm.Meta.fields + [
+        fields = profile_forms.Profile.Meta.fields + [
             'address_line_1',
             'address_line_2',
             'parish',
@@ -78,10 +78,10 @@ class ForumProfileDetailForm(profile_forms.ProfileDetailForm):
 
 # START POST AND COMMENTS
 
-class ForumPostCreateForm(posts_and_comments_forms.PostCreateForm):
-    class Meta(posts_and_comments_forms.PostCreateForm.Meta):
+class ForumPost(posts_and_comments_forms.Post):
+    class Meta(posts_and_comments_forms.Post.Meta):
         model = forum_models.ForumPost
-        fields = posts_and_comments_forms.PostCreateForm.Meta.fields + ['category', 'location']
+        fields = posts_and_comments_forms.Post.Meta.fields + ['category', 'location']
         widgets = {'text': TinyMCE()}
         labels = {'category': 'Choose a category for your post...',
                   'location': 'Which island...?'}
@@ -110,10 +110,10 @@ class ForumPostCreateForm(posts_and_comments_forms.PostCreateForm):
         self.helper.form_action = 'django_forum:post_create_view'
 
 
-class ForumCommentForm(posts_and_comments_forms.CommentForm):
+class ForumComment(posts_and_comments_forms.Comment):
     class Meta:
         model = forum_models.ForumComment
-        fields = posts_and_comments_forms.CommentForm.Meta.fields + []
+        fields = posts_and_comments_forms.Comment.Meta.fields + []
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)

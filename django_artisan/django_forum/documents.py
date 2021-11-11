@@ -22,7 +22,7 @@ html_strip = elasticsearch_dsl.analyzer(
 
 
 @registry.register_document
-class ForumCommentDocument(django_elasticsearch_dsl.Document):
+class ForumComment(django_elasticsearch_dsl.Document):
 
     class Index:
         # Name of the Elasticsearch index
@@ -55,7 +55,7 @@ class ForumCommentDocument(django_elasticsearch_dsl.Document):
 
 
 @registry.register_document
-class ForumPostDocument(django_elasticsearch_dsl.Document):
+class ForumPost(django_elasticsearch_dsl.Document):
     text = django_elasticsearch_dsl.fields.TextField(
         attr='text',
         analyzer=html_strip,

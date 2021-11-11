@@ -17,7 +17,7 @@ from django_profile import models as profile_models
 from . import soft_deletion
 
 
-class Post(soft_deletion.SoftDeletionModel):
+class Post(soft_deletion.Model):
     """
         post class contains category  TODO: sanitize field init parameters
     """
@@ -43,13 +43,13 @@ class Post(soft_deletion.SoftDeletionModel):
     def delete(self) -> None:
         for comment in self.comments.all():
             comment.delete()   ## -> calls softdeletionModel.delete
-        super().delete() ## so does this...   SoftDeletionModel.delete sets field on model and schedules
+        super().delete() ## so does this...   Model.delete sets field on model and schedules
                          ## a hard delete
     def __str__(self) -> str:
         return "Post : " + f"{self.title}"
 
 
-class Comment(soft_deletion.SoftDeletionModel):
+class Comment(soft_deletion.Model):
     """
         a post can have many comments
     """
