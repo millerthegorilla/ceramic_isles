@@ -4,14 +4,14 @@ import logging
 from random import randint
 import typing
 
-from django_q.tasks import async_task
-from sorl.thumbnail import delete
+from django_q import tasks
+from sorl import thumbnail
 
+from django import conf
 from django.contrib.auth import models as auth_models
 from django.db import models, transaction
 from django.dispatch import receiver
-from django.db.models.signals import pre_save, post_save, post_delete, pre_delete
-from django.conf import settings
+from django.db.models import signals
 from django.core import exceptions
 
 from django_forum import models as forum_models
@@ -55,14 +55,14 @@ class ArtisanForumProfile(forum_models.ForumProfile):
 """
     disconnect dummy profile
 """
-post_save.disconnect(forum_models.create_user_forum_profile, sender=auth_models.User)
-post_save.disconnect(forum_models.save_user_forum_profile, sender=auth_models.User)
+signals.post_save.disconnect(forum_models.create_user_forum_profile, sender=auth_models.User)
+signals.post_save.disconnect(forum_models.save_user_forum_profile, sender=auth_models.User)
 """
     Custom signals to create and update user profile
 """
 
 
-@receiver(post_save, sender=auth_models.User)
+@receiver(signals.post_save, sender=auth_models.User)
 def create_user_artisan_forum_profile(sender, instance: auth_models.User, created: bool, **kwargs):
     if created:
         ArtisanForumProfile.objects.create(
@@ -75,7 +75,7 @@ def create_user_artisan_forum_profile(sender, instance: auth_models.User, create
     instance.profile.save()
 
 
-@receiver(post_save, sender=auth_models.User)
+@receiver(signals.post_save, sender=auth_models.User)
 def save_user_artisan_forum_profile(sender, instance: auth_models.User, **kwargs):
     try:
         instance.profile.save()
@@ -83,7 +83,7 @@ def save_user_artisan_forum_profile(sender, instance: auth_models.User, **kwargs
         logger.error("Error saving ArtisanForumProfile : {0}".format(e))
 
 
-@receiver(pre_delete, sender=ArtisanForumProfile)
+@receiver(signals.pre_delete, sender=ArtisanForumProfile)
 def auto_delete_image_file_on_delete(sender: ArtisanForumProfile, instance: ArtisanForumProfile, **kwargs):
     """
     Deletes file from filesystem
@@ -95,10 +95,10 @@ def auto_delete_image_file_on_delete(sender: ArtisanForumProfile, instance: Arti
         if instance.image_file:
             if os.path.isfile(fp):
                 try:
-                    delete(instance.image_file)
+                    thumbnail.delete(instance.image_file)
                     if len(os.listdir(fd)) == 0:
                         os.rmdir(fd)
-                    fdu1 = settings.MEDIA_ROOT + \
+                    fdu1 = core.settings.MEDIA_ROOT + \
                         'uploads/users/' + \
                         instance.display_name
                     if os.path.isdir(fdu1):
@@ -150,7 +150,7 @@ class UserProductImage(models.Model):
             return cls.objects.values_list('id', flat=True)[0]
 
 
-@receiver(post_delete, sender=UserProductImage)
+@receiver(signals.post_delete, sender=UserProductImage)
 def auto_delete_file_on_delete(sender: UserProductImage, instance: UserProductImage, **kwargs):
     """
     Deletes file from filesystem
@@ -159,12 +159,12 @@ def auto_delete_file_on_delete(sender: UserProductImage, instance: UserProductIm
     fp = instance.image_file.path
     fd = os.path.dirname(fp)
     if instance.image_file:
-        delete(instance.image_file)  # removes from cache - sorl thumbnail
+        thumbnaildelete(instance.image_file)  # removes from cache - sorl thumbnail
         if len(os.listdir(fd)) == 0:
             os.rmdir(fd)
 
 # the below function was commented out
-@receiver(pre_save, sender=UserProductImage)
+@receiver(signals.pre_save, sender=UserProductImage)
 def auto_delete_file_on_change(sender: UserProductImage, instance:UserProductImage, **kwargs):
     """
     Deletes old file from filesystem
@@ -184,16 +184,16 @@ def auto_delete_file_on_change(sender: UserProductImage, instance:UserProductIma
     new_file = instance.image_file
     if not old_image_field.file == new_file:
         if os.path.isfile(old_image_field.file.path):
-            delete(old_image_field) # clear thumbs from cache
+            thumbnail.delete(old_image_field) # clear thumbs from cache
             os.remove(old_image_field.file.path)
 
 
-@receiver(post_save, sender=UserProductImage)
+@receiver(signals.post_save, sender=UserProductImage)
 def send_email_when_image_uploaded(sender: UserProductImage, instance: UserProductImage, **kwargs):
     """
        Send email to moderators
     """
-    async_task(forum_views.ForumPostView.send_mod_mail('Image'))
+    tasks.async_task(forum_views.ForumPostView.send_mod_mail('Image'))
 
 
 class Event(models.Model):

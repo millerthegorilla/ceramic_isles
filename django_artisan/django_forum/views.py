@@ -1,97 +1,73 @@
-import bleach
-import html
-import logging
-from uuid import uuid4
-from elasticsearch_dsl import Q
-from random import randint
-from typing import Union
+import bleach, html, logging, uuid, elasticsearch_dsl, typing
 
-from django_q.tasks import schedule
+from django_q import tasks
 
-from django.shortcuts import render, redirect
-from django.urls import reverse_lazy
-from django.template.defaultfilters import slugify
-from django.http import JsonResponse, HttpResponseServerError
-from django.forms.models import model_to_dict
-from django.forms import ModelForm
-from django.core.paginator import Paginator
-from django.utils import timezone
-from django.utils import dateformat
-from django.utils.decorators import method_decorator
-from django.core.exceptions import ObjectDoesNotExist
-from django.contrib.auth import get_user_model
-from django.contrib.auth.models import User
-from django.views.decorators.cache import never_cache
-from django.conf import settings
-from django.views.generic.base import TemplateView
-from django.core.mail import send_mail
-from django.db.models.signals import post_save
-from django.contrib.sites.models import Site
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django import urls, forms, shortcuts, http, utils, conf
+from django.template import defaultfilters
+from django.core import exceptions, mail
+from django.contrib import auth
+from django.views.decorators import cache
+
+from django.views import generic
+from django.contrib.sites import models as site_models
 
 # Create your views here.
-from django_posts_and_comments.models import Post
-from django_posts_and_comments.views import PostCreateView, PostListView, PostView
-from django_profile.views import ProfileUpdateView
-from django_users.views import RegisterView
+from django_posts_and_comments import views as posts_and_comments_views
+from django_profile import views as profile_views
+from django_users import views as users_views
 
-from .documents import ForumPostDocument, ForumCommentDocument
-from .models import ForumProfile, ForumPost, ForumComment
-from .forms import ForumPostCreateForm, ForumPostListSearch, \
-    ForumCommentForm, ForumProfileUserForm, \
-    ForumProfileDetailForm
-from .custom_registration_form import CustomUserCreationForm
-from .models import create_user_forum_profile, Avatar, default_avatar
-from .tasks import send_susbcribed_email
-from typing import Any
+from . import documents as forum_documents
+from . import models as forum_models
+from . import forms as forum_forms
+from . import custom_registration_form as custom_reg_form
 
 logger = logging.getLogger('django_artisan')
 
 
 # START POSTS AND COMMENTS
-class ForumPostCreateView(PostCreateView):
-    model = ForumPost
+class ForumPostCreateView(posts_and_comments_views.PostCreateView):
+    model = forum_models.ForumPost
     template_name = "django_forum/posts_and_comments/forum_post_create_form.html"
-    form_class = ForumPostCreateForm
+    form_class = forum_forms.ForumPostCreateForm
 
-    def form_valid(self, form: ModelForm) -> HttpResponseRedirect:
+    def form_valid(self, form: forms.ModelForm) -> http.HttpResponseRedirect:
         post = form.save(commit=False)
         post.user_profile = self.request.user.profile.forumprofile
-        post.text = PostCreateView.sanitize_post_text(post.text)
-        post.slug = slugify(
-            post.title[:60] + '-' + str(dateformat.format(timezone.now(), 'Y-m-d H:i:s')))
+        post.text = posts_and_comments_views.PostCreateView.sanitize_post_text(post.text)
+        post.slug = defaultfilters.slugify(
+            post.title[:60] + '-' + str(utils.dateformat.format(utils.timezone.now(), 'Y-m-d H:i:s')))
         post.save()
         if 'subscribe' in self.request.POST:
             post.subscribed_users.add(self.request.user)
-        return redirect(self.get_success_url(post))
+        return shortcuts.redirect(self.get_success_url(post))
 
-    def get_success_url(self, post: ForumPost, *args, **kwargs) -> str:
-        return reverse_lazy(
+    def get_success_url(self, post: forum_models.ForumPost, *args, **kwargs) -> str:
+        return urls.reverse_lazy(
             'django_forum:post_view', args=(
                 post.id, post.slug,))
 
 
-@method_decorator(never_cache, name='dispatch')
-@method_decorator(never_cache, name='get')
-class ForumPostView(PostView):
+@utils.decorators.method_decorator(cache.never_cache, name='dispatch')
+@utils.decorators.method_decorator(cache.never_cache, name='get')
+class ForumPostView(posts_and_comments_views.PostView):
     """
         TODO: Replace superclass form processing if conditions with separate urls/views
               and overload them individually here, where necessary, instead of redefining
               the whole if clause.
     """
-    model: ForumPost = ForumPost
+    model: forum_models.ForumPost = forum_models.ForumPost
     slug_url_kwarg: str = 'post_slug'
     slug_field: str = 'slug'
     template_name: str = 'django_forum/posts_and_comments/forum_post_detail.html'
-    form_class: ForumPostCreateForm = ForumPostCreateForm
-    comment_form_class: ForumCommentForm = ForumCommentForm
+    form_class: forum_forms.ForumPostCreateForm = forum_forms.ForumPostCreateForm
+    comment_form_class: forum_forms.ForumCommentForm = forum_forms.ForumCommentForm
     #extra_context = { 'site_url':Site.objects.get_current().domain }
 
-    def post(self, *args, **kwargs) -> Union[HttpResponse, HttpResponseRedirect]:
-        post = ForumPost.objects.get(pk=kwargs['pk'])
+    def post(self, *args, **kwargs) -> typing.Union[http.HttpResponse, http.HttpResponseRedirect]:
+        post = forum_models.ForumPost.objects.get(pk=kwargs['pk'])
         if self.request.POST['type'] == 'post' and self.request.user.profile.display_name == post.author:
             post.delete()
-            return redirect(reverse_lazy('django_forum:post_list_view'))
+            return shortcuts.redirect(urls.reverse_lazy('django_forum:post_list_view'))
         elif self.request.POST['type'] == 'comment':
             comment_form = self.comment_form_class(data=self.request.POST)
             if comment_form.is_valid():
@@ -101,19 +77,19 @@ class ForumPostView(PostView):
                 new_comment.forum_post = post
                 new_comment.user_profile = self.request.user.profile.forumprofile
                 new_comment.save()
-                schedule('django_forum.tasks.send_susbcribed_email',
-                         name="subscribe_timeout" + str(uuid4()),
-                         schedule_type="O",
-                         repeats=-1,
-                         next_run=timezone.now() + settings.COMMENT_WAIT,
-                         post_id=post.id,
-                         comment_id=new_comment.id,
-                         path_info=self.request.path_info)
-                return redirect(post)
+                tasks.schedule('django_forum.tasks.send_susbcribed_email',
+                             name="subscribe_timeout" + str(uuid.uuid4()),
+                             schedule_type="O",
+                             repeats=-1,
+                             next_run=utils.timezone.now() + conf.settings.COMMENT_WAIT,
+                             post_id=post.id,
+                             comment_id=new_comment.id,
+                             path_info=self.request.path_info)
+                return shortcuts.redirect(post)
             else:
-                site = Site.objects.get_current()
-                comments = ForumComment.objects.filter(post=post).all()
-                return render(self.request,
+                site = site_models.Site.objects.get_current()
+                comments = forum_models.ForumComment.objects.filter(post=post).all()
+                return shortcuts.render(self.request,
                               self.template_name,
                               {'post': post,
                                'comments': comments,
@@ -124,66 +100,66 @@ class ForumPostView(PostView):
             post.category = self.request.POST['category']
             post.location = self.request.POST['location']
             post.save(update_fields=['text', 'location', 'category'])
-            return redirect(post)
+            return shortcuts.redirect(post)
         elif self.request.POST['type'] == 'rem-comment':
-            ForumComment.objects.get(pk=self.request.POST['comment']).delete()
-            return redirect(post)
+            forum_models.ForumComment.objects.get(pk=self.request.POST['comment']).delete()
+            return shortcuts.redirect(post)
         elif self.request.POST['type'] == 'comment-update':
             try:
-                comment = ForumComment.objects.get(id=self.request.POST['id'])
+                comment = forum_models.ForumComment.objects.get(id=self.request.POST['id'])
                 comment.text = bleach.clean(html.unescape(
                     self.request.POST['comment-update']), strip=True)
                 comment.save(update_fields=['text'])
-                return redirect(post)
-            except ObjectDoesNotExist as e:
+                return shortcuts.redirect(post)
+            except exceptions.ObjectDoesNotExist as e:
                 logger.error("Error accessing comment : {0}".format(e))
-                return HttpResponse(status=500)
+                return http.HttpResponse(status=500)
         elif self.request.POST['type'] == 'post-report':
-            post.moderation = timezone.now()
+            post.moderation = utils.timezone.now()
             post.save(update_fields=['moderation'])
             ForumPostView.send_mod_mail('Post')
-            return redirect(post)
+            return shortcuts.redirect(post)
         elif self.request.POST['type'] == 'comment-report':
-            comment = ForumComment.objects.get(id=self.request.POST['id'])
-            comment.moderation = timezone.now()
+            comment = forum_models.ForumComment.objects.get(id=self.request.POST['id'])
+            comment.moderation = utils.timezone.now()
             comment.save(update_fields=['moderation'])
             ForumPostView.send_mod_mail('Comment')
-            return redirect(post)
+            return shortcuts.redirect(post)
         else:
-            return redirect('django_forum:post_list_view')
+            return shortcuts.redirect('django_forum:post_list_view')
 
     @staticmethod
     def send_mod_mail(type: str) -> None:
-        send_mail(
+        mail.send_mail(
             'Moderation for {0}'.format(type),
             'A {0} has been created and requires moderation.  Please visit the {1} AdminPanel, and inspect the {0}'.format(
                 type,
-                settings.SITE_NAME),
-            settings.EMAIL_HOST_USER,
+                conf.settings.SITE_NAME),
+            conf.settings.EMAIL_HOST_USER,
             list(
-                get_user_model().objects.filter(
+                auth.get_user_model().objects.filter(
                     is_staff=True).values_list(
                     'email',
                     flat=True)),
             fail_silently=False,
         )
 
-    def get(self, *args, **kwargs) -> HttpResponse:
-        site = Site.objects.get_current()
-        post = ForumPost.objects.get(pk=kwargs['pk'])
+    def get(self, *args, **kwargs) -> http.HttpResponse:
+        site = site_models.Site.objects.get_current()
+        post = forum_models.ForumPost.objects.get(pk=kwargs['pk'])
         form = self.form_class(user_name=self.request.user.username, post=post) # type: ignore
         subscribed = ''
         try:
             if post.subscribed_users.get(username=self.request.user.username): # type: ignore
                 subscribed = 'checked'
-        except get_user_model().DoesNotExist:
+        except auth.get_user_model().DoesNotExist:
             subscribed = ''
         new_comment_form = self.comment_form_class() # type: ignore
-        comments = ForumComment.objects.filter(post=post)
+        comments = forum_models.ForumComment.objects.filter(post=post)
         user_display_name = self.request.user.profile.display_name
         category = post.get_category_display()
         cat_text = ''
-        for i in [(cat.value, cat.label) for cat in settings.CATEGORY]:
+        for i in [(cat.value, cat.label) for cat in conf.settings.CATEGORY]:
             if i[1] == category:
                 cat_text = cat_text + '<option value="' + \
                     str(i[0]) + '" selected>' + str(i[1]) + '</option>'
@@ -192,7 +168,7 @@ class ForumPostView(PostView):
                     str(i[0]) + '">' + str(i[1]) + '</option>'
         location = post.get_location_display()
         loc_text = ''
-        for i in [(loc.value, loc.label) for loc in settings.LOCATION]:
+        for i in [(loc.value, loc.label) for loc in conf.settings.LOCATION]:
             if i[1] == location:
                 loc_text = loc_text + '<option value="' + \
                     str(i[0]) + '" selected>' + str(i[1]) + '</option>'
@@ -200,7 +176,7 @@ class ForumPostView(PostView):
                 loc_text = loc_text + '<option value="' + \
                     str(i[0]) + '">' + str(i[1]) + '</option>'
 
-        return render(self.request,
+        return shortcuts.render(self.request,
                       self.template_name,
                       {'form': form,
                        'post': post,
@@ -213,30 +189,30 @@ class ForumPostView(PostView):
                        'site_url': (self.request.scheme or 'https') + '://' + site.domain})
 
 
-def subscribe(request) -> JsonResponse:
+def subscribe(request) -> http.JsonResponse:
     # request should be ajax and method should be POST.
     if request.is_ajax and request.method == "POST":
         try:
-            fp = ForumPost.objects.get(slug=request.POST['post_slug'])
+            fp = forum_models.ForumPost.objects.get(slug=request.POST['post_slug'])
             if request.POST['data'] == 'true':
                 fp.subscribed_users.add(request.user)
             else:
                 fp.subscribed_users.remove(request.user)
-            return JsonResponse({}, status=200)
-        except ForumPost.DoesNotExist as e:
+            return http.JsonResponse({}, status=200)
+        except forum_models.ForumPost.DoesNotExist as e:
             logger.error('There is no post with that slug : {0}'.format(e))
-            return JsonResponse(
+            return http.JsonResponse(
                 {"error": "no post with that slug"}, 
                 status=500)
     else:
-        return JsonResponse(
+        return http.JsonResponse(
             {"error": ""}, 
             status=500)
 
 
-@method_decorator(never_cache, name='dispatch')
-class ForumPostListView(PostListView):
-    model = ForumPost
+@utils.decorators.method_decorator(cache.never_cache, name='dispatch')
+class ForumPostListView(posts_and_comments_views.PostListView):
+    model = forum_models.ForumPost
     template_name = 'django_forum/posts_and_comments/forum_post_list.html'
     paginate_by = 5
     """
@@ -245,7 +221,7 @@ class ForumPostListView(PostListView):
        comments.  The search indexes are defined in documents.py.
     """
 
-    def get(self, request: HttpRequest, search_slug: str = None) -> HttpResponse: # type: ignore
+    def get(self, request: http.HttpRequest, search_slug: str = None) -> http.HttpResponse: # type: ignore
         '''
             I had a function that tested for the existence of a search slug
             and then performed the search if necessary.  I have refactored that
@@ -254,11 +230,11 @@ class ForumPostListView(PostListView):
             So, TODO profile this method vs the original from commit id
             1d5cbccde9f7b183e4d886d7e644712b79db60cd 
         '''
-        site = Site.objects.get_current()
+        site = site_models.Site.objects.get_current()
         search = 0
         p_c = None
         is_a_search = False
-        form = ForumPostListSearch(request.GET)
+        form = forum_forms.ForumPostListSearch(request.GET)
         if form.is_valid():
             is_a_search = True
             terms = form.cleaned_data['q'].split(' ')
@@ -267,25 +243,24 @@ class ForumPostListView(PostListView):
             else:
                 t = 'match'
                 terms = terms[0]
-            queryset_p = ForumPostDocument.search().query(
-                Q(t, text=terms) |
-                Q(t, author=terms) |
-                Q(t, title=terms) |
-                Q(t, category=terms) |
-                Q(t, location=terms)).to_queryset()
-            queryset_c = ForumCommentDocument.search().query(
-                Q(t, text=terms) | Q(t, author=terms)).to_queryset()
+            queryset_p = forum_documents.ForumPostDocument.search().query(
+                elasticsearch_dsl.Q(t, text=terms) |
+                elasticsearch_dsl.Q(t, author=terms) |
+                elasticsearch_dsl.Q(t, title=terms) |
+                elasticsearch_dsl.Q(t, category=terms) |
+                elasticsearch_dsl.Q(t, location=terms)).to_queryset()
+            queryset_c = forum_documents.ForumCommentDocument.search().query(
+                elasticsearch_dsl.Q(t, text=terms) | elasticsearch_dsl.Q(t, author=terms)).to_queryset()
             p_c = list(queryset_p) + list(queryset_c)
             search = len(p_c)
             if search == 0:
-               # queryset = ForumPost.objects.all()
-                queryset = ForumPost.objects.order_by('-pinned')
-                paginator = Paginator(queryset, self.paginate_by)
+                queryset = forum_models.ForumPost.objects.order_by('-pinned')
+                paginator = paginator.Paginator(queryset, self.paginate_by)
             else:
-                paginator = Paginator(p_c, self.paginate_by)
+                paginator = paginator.Paginator(p_c, self.paginate_by)
         else:
-            queryset = ForumPost.objects.order_by('-pinned')
-            paginator = Paginator(queryset, self.paginate_by)
+            queryset = forum_models.ForumPost.objects.order_by('-pinned')
+            paginator = paginator.Paginator(queryset, self.paginate_by)
 
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
@@ -294,10 +269,10 @@ class ForumPostListView(PostListView):
             'search': search,
             'is_a_search': is_a_search,
             'site_url': (request.scheme or 'https') + '://' + site.domain}
-        return render(request, self.template_name, context)
+        return shortcuts.render(request, self.template_name, context)
             # # TODO: show form errors?
             # breakpoint()
-            # return render(request, self.template_name, {'form': form, 'is_a_search': False })
+            # return shortcuts.render(request, self.template_name, {'form': form, 'is_a_search': False })
 
 ## autocomplete now removed to reduce number of requests
 # def autocomplete(request):
@@ -317,34 +292,34 @@ class ForumPostListView(PostListView):
 
 
 # START PROFILE
-@method_decorator(never_cache, name='dispatch')
-class ForumProfileUpdateView(ProfileUpdateView):
-    model = ForumProfile
-    form_class = ForumProfileDetailForm
-    user_form_class = ForumProfileUserForm
-    success_url = reverse_lazy('django_forum:profile_update_view')
+@utils.decorators.method_decorator(cache.never_cache, name='dispatch')
+class ForumProfileUpdateView(profile_views.ProfileUpdateView):
+    model = forum_models.ForumProfile
+    form_class = forum_forms.ForumProfileDetailForm
+    user_form_class = forum_forms.ForumProfileUserForm
+    success_url = urls.reverse_lazy('django_forum:profile_update_view')
     template_name = 'django_forum/profile/forum_profile_update_form.html'
 
-    def form_valid(self, form: ModelForm) -> Union[HttpResponse, HttpResponseRedirect]: # type: ignore
+    def form_valid(self, form: forms.ModelForm) -> typing.Union[http.HttpResponse, http.HttpResponseRedirect]: # type: ignore
     # mypy can't handle inheritance properly, and grumbles about a missing return statement
         if self.request.POST['type'] == 'update-profile':
             if form.has_changed():
                 form.save()
             return super().form_valid(form)  # process other form in django_profile app
         elif self.request.POST['type'] == 'update-avatar':
-            fp = ForumProfile.objects.get(profile_user=self.request.user)
+            fp = forum_models.ForumProfile.objects.get(profile_user=self.request.user)
             fp.avatar.image_file.save(
                 self.request.FILES['avatar'].name,
                 self.request.FILES['avatar'])
-            return redirect(self.success_url)
+            return shortcuts.redirect(self.success_url)
 
     def get_context_data(self, **args) -> dict:
         context = super().get_context_data(**args)
-        context['avatar'] = ForumProfile.objects.get(
+        context['avatar'] = forum_models.ForumProfile.objects.get(
             profile_user=self.request.user).avatar
-        queryset = ForumPost.objects.filter(
+        queryset = forum_models.ForumPost.objects.filter(
             author=self.request.user.profile.display_name)
-        paginator = Paginator(queryset, 6)
+        paginator = paginator.Paginator(queryset, 6)
         page_number = self.request.GET.get('page')
         page_obj = paginator.get_page(page_number)
         context['page_obj'] = page_obj
@@ -357,20 +332,20 @@ class ForumProfileUpdateView(ProfileUpdateView):
 # path('users/accounts/register/', CustomRegisterView.as_view(), name='register'),
 
 
-class CustomRegisterView(RegisterView):
-    form_class = CustomUserCreationForm
+class CustomRegisterView(users_views.RegisterView):
+    form_class = custom_reg_form.CustomUserCreationForm
 
-    def form_valid(self, form: CustomUserCreationForm) -> HttpResponseRedirect:
+    def form_valid(self, form: custom_reg_form.CustomUserCreationForm) -> http.HttpResponseRedirect:
         user = form.save()
         user.profile.forumprofile.rules_agreed = form['rules'].value()
         user.profile.forumprofile.save(update_fields=['rules_agreed'])
-        user.profile.display_name = slugify(form['display_name'].value())
+        user.profile.display_name = defaultfilters.slugify(form['display_name'].value())
         user.profile.save(update_fields=['display_name'])
         user.save()
         super().form_valid(form, user)
-        return redirect('password_reset_done')
+        return shortcuts.redirect('password_reset_done')
 
 
-class RulesPageView(TemplateView):
+class RulesPageView(generic.base.TemplateView):
     template_name = 'django_forum/rules.html'
-    extra_context = {'app_name': settings.SITE_NAME}
+    extra_context = {'app_name': conf.settings.SITE_NAME}

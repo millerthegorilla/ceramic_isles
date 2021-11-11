@@ -3,28 +3,18 @@ import logging
 from random import randint
 from typing import Any, Union
 
-from django.db.models import Max
-from django.core.files import File
-from django.core.exceptions import ObjectDoesNotExist, FieldError
-from django.db import models, DEFAULT_DB_ALIAS
-from django.dispatch import receiver
-from django.db.models.signals import pre_init, post_save, pre_save, post_delete, pre_delete
-from django.contrib.auth.models import User
-from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes import fields
-from django.utils.translation import gettext_lazy as _
-from django.utils import dateformat
-from django.template.defaultfilters import slugify
-from django.urls import reverse_lazy
-from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist
+from sorl import thumbnail
+from safe_imagefield import models as safe_image_models
 
-from django_profile.models import Profile
-from django_profile.models import create_user_profile, save_user_profile
-from django_posts_and_comments.models import Post, Comment
-from safe_imagefield.models import SafeImageField
-from sorl.thumbnail.fields import ImageField
-from sorl.thumbnail import delete
+from django import urls, conf, dispatch
+from django.core import exceptions
+from django.db import models as db_models, DEFAULT_DB_ALIAS
+from django.db.models import signals
+from django.contrib.auth import models as auth_models
+
+from django_profile import models as profile_models
+from django_posts_and_comments import models as posts_and_comments_models
+
 
 # _: Any
 
@@ -46,11 +36,11 @@ def default_avatar(num: int) -> str:
 
 # START AVATARS
 
-class Avatar(models.Model):
-    image_file = models.ImageField(upload_to=user_directory_path_avatar)
+class Avatar(db_models.Model):
+    image_file = safe_image_models.SafeImageField(upload_to=user_directory_path_avatar)
 
 
-@receiver(pre_save, sender=Avatar)
+@dispatch.receiver(signals.pre_save, sender=Avatar)
 def auto_delete_file_on_change(sender: Avatar, instance: Avatar, **kwargs):
     """
     Deletes old file from filesystem
@@ -71,25 +61,25 @@ def auto_delete_file_on_change(sender: Avatar, instance: Avatar, **kwargs):
         if not old_avatar.image_file == new_file:
             if os.path.isfile(old_avatar.image_file.path):
                 try:
-                    delete(old_avatar.image_file)
-                except ObjectDoesNotExist as e:
+                    thumbnail.delete(old_avatar.image_file)
+                except exceptions.ObjectDoesNotExist as e:
                     logger.error(
                         "Error, avatar does not exist : {0}".format(e))
 
 # END AVATARS
 
 
-class ForumProfile(Profile):
-    address_line_1: models.CharField = models.CharField(
+class ForumProfile(profile_models.Profile):
+    address_line_1: db_models.CharField = db_models.CharField(
         'address line 1', max_length=30, blank=True, default='')
-    address_line_2: models.CharField = models.CharField(
+    address_line_2: db_models.CharField = db_models.CharField(
         'address line 2', max_length=30, blank=True, default='')
-    parish: models.CharField = models.CharField('parish', max_length=30, blank=True, default='')
-    postcode: models.CharField = models.CharField(
+    parish: db_models.CharField = db_models.CharField('parish', max_length=30, blank=True, default='')
+    postcode: db_models.CharField = db_models.CharField(
         'postcode', max_length=6, blank=True, default='')
-    avatar: models.OneToOneField = models.OneToOneField(
-        Avatar, on_delete=models.CASCADE, related_name='user_profile')
-    rules_agreed: models.BooleanField = models.BooleanField(default='False')
+    avatar: db_models.OneToOneField = db_models.OneToOneField(
+        Avatar, on_delete=db_models.CASCADE, related_name='user_profile')
+    rules_agreed: db_models.BooleanField = db_models.BooleanField(default='False')
 
     def username(self) -> str:
         return self.profile_user.username
@@ -101,15 +91,15 @@ class ForumProfile(Profile):
 """
     disconnect dummy profile
 """
-post_save.disconnect(create_user_profile, sender=User)
-post_save.disconnect(save_user_profile, sender=User)
+signals.post_save.disconnect(profile_models.create_user_profile, sender=auth_models.User)
+signals.post_save.disconnect(profile_models.save_user_profile, sender=auth_models.User)
 """
     Custom signals to create and update user profile
 """
 
 
-@receiver(post_save, sender=User)
-def create_user_forum_profile(sender: User, instance: User, created: bool, **kwargs) -> None:
+@dispatch.receiver(signals.post_save, sender=auth_models.User)
+def create_user_forum_profile(sender: auth_models.User, instance: auth_models.User, created: bool, **kwargs) -> None:
     if created:
         ForumProfile.objects.create(
             profile_user=instance,
@@ -121,15 +111,15 @@ def create_user_forum_profile(sender: User, instance: User, created: bool, **kwa
     instance.profile.save()
 
 
-@receiver(post_save, sender=User)
-def save_user_forum_profile(sender: User, instance: User, **kwargs) -> None:
+@dispatch.receiver(signals.post_save, sender=auth_models.User)
+def save_user_forum_profile(sender: auth_models.User, instance: auth_models.User, **kwargs) -> None:
     try:
         instance.profile.save()
-    except (ObjectDoesNotExist, FieldError) as e:
+    except (exceptions.ObjectDoesNotExist, exceptions.FieldError) as e:
         logger.error("Error saving forum profile : {0}".format(e))
 
 
-@receiver(pre_delete, sender=ForumProfile)
+@dispatch.receiver(signals.pre_delete, sender=ForumProfile)
 def auto_delete_avatar_on_delete(sender: ForumProfile, instance: ForumProfile, **kwargs) -> None:
     """
     Deletes Avatar from filesystem
@@ -140,49 +130,49 @@ def auto_delete_avatar_on_delete(sender: ForumProfile, instance: ForumProfile, *
     if instance.avatar.image_file and 'default_avatars' not in instance.avatar.image_file.path:
         if os.path.isfile(fp):
             try:
-                delete(instance.avatar.image_file)
+                thumbnail.delete(instance.avatar.image_file)
                 instance.avatar.delete()
                 if len(os.listdir(fd)) == 0:
                     os.rmdir(fd)
-                fdu1 = settings.MEDIA_ROOT + \
+                fdu1 = conf.settings.MEDIA_ROOT + \
                     'uploads/users/' + \
                     instance.display_name
                 if os.path.isdir(fdu1):
                     if len(os.listdir(fdu1)) == 0:
                         os.rmdir(fdu1)
-            except ObjectDoesNotExist as e:
+            except exceptions.ObjectDoesNotExist as e:
                 logger.error("unable to delete avatar : {0}".format(e))
 
 # START POST AND COMMENTS
 
 ## TODO Post and Comment should probably have common superclass somewhere.
 
-class ForumPost(Post):
-    author: models.CharField = models.CharField(default='', max_length=40)
-    active: models.BooleanField = models.BooleanField(default=True)
-    moderation: models.DateField = models.DateField(null=True, default=None, blank=True)
-    pinned:models.SmallIntegerField = models.SmallIntegerField(default=0)
-    subscribed_users: models.ManyToManyField = models.ManyToManyField(
-        User, blank=True, related_name="subscribed_posts")
+class ForumPost(posts_and_comments_models.Post):
+    author: db_models.CharField = db_models.CharField(default='', max_length=40)
+    active: db_models.BooleanField = db_models.BooleanField(default=True)
+    moderation: db_models.DateField = db_models.DateField(null=True, default=None, blank=True)
+    pinned: db_models.SmallIntegerField = db_models.SmallIntegerField(default=0)
+    subscribed_users: db_models.ManyToManyField = db_models.ManyToManyField(
+        auth_models.User, blank=True, related_name="subscribed_posts")
 
     class Meta:
         ordering = ['-date_created']
         permissions = [('approve_post', 'Approve Post')]
 
-    category: models.CharField = models.CharField(
+    category: db_models.CharField = db_models.CharField(
         max_length=2,
-        choices=settings.CATEGORY.choices,
-        default=settings.CATEGORY.GENERAL,
+        choices=conf.settings.CATEGORY.choices,
+        default=conf.settings.CATEGORY.GENERAL,
     )
 
-    location: models.CharField = models.CharField(
+    location: db_models.CharField = db_models.CharField(
         max_length=2,
-        choices=settings.LOCATION.choices,
-        default=settings.LOCATION.ANY_ISLE,
+        choices=conf.settings.LOCATION.choices,
+        default=conf.settings.LOCATION.ANY_ISLE,
     )
 
     def get_absolute_url(self) -> str:
-        return reverse_lazy(
+        return urls.reverse_lazy(
             'django_forum:post_view', args=(
                 self.id, self.slug,)) # type: ignore
 
@@ -190,26 +180,26 @@ class ForumPost(Post):
         return f"Post by {self.author}"
 
     def category_label(self) -> str:
-        return settings.CATEGORY(self.category).label
+        return conf.settings.CATEGORY(self.category).label
 
     def location_label(self) -> str:
-        return settings.LOCATION(self.location).label
+        return conf.settings.LOCATION(self.location).label
 
 
-@receiver(post_save, sender=ForumPost)
+@dispatch.receiver(signals.post_save, sender=ForumPost)
 def save_author_on_post_creation(sender: ForumPost, instance: ForumPost, created, **kwargs) -> None:
     if created:
         instance.author = instance.post_author()
         instance.save()
 
 
-class ForumComment(Comment):
+class ForumComment(posts_and_comments_models.Comment):
     # author: models.CharField = models.CharField(default='', max_length=40)
-    forum_post: models.ForeignKey = models.ForeignKey(
-        ForumPost, on_delete=models.CASCADE, related_name="forum_comments")
-    active: models.BooleanField = models.BooleanField(default='True')
-    moderation: models.DateField = models.DateField(null=True, default=None, blank=True)
-    title_slug: models.SlugField = models.SlugField()
+    forum_post: db_models.ForeignKey = db_models.ForeignKey(
+        ForumPost, on_delete=db_models.CASCADE, related_name="forum_comments")
+    active: db_models.BooleanField = db_models.BooleanField(default='True')
+    moderation: db_models.DateField = db_models.DateField(null=True, default=None, blank=True)
+    title_slug: db_models.SlugField = db_models.SlugField()
 
     class Meta:
         ordering = ['date_created']
@@ -225,7 +215,7 @@ class ForumComment(Comment):
     def get_category_display(self) -> str:
         return 'Comment'
 
-# @receiver(post_save, sender=ForumComment)
+# @dispatch.receiver(post_save, sender=ForumComment)
 # def save_author_on_comment_creation(sender: ForumComment, instance: ForumComment, created, **kwargs) -> None:
 #     if created:
 #         instance.author = instance.comment_author()

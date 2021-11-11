@@ -1,34 +1,25 @@
-from django.urls import path, include
+from django import urls
 
-from .views import ForumPostListView, \
-    ForumPostView, \
-    ForumPostCreateView, \
-    CustomRegisterView, \
-    ForumProfileUpdateView, \
-    RulesPageView, \
-    subscribe
-# autocomplete
-from .forms import ForumPostCreateForm
-from .models import ForumPost
+from . import views as forum_views 
 
 app_name = "django_forum"
 urlpatterns = [
-    path('profile/', ForumProfileUpdateView.as_view(),
+    urls.path('profile/', forum_views.ForumProfileUpdateView.as_view(),
          name='profile_update_view'),
-    path(
+    urls.path(
         'create_post/',
-        ForumPostCreateView.as_view(),
+        forum_views.ForumPostCreateView.as_view(),
         name='post_create_view'),
-    path('posts/<slug:search_slug>',
-         ForumPostListView.as_view(), name='post_list_view'),
-    path('posts/', ForumPostListView.as_view(), name='post_list_view'),
-    path(
+    urls.path('posts/<slug:search_slug>',
+         forum_views.ForumPostListView.as_view(), name='post_list_view'),
+    urls.path('posts/', forum_views.ForumPostListView.as_view(), name='post_list_view'),
+    urls.path(
         '<int:pk>/<slug:post_slug>/',
-        ForumPostView.as_view(),
+        forum_views.ForumPostView.as_view(),
         name='post_view'),
-    path('rules/', RulesPageView.as_view(), name='rules_view'),
-    path('register/', CustomRegisterView.as_view(), name='register'),
-    path('subscribe/', subscribe, name='subscribe')
+    urls.path('rules/', forum_views.RulesPageView.as_view(), name='rules_view'),
+    urls.path('register/', forum_views.CustomRegisterView.as_view(), name='register'),
+    urls.path('subscribe/', forum_views.subscribe, name='subscribe')
     # path('autocomplete/', autocomplete, name='autocomplete')  # experimental
     # autocomplete
 ]
