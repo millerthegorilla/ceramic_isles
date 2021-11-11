@@ -2,28 +2,26 @@ import os
 import uuid
 import logging
 from random import randint
-from pathlib import Path
-from typing import Any, Union
+import typing
 
 from django_q.tasks import async_task
 from sorl.thumbnail import delete
 
-from django.contrib.auth.models import User
+from django.contrib.auth import models as auth_models
 from django.db import models, transaction
 from django.dispatch import receiver
 from django.db.models.signals import pre_save, post_save, post_delete, pre_delete
 from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist, FieldError
+from django.core import exceptions
 
-from django_profile.models import Profile
-from django_forum.models import ForumProfile, create_user_forum_profile, save_user_forum_profile, Avatar, default_avatar
-from django_forum.views import ForumPostView
-from safe_imagefield.models import SafeImageField
+from django_forum import models as forum_models
+from django_forum import views as forum_views
+from safe_imagefield import models as safe_image_models
 
 logger = logging.getLogger('django_artisan')
 
 
-def user_directory_path(instance : Union['ArtisanForumProfile', 'UserProductImage'], filename: str) -> str:
+def user_directory_path(instance : typing.Union['ArtisanForumProfile', 'UserProductImage'], filename: str) -> str:
     if isinstance(instance, ArtisanForumProfile):
         return 'uploads/users/{0}/{1}'.format(
             instance.display_name, filename)
@@ -32,7 +30,7 @@ def user_directory_path(instance : Union['ArtisanForumProfile', 'UserProductImag
             instance.user_profile.display_name, filename)
 
 
-class ArtisanForumProfile(ForumProfile):
+class ArtisanForumProfile(forum_models.ForumProfile):
     bio: models.TextField = models.TextField('biographical information, max 500 chars',
                            max_length=500,
                            blank=True,
@@ -57,31 +55,31 @@ class ArtisanForumProfile(ForumProfile):
 """
     disconnect dummy profile
 """
-post_save.disconnect(create_user_forum_profile, sender=User)
-post_save.disconnect(save_user_forum_profile, sender=User)
+post_save.disconnect(forum_models.create_user_forum_profile, sender=auth_models.User)
+post_save.disconnect(forum_models.save_user_forum_profile, sender=auth_models.User)
 """
     Custom signals to create and update user profile
 """
 
 
-@receiver(post_save, sender=User)
-def create_user_artisan_forum_profile(sender, instance: User, created: bool, **kwargs):
+@receiver(post_save, sender=auth_models.User)
+def create_user_artisan_forum_profile(sender, instance: auth_models.User, created: bool, **kwargs):
     if created:
         ArtisanForumProfile.objects.create(
             profile_user=instance,
-            avatar=Avatar.objects.create(
-                image_file=default_avatar(
+            avatar=forum_models.Avatar.objects.create(
+                image_file=forum_models.default_avatar(
                     randint(
                         1,
                         4))))
     instance.profile.save()
 
 
-@receiver(post_save, sender=User)
-def save_user_artisan_forum_profile(sender, instance: User, **kwargs):
+@receiver(post_save, sender=auth_models.User)
+def save_user_artisan_forum_profile(sender, instance: auth_models.User, **kwargs):
     try:
         instance.profile.save()
-    except (ObjectDoesNotExist, FieldError) as e:
+    except (exceptions.ObjectDoesNotExist, exceptions.FieldError) as e:
         logger.error("Error saving ArtisanForumProfile : {0}".format(e))
 
 
@@ -107,7 +105,7 @@ def auto_delete_image_file_on_delete(sender: ArtisanForumProfile, instance: Arti
                         if len(os.listdir(fdu1)) == 0:
                             os.rmdir(fdu1)
 
-                except ObjectDoesNotExist as e:
+                except exceptions.ObjectDoesNotExist as e:
                     logger.error("Error deleting image file : {0}".format(e))
 
 
@@ -117,7 +115,7 @@ class UserProductImage(models.Model):
     class Meta:
         permissions = [('approve_image', 'Approve Image')]
 
-    image_file: SafeImageField = SafeImageField(upload_to=user_directory_path)
+    image_file: safe_image_models.SafeImageField = safe_image_models.SafeImageField(upload_to=user_directory_path)
     image_text: models.CharField = models.CharField(max_length=400, default='', blank=True)
     image_title: models.CharField = models.CharField(max_length=30, default='', blank=True)
     image_shop_link: models.CharField = models.CharField(max_length=50, default='', blank=True)
@@ -195,7 +193,7 @@ def send_email_when_image_uploaded(sender: UserProductImage, instance: UserProdu
     """
        Send email to moderators
     """
-    async_task(ForumPostView.send_mod_mail('Image'))
+    async_task(forum_views.ForumPostView.send_mod_mail('Image'))
 
 
 class Event(models.Model):

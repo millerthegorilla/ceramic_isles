@@ -1,7 +1,8 @@
 import re
 from typing import List
-from django.core.checks import register
-from django.core.checks.messages import CheckMessage, DEBUG, INFO, WARNING, ERROR
+
+from django.core import checks
+from django.core.checks .messages import CheckMessage, DEBUG, INFO, WARNING, ERROR
 from django.conf import settings
 
 from mypy import api
@@ -19,7 +20,7 @@ class MyPyErrorLocation:
         return self.location
 
 
-@register()
+@checks.register()
 def mypy(app_configs, **kwargs) -> List:
     print("Performing mypy checks...\n")
     # By default run mypy against the whole database everytime checks are performed.
@@ -48,13 +49,13 @@ def mypy(app_configs, **kwargs) -> List:
         code = parsed.group(4)  
         # now I can filter out messages with specific error codes here...
         # ...
-        level = DEBUG
+        level = checks.messages.DEBUG
         if mypy_level == "note":
-            level = INFO
+            level = checks.messages.INFO
         elif mypy_level == "warning":
-            level = WARNING
+            level = checks.messages.WARNING
         elif mypy_level == "error":
-            level = ERROR
+            level = checks.messages.ERROR
         else:
             print(f"Unrecognized mypy level: {mypy_level}")
         
@@ -62,7 +63,7 @@ def mypy(app_configs, **kwargs) -> List:
         if (code in ['import']
                 or location in ['opt/ceramic_isles_dev/django_artisan/fields.py:21']
                 or any(x in message.strip() for x in ['has no attribute "profile"'])) == False:
-            errors.append(CheckMessage(level, message, code, obj=MyPyErrorLocation(location)))
+            errors.append(checks.messages.CheckMessage(level, message, code, obj=MyPyErrorLocation(location)))
         
         #positive search
         # any(x in message.strip() for x in ['Name "_" already defined'])

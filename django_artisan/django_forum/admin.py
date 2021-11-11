@@ -1,29 +1,20 @@
 import logging
 
 from django.contrib import admin
-from django.urls import reverse
-from django.utils.html import escape
-from django.utils.safestring import mark_safe
+from django import urls, utils, http
 from django.contrib import messages
-from django.utils.translation import ngettext
-from django.core.mail import EmailMessage
 from django.conf import settings
-from django.contrib.sites.models import Site
-from django.db.models import QuerySet
-from django.http import HttpRequest
+from django.db import models as db_models
 
-from django_posts_and_comments.soft_deletion import SoftDeletionAdmin, SoftDeletionModel
-#from django_posts_and_comments.admin import CommentAdmin
-from django_profile.models import Profile
-from django_posts_and_comments.models import Comment
+from django_posts_and_comments import soft_deletion
 
-from .models import ForumPost, ForumComment, ForumProfile
+from . import models as forum_models
 
 logger = logging.getLogger('django_artisan')
 
 
-@admin.register(ForumComment)
-class ForumCommentAdmin(admin.ModelAdmin):  # SoftDeletionAdmin):
+@admin.register(forum_models.ForumComment)
+class ForumCommentAdmin(soft_deletion.SoftDeletionAdmin):
     #fields = ('moderation', 'active', 'author', 'title', 'text', 'date_created', 'deleted_at', 'user_profile')
     # fieldsets = [
     #     ('Moderation', {'fields': ['moderation']}),
@@ -38,11 +29,11 @@ class ForumCommentAdmin(admin.ModelAdmin):  # SoftDeletionAdmin):
                    'post', 'author') # 'deleted_at')
     search_fields = ('author', 'text')
 
-    def post_str(self, obj: ForumComment) -> str:
-        link = reverse("admin:django_forum_forumpost_change",
+    def post_str(self, obj: forum_models.ForumComment) -> str:
+        link = urls.reverse("admin:django_forum_forumpost_change",
                        args=[obj.forum_post.id])
-        return mark_safe(
-            f'<a href="{link}">{escape(obj.forum_post.__str__())}</a>')
+        return utils.safestring.mark_safe(
+            f'<a href="{link}">{utils.html.escape(obj.forum_post.__str__())}</a>')
 
     post_str.short_description = 'ForumPost' # type: ignore
     # make row sortable
@@ -50,7 +41,7 @@ class ForumCommentAdmin(admin.ModelAdmin):  # SoftDeletionAdmin):
 
     actions = ['approve_comment']
 
-    def approve_comment(self, request: HttpRequest, queryset: QuerySet):
+    def approve_comment(self, request: http.HttpRequest, queryset: db_models.QuerySet):
         # idx = 0
         # for q in queryset:
         #     q.moderation = None
@@ -62,16 +53,16 @@ class ForumCommentAdmin(admin.ModelAdmin):  # SoftDeletionAdmin):
         updated = queryset.update(moderation=None)
 
         self.message_user(request,
-                          ngettext(
-                                '%d comment was approved.',
-                                '%d comments were approved.',
-                                updated,
-                          ) % updated, 
+                          utils.translation.ngettext(
+                                    '%d comment was approved.',
+                                    '%d comments were approved.',
+                                    updated,
+                              ) % updated, 
                           messages.SUCCESS)
 
 
-@admin.register(ForumPost)
-class ForumPostAdmin(SoftDeletionAdmin):
+@admin.register(forum_models.ForumPost)
+class ForumPostAdmin(soft_deletion.SoftDeletionAdmin):
     list_display = ('pinned', 'moderation', 'active', 'author',
                     'title', 'text', 'date_created', 'deleted_at')
     list_filter = ('pinned', 'moderation', 'active',
@@ -80,7 +71,7 @@ class ForumPostAdmin(SoftDeletionAdmin):
 
     actions = ['approve_post']
 
-    def approve_post(self, request: HttpRequest, queryset: QuerySet):
+    def approve_post(self, request: http.HttpRequest, queryset: db_models.QuerySet):
         idx = 0
         for q in queryset:
             q.moderation = None
@@ -91,7 +82,7 @@ class ForumPostAdmin(SoftDeletionAdmin):
                 logger.error("Error approving moderation : {0}".format(e))
         
         self.message_user(request,
-                          ngettext(
+                          utils.translation.ngettext(
                                 '%d post was approved.',
                                 '%d posts were approved.',
                                 idx,
@@ -109,7 +100,7 @@ class ForumPostAdmin(SoftDeletionAdmin):
 # admin.site.unregister(Profile)
 
 # Register your models here.
-@admin.register(ForumProfile)
+@admin.register(forum_models.ForumProfile)
 class ForumProfileAdmin(admin.ModelAdmin):
     list_display = [
         'display_name',
@@ -122,5 +113,5 @@ class ForumProfileAdmin(admin.ModelAdmin):
     list_filter = ['display_name', 'parish', 'rules_agreed']
     search_fields = ['display_name', 'address_line_1']
 
-    def get_queryset(self, request: HttpRequest) -> QuerySet:
+    def get_queryset(self, request: http.HttpRequest) -> db_models.QuerySet:
         return super().get_queryset(request).exclude(profile_user__is_superuser=True)

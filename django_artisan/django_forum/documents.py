@@ -1,18 +1,19 @@
-from elasticsearch_dsl import analyzer, tokenizer, Nested
-from django_elasticsearch_dsl import Document, fields, Index
+import elasticsearch_dsl
+import django_elasticsearch_dsl
 from django_elasticsearch_dsl.registries import registry
-from .models import ForumPost, ForumComment
+
+from . import models as forum_models
 
 
-sugg_analyzer = analyzer(
+sugg_analyzer = elasticsearch_dsl.analyzer(
     'sugg_analyzer',
-    tokenizer=tokenizer(
+    tokenizer=elasticsearch_dsl.tokenizer(
         'trigram', 'ngram', min_gram=3, max_gram=3
     ),
     filter=['lowercase']
 )
 
-html_strip = analyzer(
+html_strip = elasticsearch_dsl.analyzer(
     'html_strip',
     tokenizer="standard",
     filter=["lowercase", "stop", "snowball"],
@@ -21,7 +22,7 @@ html_strip = analyzer(
 
 
 @registry.register_document
-class ForumCommentDocument(Document):
+class ForumCommentDocument(django_elasticsearch_dsl.Document):
 
     class Index:
         # Name of the Elasticsearch index
@@ -35,7 +36,7 @@ class ForumCommentDocument(Document):
            I no longer have an autocomplete defined, as the amount of requests is crazy.
         """
 
-        model = ForumComment
+        model = forum_models.ForumComment
         fields = [
             'text',
             'author',
@@ -54,17 +55,17 @@ class ForumCommentDocument(Document):
 
 
 @registry.register_document
-class ForumPostDocument(Document):
-    text = fields.TextField(
+class ForumPostDocument(django_elasticsearch_dsl.Document):
+    text = django_elasticsearch_dsl.fields.TextField(
         attr='text',
         analyzer=html_strip,
     )
 
-    category = fields.TextField(
+    category = django_elasticsearch_dsl.fields.TextField(
         attr='category_label'
     )
 
-    location = fields.TextField(
+    location = django_elasticsearch_dsl.fields.TextField(
         attr='location_label'
     )
 
@@ -80,7 +81,7 @@ class ForumPostDocument(Document):
             I no longer have an autocomplete defined as the amount of requests goes
             through the roof.
         """
-        model = ForumPost
+        model = forum_models.ForumPost
         fields = [
             'title',
             'author',

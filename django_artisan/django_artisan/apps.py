@@ -2,18 +2,18 @@ import importlib.util
 import sys
 
 from django.utils import log
-from django.apps import AppConfig
-from django.db.models.signals import post_migrate
+from django import apps
+from django.db import models
 from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured
+from django.core import exceptions
 
 
-class DjangoArtisanConfig(AppConfig):
+class DjangoArtisanConfig(apps.AppConfig):
     name = 'django_artisan'
 
     def ready(self) -> None:
         #breakpoint()
-        post_migrate.connect(callback, sender=self)
+        models.signals.post_migrate.connect(callback, sender=self)
         try:
             settings.DEBUG
         except NameError:
@@ -35,7 +35,7 @@ def callback(sender: DjangoArtisanConfig, **kwargs) -> None:
             #current_site.id = settings.SITE_ID
             current_site.save()
         elif current_site.domain != settings.SITE_DOMAIN:
-            raise ImproperlyConfigured("SITE_ID does not match SITE_DOMAIN")
+            raise exceptions.ImproperlyConfigured("SITE_ID does not match SITE_DOMAIN")
     except Site.DoesNotExist:
         Site.objects.create(domain=settings.SITE_DOMAIN,
                             name=settings.SITE_NAME, id=settings.SITE_ID)

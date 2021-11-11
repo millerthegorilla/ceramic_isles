@@ -1,35 +1,31 @@
 import random
 import logging
-from PIL import Image, ImageOps
+import PIL
 from sorl.thumbnail import delete
 from django_q.tasks import async_task
-from typing import Union
+import typing
 
-from django.db.models import Max, QuerySet
+from django.db import models as db_models
 from django.shortcuts import render, redirect
-from django.views.generic.base import TemplateView
-from django.views.generic.detail import DetailView
-from django.views.generic.list import ListView
+from django.views import generic
 from django.utils.decorators import method_decorator
 from django.utils import timezone
 from django.views.decorators.cache import never_cache
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth import mixins
 from django.urls import reverse_lazy
-from django.views.generic.edit import FormView, UpdateView
-from django.core.paginator import Paginator
+from django.core import paginator
 from django.conf import settings
 from django.contrib.sitemaps import ping_google
-from django.contrib.sites.models import Site
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, HttpResponsePermanentRedirect
-from django.forms import ModelForm
+from django.contrib.sites import models as site_models
+from django import http
+from django import forms
 
-from django_forum.forms import ForumProfileUserForm
-from django_forum.views import ForumProfileUpdateView, CustomRegisterView
-from django_forum.models import ForumPost
+from django_forum import forms as forum_forms
+from django_forum import views as forum_views
+from django_forum import models as forum_models
 
-from .models import Event, UserProductImage, ArtisanForumProfile
-from .forms import ArtisanForumProfileDetailForm, UserProductImageForm
-
+from . import models as artisan_models
+from . import forms as artisan_forms 
 
 logger = logging.getLogger('django_artisan')
 
@@ -41,19 +37,19 @@ def ping_google_func() -> None:
         logger.error("unable to ping_google : {0}".format(e))
 
 @method_decorator(never_cache, name='dispatch')
-class ArtisanForumProfileUpdateView(ForumProfileUpdateView):
+class ArtisanForumProfileUpdateView(forum_views.ForumProfileUpdateView):
     """
         ForumProfileUpdateView subclasses LoginRequiredMixin
     """
-    model = ArtisanForumProfile 
-    form_class = ArtisanForumProfileDetailForm
-    user_form_class = ForumProfileUserForm
+    model = artisan_models.ArtisanForumProfile 
+    form_class = artisan_forms.ArtisanForumProfileDetailForm
+    user_form_class = forum_forms.ForumProfileUserForm
     success_url = reverse_lazy('django_artisan:profile_update_view')
     template_name = 'django_artisan/profile/forum_profile_update_form.html'
 
-    ## TODO type form to correct type of Form - probably ArtisanForumProfileDetailForm
+    ## TODO type form to correct type of Form - probably artisan_forms.ArtisanForumProfileDetailForm
     ##  and do the same in superclasses
-    def form_valid(self, form: ModelForm, **kwargs) -> Union[HttpResponse, HttpResponseRedirect]: # type: ignore
+    def form_valid(self, form: forms.ModelForm, **kwargs) -> typing.Union[http.HttpResponse, http.HttpResponseRedirect]: # type: ignore
     # - mypy grumbles about missing return statement coz it can't handle inheritance
         if self.request.POST['type'] == 'update-profile':
             if form.has_changed():
@@ -62,8 +58,8 @@ class ArtisanForumProfileUpdateView(ForumProfileUpdateView):
                    async_task(ping_google_func)
                 obj = form.save()
                 if obj.image_file:
-                    img = Image.open(obj.image_file.path)
-                    img = ImageOps.expand(img, border=10, fill='white')
+                    img = PIL.Image.open(obj.image_file.path)
+                    img = PIL.ImageOps.expand(img, border=10, fill='white')
                     img.save(obj.image_file.path)
             return super().form_valid(form)
             #return redirect(self.success_url)
@@ -73,16 +69,16 @@ class ArtisanForumProfileUpdateView(ForumProfileUpdateView):
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
-        site = Site.objects.get_current()
+        site = site_models.Site.objects.get_current()
         # context['form'].initial.update(
         #             {'bio':self.request.user.profile.forumprofile.artisanforumprofile.bio,
         #              'image_file':self.request.user.profile.forumprofile.artisanforumprofile.image_file,
         #              'shop_web_address':self.request.user.profile.forumprofile.artisanforumprofile.shop_web_address,
         #              'outlets':self.request.user.profile.forumprofile.artisanforumprofile.outlets,
         #              'listed_member':self.request.user.profile.forumprofile.artisanforumprofile.listed_member})
-        context['avatar'] = ArtisanForumProfile.objects.get(profile_user=self.request.user).avatar
-        queryset = ForumPost.objects.filter(author=self.request.user.profile.display_name)
-        paginator = Paginator(queryset, 6)
+        context['avatar'] = artisan_models.ArtisanForumProfile.objects.get(profile_user=self.request.user).avatar
+        queryset = forum_models.ForumPost.objects.filter(author=self.request.user.profile.display_name)
+        paginator = paginator.Paginator(queryset, 6)
         page_number = self.request.GET.get('page')
         page_obj = paginator.get_page(page_number)
         context['page_obj'] = page_obj
@@ -90,14 +86,14 @@ class ArtisanForumProfileUpdateView(ForumProfileUpdateView):
         return context
 
 
-class AboutPageView(ListView):
-    model = Event
+class AboutPageView(generic.list.ListView):
+    model = artisan_models.Event
     template_name = 'django_artisan/about.html'
     
     def get_context_data(self, **kwargs) -> dict:
         data = super().get_context_data(**kwargs)
         data['about_text'] = settings.ABOUT_US_SPIEL
-        qs = ArtisanForumProfile.objects.all().exclude(profile_user__is_superuser=True).exclude(listed_member=False) \
+        qs = artisan_models.ArtisanForumProfile.objects.all().exclude(profile_user__is_superuser=True).exclude(listed_member=False) \
                                        .values_list('display_name', 'avatar__image_file')
         if qs.count:
             data['people'] = {}
@@ -107,7 +103,7 @@ class AboutPageView(ListView):
         data['colours'] = ['text-white', 'text-purple', 'text-warning', 'text-lightgreen', 'text-danger', 'headline-text', 'sub-headline-text']
         return data
 
-    def get_queryset(self) -> QuerySet:
+    def get_queryset(self) -> db_models.QuerySet:
             """Return all published posts."""
              # filter objects created today
             qs_bydate = self.model.objects.filter(time__gt=timezone.now().replace(hour=0, minute=0, second=0, microsecond=0))
@@ -115,13 +111,13 @@ class AboutPageView(ListView):
             return qs_bydate | qs_repeating
 
 
-class LandingPageView(TemplateView):
-    model = UserProductImage
+class LandingPageView(generic.base.TemplateView):
+    model = artisan_models.UserProductImage
     template_name = 'django_artisan/landing_page.html'
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
-        context['images'] = UserProductImage.objects.filter(active=True).order_by('?')
+        context['images'] = artisan_models.UserProductImage.objects.filter(active=True).order_by('?')
         context['image_size'] = "1024x768"
         context['username'] = self.request.user.username # type: ignore
         return context
@@ -141,18 +137,18 @@ class LandingPageView(TemplateView):
 #         data['colours'] = ['text-white', 'text-purple', 'text-warning', 'text-lightgreen', 'text-danger', 'headline-text', 'sub-headline-text']
 #         return data
 
-class PersonalPageView(DetailView):
-    model = ArtisanForumProfile
+class PersonalPageView(generic.detail.DetailView):
+    model = artisan_models.ArtisanForumProfile
     slug_url_kwarg = 'name_slug'
     slug_field = 'display_name'
     template_name = 'django_artisan/personal_page.html'
 
-    def get_queryset(self) -> QuerySet:  #TODO: try/except clause
+    def get_queryset(self) -> db_models.QuerySet:  #TODO: try/except clause
         return self.model.objects.filter(display_name=self.request.resolver_match.kwargs['name_slug'])
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
-        context['images'] = UserProductImage.objects.filter(
+        context['images'] = artisan_models.UserProductImage.objects.filter(
                                 user_profile=self.object).filter(active=True).order_by('?')
         u_p = self.get_queryset().first()
         context['profile_image_file'] = u_p.image_file
@@ -168,7 +164,7 @@ class PersonalPageView(DetailView):
         context['outlets'] = u_p.outlets
         return context
 
-    def get(self, request: HttpRequest, *args, **kwargs) -> Union[HttpResponse, HttpResponseRedirect]:
+    def get(self, request: http.HttpRequest, *args, **kwargs) -> typing.Union[http.HttpResponse, http.HttpResponseRedirect]:
         self.object = self.get_object()
         if self.object.display_personal_page or self.request.user.is_authenticated:
             context = self.get_context_data(object=self.object)
@@ -178,30 +174,30 @@ class PersonalPageView(DetailView):
 
 
 
-class UserProductImageUploadView(LoginRequiredMixin, FormView):
-    model = UserProductImage
-    form_class = UserProductImageForm
+class UserProductImageUploadView(mixins.LoginRequiredMixin, generic.edit.FormView):
+    model = artisan_models.UserProductImage
+    form_class = artisan_forms.UserProductImageForm
     template_name = 'django_artisan/profile/images/image_update.html'
     success_url = reverse_lazy('django_artisan:image_update')
     
     @never_cache
-    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+    def get(self, request: http.HttpRequest, *args, **kwargs) -> http.HttpResponse:
         form = self.form_class()
         message = 'Choose a file and add some accompanying text and a shop link if you have one'
         images = self.model.objects.filter(user_profile=self.request.user.profile.forumprofile)
         context = {'images': images, 'form': form, 'message': message}
         return render(self.request, './django_artisan/profile/images/image_update.html', context)
 
-    def form_valid(self, form: ModelForm) -> HttpResponseRedirect:
+    def form_valid(self, form: forms.ModelForm) -> http.HttpResponseRedirect:
         obj = form.save(commit=False)
         obj.user_profile = self.request.user.profile.forumprofile.artisanforumprofile
         obj.save()
-        img = Image.open(obj.image_file.path)
-        img = ImageOps.expand(img, border=10, fill='white')
+        img = PIL.Image.open(obj.image_file.path)
+        img = PIL.ImageOps.expand(img, border=10, fill='white')
         img.save(obj.image_file.path)
         return redirect('django_artisan:image_update')
 
-    def form_invalid(self, form: ModelForm) -> HttpResponse:
+    def form_invalid(self, form: forms.ModelForm) -> http.HttpResponse:
         error_msg = str(form.errors)
         if len(form.errors['image_file']) > 1:
             message = 'The form is not valid. Fix the following errors...'
@@ -220,22 +216,24 @@ class UserProductImageUploadView(LoginRequiredMixin, FormView):
         return kwarg_dict
 
 
-class UserProductImageDeleteView(LoginRequiredMixin, UpdateView):
+class UserProductImageDeleteView(mixins.LoginRequiredMixin, generic.edit.UpdateView):
     http_method_names = ['post']
-    model = UserProductImage
+    model = artisan_models.UserProductImage
     slug_url_kwarg = 'unique_id'
     slug_field = 'slug'
     success_url = reverse_lazy('django_artisan:image_update')  
     template_name = 'django_artisan/profile/images/image_list.html'                  
 
-    def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponseRedirect:
-        UserProductImage.objects.get(image_id=self.kwargs['unique_id']).delete()
+    def post(self, request: http.HttpRequest, *args, **kwargs) -> http.HttpResponseRedirect:
+        artisan_models.UserProductImage.objects.get(image_id=self.kwargs['unique_id']).delete()
         return redirect(self.success_url)
 
-    def get_object(self, queryset=None, *args, **kwargs) -> Union[UserProductImage, HttpResponseRedirect, HttpResponsePermanentRedirect]:
+    def get_object(self, queryset=None, *args, **kwargs) -> typing.Union[artisan_models.UserProductImage, 
+                                                                         http.HttpResponseRedirect,
+                                                                         http.HttpResponsePermanentRedirect]:
         try:
-            image = UserProductImage.objects.get(id=self.kwargs['unique_id'])
-        except UserProductImage.DoesNotExist as e:
+            image = artisan_models.UserProductImage.objects.get(id=self.kwargs['unique_id'])
+        except artisan_models.UserProductImage.DoesNotExist as e:
             logger.error("Unable to get UserProductImage when deleting : {0}".format(e))
             image = None
         if image is None:

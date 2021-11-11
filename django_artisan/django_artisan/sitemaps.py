@@ -1,14 +1,17 @@
-from django.contrib.sitemaps import Sitemap
-from django.urls import reverse
-from django_artisan.models import ArtisanForumProfile
-from typing import Any, List
+import typing
+
+from django import urls
+from django.contrib import sitemaps
+from django.db import models as db_models
+
+from django_artisan import models as artisan_models
 
 
-class StaticViewSitemap(Sitemap):
+class StaticViewSitemap(sitemaps.Sitemap):
     priority = 0.5
     changefreq = 'daily'
 
-    def items(self) -> List[str]:
+    def items(self) -> typing.List[str]:
         return [
             'about_view',
             'register',
@@ -17,15 +20,15 @@ class StaticViewSitemap(Sitemap):
             'rules_view']
 
     def location(self, item) -> str:
-        return reverse(item)
+        return urls.reverse(item)
 
 
-class PersonalPageSiteMap(Sitemap):
+class PersonalPageSiteMap(sitemaps.Sitemap):
     priority = 0.5
     changefreq = 'daily'
 
-    def items(self) -> Any:
-        return ArtisanForumProfile.objects.all().filter(
+    def items(self) -> db_models.QuerySet:
+        return artisan_models.ArtisanForumProfile.objects.all().filter(
             display_personal_page=True).values('display_name')
 
     def location(self, item) -> str:

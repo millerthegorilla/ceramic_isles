@@ -1,18 +1,20 @@
-from django.forms import Form
-from crispy_forms.layout import Field
 from typing import Any
 
+from django import forms
 
-class FloatingField(Field):
+from crispy_forms import layout
+
+
+class FloatingField(layout.Field):
     template = 'fields/artisan_floating_field.html'
 
 
-class FileClearInput(Field):
+class FileClearInput(layout.Field):
     template = 'fields/artisan_file_clear_input.html'
 
     def render(
             self,
-            form: Form,
+            form: forms.Form,
             form_style: str,
             context: object,
             template_pack='bootstrap4',
@@ -28,5 +30,5 @@ class FileClearInput(Field):
             **kwargs)
 
 
-class FileInput(Field):
+class FileInput(layout.Field):
     template = 'fields/artisan_file_input.html'

@@ -1,17 +1,11 @@
 import dropbox
 import logging
 
-from django.contrib import admin
-from django.contrib import messages
-from django.utils.translation import ngettext
-from django.utils import log
-from django.core import management
-from django.apps import AppConfig
-from django.db.models.signals import post_migrate
-from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured
-from django.http import HttpRequest
-from django.db.models import QuerySet
+from django import apps, conf, http
+from django.contrib import admin, messages
+from django.core import exceptions, management
+from django.utils import translation, log
+from django.db import models
 
 from django_password_validators.password_history.models import PasswordHistory
 
@@ -22,23 +16,23 @@ from .models import UserProductImage, Event, ArtisanForumProfile
 logger = logging.getLogger('django_artisan')
 
 
-class DjangoArtisanConfig(AppConfig):
+class DjangoArtisanConfig(apps.AppConfig):
     name = 'django_artisan'
 
     def ready(self) -> None:
-        post_migrate.connect(callback, sender=self)
+        models.signals.post_migrate.connect(callback, sender=self)
 
 def callback(sender: DjangoArtisanConfig, **kwargs) -> None:
     from django.contrib.sites.models import Site
     try:
-        current_site = Site.objects.get(id=settings.SITE_ID)
-        if current_site.domain != settings.SITE_DOMAIN:
-            raise ImproperlyConfigured("SITE_ID does not match SITE_DOMAIN")
+        current_site = Site.objects.get(id=conf.settings.SITE_ID)
+        if current_site.domain != conf.settings.SITE_DOMAIN:
+            raise exceptions.ImproperlyConfigured("SITE_ID does not match SITE_DOMAIN")
     except Site.DoesNotExist:
         logger.info("Creating Site Model with domain={0}, name={1}, id={2}".format(
-            settings.SITE_DOMAIN, settings.SITE_NAME, settings.SITE_ID))
-        Site.objects.create(domain=settings.SITE_DOMAIN,
-                            name=settings.SITE_NAME, id=settings.SITE_ID)
+            conf.settings.SITE_DOMAIN, conf.settings.SITE_NAME, conf.settings.SITE_ID))
+        Site.objects.create(domain=conf.settings.SITE_DOMAIN,
+                            name=conf.settings.SITE_NAME, id=conf.settings.SITE_ID)
 
 
 @admin.register(UserProductImage)
@@ -59,11 +53,11 @@ class ImageAdmin(admin.ModelAdmin):
     )
     actions = ['approve_image']
 
-    def approve_image(self, request: HttpRequest, queryset: QuerySet) -> None:
+    def approve_image(self, request: http.HttpRequest, queryset: models.QuerySet) -> None:
         updated = queryset.update(active=True)
         self.message_user(
             request,
-            ngettext(
+            translation.ngettext(
                 '%d image was approved.',
                 '%d images were approved.',
                 updated,
@@ -81,11 +75,11 @@ class EventAdmin(admin.ModelAdmin):
     )
     actions = ['approve_event', 'disapprove_event']
 
-    def approve_event(self, request: HttpRequest, queryset: QuerySet) -> None:
+    def approve_event(self, request: http.HttpRequest, queryset: models.QuerySet) -> None:
         updated = queryset.update(active=True)
         self.message_user(
             request,
-            ngettext(
+            translation.ngettext(
                 '%d event was approved.',
                 '%d events were approved.',
                 updated,
@@ -93,11 +87,11 @@ class EventAdmin(admin.ModelAdmin):
             messages.SUCCESS
         )
 
-    def disapprove_event(self, request: HttpRequest, queryset: QuerySet) -> None:
+    def disapprove_event(self, request: http.HttpRequest, queryset: models.QuerySet) -> None:
         updated = queryset.update(active=False)
         self.message_user(
             request,
-            ngettext(
+            translation.ngettext(
                 '%d event was disapproved.',
                 '%d events were disapproved.',
                 updated,
@@ -135,7 +129,7 @@ class ArtisanForumProfileAdmin(admin.ModelAdmin):
         'parish', 'bio'
     ]
 
-    def get_queryset(self, request: HttpRequest) -> QuerySet:
+    def get_queryset(self, request: http.HttpRequest) -> models.QuerySet:
         return super().get_queryset(request).exclude(profile_user__is_superuser=True)
 
 
@@ -146,7 +140,7 @@ class tasks:
         # dropbox.
         try:
             dbx = dropbox.Dropbox(
-                settings.DBBACKUP_STORAGE_OPTIONS['oauth2_access_token'])
+                confg.settings.DBBACKUP_STORAGE_OPTIONS['oauth2_access_token'])
         except dropbox.exceptions.AuthError as e:
             logger.error("Dropbox Auth Issue : {0}".format(e))
         except dropbox.exceptions.HttpError as e:

@@ -1,9 +1,9 @@
 # TODO: need to setup clamav.conf properly
-from safe_imagefield.forms import SafeImageField
-from django.core.exceptions import ValidationError
-from crispy_forms.layout import Layout, Submit, Row, Column, Field, Fieldset, HTML, Div
-from crispy_forms.helper import FormHelper
-from crispy_bootstrap5.bootstrap5 import FloatingField
+from safe_imagefield import forms as safe_image_forms
+from django.core import exceptions
+from crispy_forms import layout
+from crispy_forms import helper
+from crispy_bootstrap5 import bootstrap5
 
 from django.conf import settings
 from django import forms
@@ -22,11 +22,11 @@ MAX_NUMBER_OF_IMAGES = settings.MAX_USER_IMAGES
 
 
 class ArtisanForumProfileDetailForm(ForumProfileDetailForm):
-    image_file = SafeImageField(allowed_extensions=('jpg', 'png'),
-                                check_content_type=True,
-                                scan_viruses=True,
-                                media_integrity=True,
-                                max_size_limit=2621440)
+    image_file = safe_image_forms.SafeImageField(allowed_extensions=('jpg', 'png'),
+                                                 check_content_type=True,
+                                                 scan_viruses=True,
+                                                 media_integrity=True,
+                                                 max_size_limit=2621440)
 
     class Meta(ForumProfileDetailForm.Meta):
         model = ArtisanForumProfile
@@ -62,11 +62,11 @@ class ArtisanForumProfileDetailForm(ForumProfileDetailForm):
         self.helper.layout.fields = self.helper.layout.fields + [
             FileClearInput(
                 'image_file', css_class="tinfo form-control form-control-lg"),
-            FloatingField('bio'),
-            FloatingField('shop_web_address'),
-            FloatingField('outlets'),
-            Div(Field('listed_member'), css_class="tinfo"),
-            Div(Field('display_personal_page'), css_class="tinfo"),
+            boostrap5.FloatingField('bio'),
+            boostrap5.FloatingField('shop_web_address'),
+            boostrap5.FloatingField('outlets'),
+            layout.Div(layout.Field('listed_member'), css_class="tinfo"),
+            layout.Div(layout.Field('display_personal_page'), css_class="tinfo"),
         ]
         self.helper.form_id = 'id-profile-form'
         self.helper.form_method = 'post'
@@ -74,11 +74,11 @@ class ArtisanForumProfileDetailForm(ForumProfileDetailForm):
 
 
 class UserProductImageForm(forms.ModelForm):
-    image_file = SafeImageField(allowed_extensions=('jpg', 'png'),
-                                check_content_type=True,
-                                scan_viruses=True,
-                                media_integrity=True,
-                                max_size_limit=2621440)
+    image_file = safe_image_forms.SafeImageField(allowed_extensions=('jpg', 'png'),
+                                                 check_content_type=True,
+                                                 scan_viruses=True,
+                                                 media_integrity=True,
+                                                 max_size_limit=2621440)
 
     class Meta:
         model = UserProductImage
@@ -89,16 +89,16 @@ class UserProductImageForm(forms.ModelForm):
         self.user = user
         super().__init__(*args, **kwargs)
         self.fields['image_file'].validators.append(self.restrict_amount)
-        self.helper = FormHelper()
+        self.helper = helper.FormHelper()
         self.helper.form_tag = False
-        self.helper.layout = Layout(
-            Fieldset(
-                '',
-                FileInput('image_file', name="image_file"),
-                FloatingField('image_title'),
-                FloatingField('image_text'),
-                FloatingField('image_shop_link'),
-                FloatingField('image_shop_link_title'),),
+        self.helper.layout = layout.Layout(
+            layout.Fieldset(
+                            '',
+                            FileInput('image_file', name="image_file"),
+                            boostrap5.FloatingField('image_title'),
+                            boostrap5.FloatingField('image_text'),
+                            boostrap5.FloatingField('image_shop_link'),
+                            boostrap5.FloatingField('image_shop_link_title'),),
         )
         self.helper.form_id = 'id-upload-form'
         self.helper.form_method = 'post'
@@ -108,17 +108,17 @@ class UserProductImageForm(forms.ModelForm):
         if self.user is not None:
             if UserProductImage.objects.filter(
                     user_profile=self.user.profile.forumprofile).count() >= MAX_NUMBER_OF_IMAGES:
-                raise ValidationError(
+                raise exceptions.ValidationError(
                     'User already has {} images'.format(MAX_NUMBER_OF_IMAGES))
 
 
 # handles deletion
 class UserProductImagesForm(forms.ModelForm):
-    image_file = SafeImageField(allowed_extensions=('jpg', 'png'),
-                                check_content_type=True,
-                                scan_viruses=True,
-                                media_integrity=True,
-                                max_size_limit=2621440)
+    image_file = safe_image_forms.SafeImageField(allowed_extensions=('jpg', 'png'),
+                                                 check_content_type=True,
+                                                 scan_viruses=True,
+                                                 media_integrity=True,
+                                                 max_size_limit=2621440)
 
     class Meta:
         model = UserProductImage
@@ -129,13 +129,13 @@ class UserProductImagesForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['image_file'].validators.append(self.restrict_amount)
 
-        self.helper = FormHelper()
-        self.helper.layout = Layout(
-            Fieldset(
-                '',
-                FileInput('image_file', css_class="col-auto"),
-                FloatingField('image_text', css_class="col-auto"),
-                FloatingField('image_shop_link', css_class="col-auto"),),
+        self.helper = helper.FormHelper()
+        self.helper.layout = layout.Layout(
+            layout.Fieldset(
+                    '',
+                    FileInput('image_file', css_class="col-auto"),
+                    boostrap5.FloatingField('image_text', css_class="col-auto"),
+                    boostrap5.FloatingField('image_shop_link', css_class="col-auto"),),
         )
         self.helper.form_id = 'id-upload-form'
         self.helper.form_method = 'post'
@@ -145,7 +145,7 @@ class UserProductImagesForm(forms.ModelForm):
         if self.user is not None:
             if UserProductImage.objects.filter(
                     user_profile=self.user.profile.forumprofile).count() >= MAX_NUMBER_OF_IMAGES:
-                raise ValidationError(_('User already has {0} images'.format(
+                raise exceptions.ValidationError(_('User already has {0} images'.format(
                     MAX_NUMBER_OF_IMAGES)), code='max_image_limit', params={'value': '3'})
 
     def clean(self) -> Dict[str, Any]:
