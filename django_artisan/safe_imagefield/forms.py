@@ -1,8 +1,6 @@
 from django import forms
-from django.forms.widgets import ClearableFileInput
 
-from .validators import AntiVirusValidator, FileContentTypeValidator, \
-    FileExtensionValidator, MediaIntegrityValidator, MaxSizeValidator
+from . import validators
 
 from typing import cast
 
@@ -13,7 +11,7 @@ class SafeImageField(forms.ImageField):
             required=True,
             label='safe_image_field',
             initial=None,
-            widget=ClearableFileInput,
+            widget=forms.widgets.ClearableFileInput,
             help_text='safe_image_field',
             **kwargs) -> None:
         self.allowed_extensions = kwargs.pop('allowed_extensions', None)
@@ -25,21 +23,21 @@ class SafeImageField(forms.ImageField):
 
         if self.allowed_extensions:
             default_validators.append(
-                cast(object, FileExtensionValidator(self.allowed_extensions))
+                cast(object, validators.FileExtensionValidator(self.allowed_extensions))
             )
 
         if self.check_content_type:
-            default_validators.append(cast(object, FileContentTypeValidator()))
+            default_validators.append(cast(object, validators.FileContentTypeValidator()))
 
         if self.scan_viruses:
-            default_validators.append(cast(object, AntiVirusValidator()))
+            default_validators.append(cast(object, validators.AntiVirusValidator()))
 
         if self.media_integrity:
-            default_validators.append(cast(object, MediaIntegrityValidator()))
+            default_validators.append(cast(object, validators.MediaIntegrityValidator()))
 
         if self.max_size_limit:
             default_validators.append(
-                cast(object, MaxSizeValidator(max_size=self.max_size_limit)))
+                cast(object, validators.MaxSizeValidator(max_size=self.max_size_limit)))
 
         self.default_validators = default_validators + self.default_validators
 

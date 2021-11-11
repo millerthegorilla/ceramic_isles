@@ -2,32 +2,29 @@ import datetime
 import uuid
 
 from django.db import models
-from django.db.models.query import QuerySet
 from django.contrib import admin
-from django.utils import timezone
-from django.conf import settings
-from django.http import HttpRequest
+from django import utils, conf, http
 
-from django_q.tasks import schedule
-from typing import Any
+from django_q import tasks
+
 # The below is from https://adriennedomingus.com/blog/soft-deletion-in-django
 # with djangoq added... :)
 
 
-class SoftDeletionQuerySet(QuerySet):
+class SoftDeletionQuerySet(models.query.QuerySet):
     def delete(self) -> int:
         return super(
             SoftDeletionQuerySet,
             self).update(
-            deleted_at=timezone.now())
+            deleted_at=utils.timezone.now())
 
     def hard_delete(self) -> tuple[int, dict]:
         return super(SoftDeletionQuerySet, self).delete()
 
-    def alive(self) -> QuerySet:
+    def alive(self) -> models.query.QuerySet:
         return self.filter(deleted_at=None)
 
-    def dead(self) -> QuerySet:
+    def dead(self) -> models.query.QuerySet:
         return self.exclude(deleted_at=None)
 
 
@@ -36,7 +33,7 @@ class SoftDeletionManager(models.Manager):
         self.alive_only = kwargs.pop('alive_only', True)
         super(SoftDeletionManager, self).__init__(*args, **kwargs)
 
-    def get_queryset(self) -> QuerySet:
+    def get_queryset(self) -> models.query.QuerySet:
         if self.alive_only:
             return SoftDeletionQuerySet(self.model).filter(deleted_at=None)
         return SoftDeletionQuerySet(self.model)
@@ -54,7 +51,7 @@ class SoftDeletionModel(models.Model):
         abstract = True
 
     def delete(self) -> None:
-        self.deleted_at = timezone.now()
+        self.deleted_at = utils.timezone.now()
         self.save()
         # slack jawed duck type hack
         try:
@@ -62,11 +59,11 @@ class SoftDeletionModel(models.Model):
         except BaseException:
             post_slug = self.slug
         
-        schedule('django_posts_and_comments.tasks.schedule_hard_delete',
+        tasks.schedule('django_posts_and_comments.tasks.schedule_hard_delete',
                  name="sd_timeout_" + str(uuid.uuid4()),
                  schedule_type="O",
                  repeats=-1,
-                 next_run=timezone.now() + settings.DELETION_TIMEOUT,
+                 next_run=utils.timezone.now() + conf.settings.DELETION_TIMEOUT,
                  post_slug=post_slug,
                  deleted_at=str(self.deleted_at),
                  type=str(self),
@@ -80,7 +77,7 @@ class SoftDeletionModel(models.Model):
 
 
 class SoftDeletionAdmin(admin.ModelAdmin):
-    def get_queryset(self, request: HttpRequest) -> QuerySet:
+    def get_queryset(self, request: http.HttpRequest) -> models.query.QuerySet:
         qs = self.model.all_objects
         # The below is copied from the base implementation in BaseModelAdmin to
         # prevent other changes in behavior
@@ -89,5 +86,5 @@ class SoftDeletionAdmin(admin.ModelAdmin):
             qs = qs.order_by(*ordering)
         return qs
 
-    def delete_model(self, request: HttpRequest, qs: SoftDeletionQuerySet) -> None:
+    def delete_model(self, request: http.HttpRequest, qs: SoftDeletionQuerySet) -> None:
         qs.hard_delete()

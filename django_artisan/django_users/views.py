@@ -1,56 +1,50 @@
 import uuid  # used as custom salt
 
-from django.shortcuts import render, redirect
-from django.contrib.auth import get_user_model
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic.edit import CreateView
-from django.views.generic import FormView
-from django.urls import reverse_lazy
-from django.template.defaultfilters import slugify
-from django.conf import settings
-from django.forms import ModelForm
-from django.http import HttpResponseRedirect, HttpResponse
+from django import shortcuts, forms
+from django.contrib import auth
+from django.views import generic
+from django import urls, http, forms
 
 from django_email_verification import send_email
 
-from .forms import CustomUserCreationForm, UserResendConfirmationForm
+from . import forms as users_forms
 
 
-class RegisterView(CreateView):
+class RegisterView(generic.edit.CreateView):
     http_method_names = ['get', 'post']
     template_name = 'django_users/register.html'
-    form_class = CustomUserCreationForm
-    success_url = reverse_lazy("password_reset_done")
-    model = get_user_model()
+    form_class = users_forms.CustomUserCreationForm
+    success_url = urls.reverse_lazy("password_reset_done")
+    model = auth.get_user_model()
 
-    def form_valid(self, form: ModelForm, user=None) -> HttpResponseRedirect:
+    def form_valid(self, form: forms.ModelForm, user=None) -> http.HttpResponseRedirect:
         super().form_valid(form)
         if user is None:
             user = form.save()
         user.is_active = False
         user.save()
         send_email(user)
-        return redirect('password_reset_done')
+        return shortcuts.redirect('password_reset_done')
 
 
-class ResendConfirmationView(FormView):
+class ResendConfirmationView(generic.FormView):
     http_method_names = ['get', 'post']
     template_name = 'django_users/resend_form.html'
     extra_context = {'instructions': 'Resend confirmation token'}
-    form_class = UserResendConfirmationForm
+    form_class = users_forms.UserResendConfirmationForm
     success_url = 'django_users/registration_confirmation_sent.html'
 
-    def form_valid(self, form, **kwargs) -> HttpResponse:
+    def form_valid(self, form, **kwargs) -> http.HttpResponse:
         super().form_valid(form)
         try:
-            user = get_user_model().objects.get(
+            user = auth.get_user_model().objects.get(
                 username=form['username'].value())
             if user.is_active is False:
                 send_email(user)
-                return render(self.request, self.success_url, {form: form})
+                return shortcuts.render(self.request, self.success_url, {form: form})
             else:
-                return render(self.request, self.template_name, {form: form})
-        except get_user_model().DoesNotExist:
+                return shortcuts.render(self.request, self.template_name, {form: form})
+        except auth.get_user_model().DoesNotExist:
             form.errors = [
                 {'username': 'Hey you haven\'t registered yet.  Register first!'}]
-            return render(self.request, self.template_name, {form: form})
+            return shortcuts.render(self.request, self.template_name, {form: form})

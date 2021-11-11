@@ -1,5 +1,5 @@
-from django.apps import AppConfig
+from django import apps
 
 
-class DjangoPostsAndCommentsConfig(AppConfig):
+class DjangoPostsAndCommentsConfig(apps.AppConfig):
     name = 'django_posts_and_comments'

@@ -1,32 +1,31 @@
-from django.urls import include, path
-from django.contrib.auth import views as auth_views
-from django.contrib.auth import urls as auth_urls
+from django import urls
+from django.contrib.auth import views as auth_views, urls as auth_urls
 
-from .views import RegisterView, ResendConfirmationView
-from .forms import UserPasswordResetForm
+from . import views as users_views
+from . import forms as users_forms
 
 urlpatterns = [
-    path(
+    urls.path(
         'accounts/login/',
         auth_views.LoginView.as_view(
             redirect_authenticated_user=True)),
-    path(
+    urls.path(
         'accounts/password_reset/',
         auth_views.PasswordResetView.as_view(
             template_name='django_users/resend_form.html',
-            form_class=UserPasswordResetForm,
+            form_class=users_forms.UserPasswordResetForm,
             extra_context={
                 'instructions': 'Send a password reset link...'}),
         name='password_reset'),
-    path(
+    urls.path(
         'accounts/resend_confirmation/',
-        ResendConfirmationView.as_view(),
+        users_views.ResendConfirmationView.as_view(),
         name='resend_confirmation'),
-    path(
+    urls.path(
         'accounts/register/',
-        RegisterView.as_view(),
+        users_views.RegisterView.as_view(),
         name='register'),
-    path(
+    urls.path(
         'accounts/',
-        include(auth_urls)),
+        urls.include(auth_urls)),
 ]

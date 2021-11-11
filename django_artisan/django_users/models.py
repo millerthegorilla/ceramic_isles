@@ -1,11 +1,10 @@
-from django.db import models
-from django.dispatch import receiver
-from django.db.models.signals import pre_init, pre_save
-from django.contrib.auth.models import User
+from django import dispatch
+from django.db.models import signals
+from django.contrib.auth import models as auth_models
 
 
-@receiver(pre_save, sender=User)
-def set_is_active_to_false(sender: User, instance: User, created: bool = False, **kwargs) -> None:
+@dispatch.receiver(signals.pre_save, sender=auth_models.User)
+def set_is_active_to_false(sender: auth_models.User, instance: auth_models.User, created: bool = False, **kwargs) -> None:
     if created and instance.is_superuser is not True:
         instance.is_active = False
         instance.save()

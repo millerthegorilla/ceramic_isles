@@ -2,9 +2,7 @@ import uuid
 
 from django.db import models
 from django.dispatch import receiver
-from django.contrib.auth.models import User
-from django.template.defaultfilters import slugify
-from django_profile.models import Profile
+from django.template import defaultfilters
 from django.contrib.contenttypes import fields
 from django.db.models.constraints import UniqueConstraint
 from django.db.models.signals import post_save
@@ -14,11 +12,12 @@ from django.urls import reverse, reverse_lazy
 
 from django_q.tasks import schedule
 
-from .soft_deletion import SoftDeletionModel
-from typing import Any
+from django_profile import models as profile_models
+
+from . import soft_deletion
 
 
-class Post(SoftDeletionModel):
+class Post(soft_deletion.SoftDeletionModel):
     """
         post class contains category  TODO: sanitize field init parameters
     """
@@ -28,7 +27,7 @@ class Post(SoftDeletionModel):
     slug: models.SlugField = models.SlugField(unique=True, db_index=True, max_length=80)
     date_created: models.DateTimeField = models.DateTimeField(auto_now_add=True)
     user_profile: models.ForeignKey = models.ForeignKey(
-        Profile, null=True, on_delete=models.SET_NULL, related_name="posts")
+        profile_models.Profile, null=True, on_delete=models.SET_NULL, related_name="posts")
 
     class Meta:
         UniqueConstraint(fields=['title', 'date_created'], name='unique_post')
@@ -50,7 +49,7 @@ class Post(SoftDeletionModel):
         return "Post : " + f"{self.title}"
 
 
-class Comment(SoftDeletionModel):
+class Comment(soft_deletion.SoftDeletionModel):
     """
         a post can have many comments
     """
@@ -60,7 +59,7 @@ class Comment(SoftDeletionModel):
         Post, null=True, on_delete=models.SET_NULL, related_name="comments")
     date_created: models.DateTimeField = models.DateTimeField(auto_now_add=True)
     user_profile: models.ForeignKey = models.ForeignKey(
-        Profile, null=True, on_delete=models.SET_NULL, related_name="comments")
+        profile_models.Profile, null=True, on_delete=models.SET_NULL, related_name="comments")
 
     # def save(self, **kwargs) -> None:
     #     super().save(**kwargs)
@@ -80,7 +79,7 @@ class Comment(SoftDeletionModel):
 def save_author_on_comment_creation(sender: Comment, instance: Comment, created, **kwargs) -> None:
     if created:
         instance.author = instance.comment_author()
-        instance.title = slugify(
+        instance.title = defaultfilters.slugify(
             instance.text[:10] + str(dateformat.format(instance.date_created, 'Y-m-d H:i:s')))
         #         instance.save()
 

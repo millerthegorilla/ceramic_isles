@@ -1,13 +1,11 @@
-from typing import Any, Tuple, cast
+import typing
 
+from django import forms
 from django.db import models
 from django.utils.deconstruct import deconstructible
-from django.forms import Field
 
-from . import forms
-from .validators import ( AntiVirusValidator, FileContentTypeValidator,
-                          FileExtensionValidator, MaxSizeValidator,
-                          MediaIntegrityValidator )
+from . import forms as safe_image_forms
+from . import validators
 
 
 class SafeImageField(models.ImageField):
@@ -22,40 +20,40 @@ class SafeImageField(models.ImageField):
 
         if self.allowed_extensions:
             default_validators.append(
-                cast(object, FileExtensionValidator(self.allowed_extensions))
+                typing.cast(object, validators.FileExtensionValidator(self.allowed_extensions))
             )
 
         if self.check_content_type:
-            default_validators.append(cast(object, FileContentTypeValidator()))
+            default_validators.append(cast(object, validators.FileContentTypeValidator()))
 
         if self.scan_viruses:
-            default_validators.append(cast(object, AntiVirusValidator()))
+            default_validators.append(cast(object, validators.AntiVirusValidator()))
 
         if self.media_integrity:
-            default_validators.append(cast(object, MediaIntegrityValidator()))
+            default_validators.append(cast(object, validators.MediaIntegrityValidator()))
 
         if self.max_size_limit:
             default_validators.append(
-                cast(object, MaxSizeValidator(max_size=self.max_size_limit)))
+                cast(object, validators.MaxSizeValidator(max_size=self.max_size_limit)))
 
         self.default_validators = default_validators + self.default_validators
 
         super().__init__(**kwargs)
 
-    def formfield(self, **kwargs) -> Field:
+    def formfield(self, **kwargs) -> forms.Field:
         return super().formfield(
-            form_class=forms.SafeImageField
+            form_class=safe_image_forms.SafeImageField
         )
 
     def __eq__(self, other: 'SafeImageField'):
-        if self.allowed_extensions == other.allowed_extensions and \
-                self.check_content_type == other.check_content_type and \
-                self.scan_viruses == other.scan_viruses:
+        if (self.allowed_extensions == other.allowed_extensions and 
+                self.check_content_type == other.check_content_type and 
+                self.scan_viruses == other.scan_viruses):
             return True
         else:
             return False
 
-    def deconstruct(self) -> Tuple[str, str, list[Any], dict[str, Any]]:
+    def deconstruct(self) -> typing.Tuple[str, str, list[typing.Any], dict[str, typing.Any]]:
         name, path, args, kwargs = super().deconstruct()
         kwargs['allowed_extensions'] = self.allowed_extensions
         kwargs['check_content_type'] = self.check_content_type

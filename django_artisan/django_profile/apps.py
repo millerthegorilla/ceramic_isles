@@ -1,5 +1,5 @@
-from django.apps import AppConfig
+from django import apps
 
 
-class DjangoProfileConfig(AppConfig):
+class DjangoProfileConfig(apps.AppConfig):
     name = 'django_profile'

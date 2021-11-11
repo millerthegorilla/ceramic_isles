@@ -1,7 +1,7 @@
-from crispy_forms.layout import Field
+from crispy_forms import layout
 
 
-class FloatingField(Field):
+class FloatingField(layout.Field):
     template = 'fields/users_app_floating_field.html'
 
     def __init__(self, *args, **kwargs) -> None:
@@ -9,5 +9,5 @@ class FloatingField(Field):
         self.attrs["placeholder"] = self.fields[0]
 
 
-class FileInput(Field):
+class FileInput(layout.Field):
     template = 'fields/users_app_file_input.html'

@@ -1,33 +1,25 @@
-from typing import Any, Union
+import typing
 
-from django.shortcuts import render, redirect
-from django.contrib.auth.models import User
-from django.views.generic.edit import UpdateView, FormView
-from django.forms.models import inlineformset_factory
-from django.forms import ModelForm
-from django.urls import reverse_lazy, reverse
-from django.core.exceptions import PermissionDenied
-from django.shortcuts import get_object_or_404
-from django.conf import settings
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.template.defaultfilters import slugify
-from django.http import HttpResponse, HttpResponseRedirect
+from django import shortcuts, forms, urls, http
+from django.views import generic
+from django.contrib.auth import mixins
+from django.template import defaultfilters
 
-from django_users.views import RegisterView
+import django_users.views as users_views
 
-from .custom_registration_form import CustomUserCreationForm
-from .models import Profile
-from .forms import ProfileDetailForm, ProfileUserForm
+from . import custom_registration_form
+from . import models as profile_models
+from . import forms as profile_forms
 
 
-class ProfileUpdateView(LoginRequiredMixin, UpdateView):
-    form_class = ProfileDetailForm
-    user_form_class = ProfileUserForm
-    model = Profile
-    success_url = reverse_lazy('django_profile:profile_update_view')
+class ProfileUpdateView(mixins.LoginRequiredMixin, generic.edit.UpdateView):
+    form_class = profile_forms.ProfileDetailForm
+    user_form_class = profile_forms.ProfileUserForm
+    model = profile_models.Profile
+    success_url = urls.reverse_lazy('django_profile:profile_update_view')
     template_name = 'django_profile/profile_update_form.html'
 
-    def get_object(self) -> Profile:
+    def get_object(self) -> profile_models.Profile:
         return self.model.objects.get(profile_user_id=self.request.user.id)
 
     def get_context_data(self, **kwargs) -> dict:
@@ -41,7 +33,7 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
                 'last_name': self.request.user.last_name})
         return context
 
-    def form_valid(self, form: ModelForm) -> Union[HttpResponse, HttpResponseRedirect]: 
+    def form_valid(self, form: forms.ModelForm) -> typing.Union[http.HttpResponse, http.HttpResponseRedirect]: 
         user_form = self.user_form_class(self.request.POST)
         user_form.initial = {'username': self.request.user.username, # type: ignore
                              'email': self.request.user.email,
@@ -53,7 +45,7 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
         # the is_valid function then populates errors.
         user_form.errors.clear()
         if not user_form.is_valid():
-            return render(
+            return shortcuts.render(
                 self.request,
                 self.template_name,
                 context={
@@ -64,9 +56,9 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
         self.request.user.save()
         if form.has_changed():
             obj = form.save(commit=False)
-            obj.display_name = slugify(form['display_name'].value())
+            obj.display_name = defaultfilters.slugify(form['display_name'].value())
             obj.save()
-        return redirect(self.success_url)
+        return shortcuts.redirect(self.success_url)
         # return render(self.request: HttpRequest self.template_name, {'form': form,
         # 'user_form': user_form})
 
@@ -75,12 +67,12 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
 # the following goes in the project top level urls.py
 # from django_profile.views import CustomRegisterView
 # path('users/accounts/register/', CustomRegisterView.as_view(), name='register'),
-class CustomRegisterView(RegisterView):
-    form_class = CustomUserCreationForm
+class CustomRegisterView(users_views.RegisterView):
+    form_class = custom_registration_form.CustomUserCreationForm
 
-    def form_valid(self, form: ModelForm) -> HttpResponseRedirect:
+    def form_valid(self, form: forms.ModelForm) -> http.HttpResponseRedirect:
         user = form.save()
-        user.profile.display_name = slugify(form['display_name'].value())
+        user.profile.display_name = defaultfilters.slugify(form['display_name'].value())
         user.profile.save(update_fields=['display_name'])
         super().form_valid(form, user)
-        return redirect('password_reset_done')
+        return shortcuts.redirect('password_reset_done')

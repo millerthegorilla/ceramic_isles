@@ -1,16 +1,8 @@
-import mimetypes
-import os
-import logging
-from django.core.exceptions import ValidationError
-from django.utils.translation import ugettext_lazy as _
-from . import clamav
-from .utils import detect_content_type, \
-    pil_check, \
-    ffmpeg_check, \
-    convert_size
-from typing import Any
+import mimetypes, os, logging
 
-# _: Any
+from django.core import exceptions
+from django.utils import translation
+from . import clamav, utils
 
 
 logger = logging.getLogger('safe_imagefield')
@@ -34,7 +26,7 @@ logger = logging.getLogger('safe_imagefield')
 # TODO do I need to call the superclass of object in each validator init??
 
 class FileExtensionValidator(object):
-    message = _(
+    message = translation.ugettext_lazy(
         "File extension '%(extension)s' is not allowed. "
         "Allowed extensions are: '%(allowed_extensions)s'."
     )
@@ -53,7 +45,7 @@ class FileExtensionValidator(object):
         extension = os.path.splitext(value.name)[1][1:].lower()
 
         if self.allowed_extensions is not None and extension not in self.allowed_extensions:
-            raise ValidationError(
+            raise exceptions.ValidationError(
                 self.message,
                 error_code=self.error_code,
                 params={
@@ -65,7 +57,7 @@ class FileExtensionValidator(object):
 
 
 class FileContentTypeValidator(object):
-    message = _(
+    message = translation.ugettext_lazy(
         'File has invalid content-type. '
         'Maybe the file extension does not match the file content?'
     )
@@ -83,7 +75,7 @@ class FileContentTypeValidator(object):
         __, ext = os.path.splitext(file.name)
 
         # TODO:  Update below code to match imagefile.
-        detected_content_type = detect_content_type(file)
+        detected_content_type = utils.detect_content_type(file)
         if getattr(file, 'content_type', None) is not None:
             is_valid_content_type = bool(
                 (
@@ -118,7 +110,7 @@ class FileContentTypeValidator(object):
             }
 
         if not is_valid_content_type:
-            raise ValidationError(
+            raise exceptions.ValidationError(
                 self.message,
                 error_code=self.error_code,
                 params=params
@@ -126,7 +118,7 @@ class FileContentTypeValidator(object):
 
 
 class AntiVirusValidator(object):
-    message = _('File is infected with %(virus)s.')
+    message = translation.ugettext_lazy('File is infected with %(virus)s.')
 
     error_code = 'infected'
 
@@ -141,7 +133,7 @@ class AntiVirusValidator(object):
         status, virus_name = clamav.scan_file(file)
 
         if status != 'OK':
-            raise ValidationError(
+            raise exceptions.ValidationError(
                 self.message,
                 self.error_code,
                 params={
@@ -152,7 +144,7 @@ class AntiVirusValidator(object):
 
 class MediaIntegrityValidator(object):
     # error_detect can be 'default' or 'strict'
-    message = _('File failed integrity check! %(error)s')
+    message = translation.ugettext_lazy('File failed integrity check! %(error)s')
 
     error_code = 'integrity_failure'
 
@@ -166,20 +158,20 @@ class MediaIntegrityValidator(object):
         self.error_detect = error_detect
 
     def __call__(self, file):
-        content_type = detect_content_type(file).split('/')[0]
+        content_type = utils.detect_content_type(file).split('/')[0]
         if content_type == 'video':
-            ffmpeg_check(file, self.error_detect)
+            utils.ffmpeg_check(file, self.error_detect)
         elif content_type == 'image':
             try:
-                pil_check(file)
+                utils.pil_check(file)
             except Exception as e:
                 logger.error("PIL CHECK ERROR : {0}".format(e))
-                raise ValidationError(
+                raise exceptions.ValidationError(
                     self.message, self.error_code, params={'error': str(e)})
 
 
 class MaxSizeValidator(object):
-    message = _('File is greater than %(max_size)s')
+    message = translation.ugettext_lazy('File is greater than %(max_size)s')
 
     error_code = 'max_size_error'
 
@@ -195,8 +187,8 @@ class MaxSizeValidator(object):
 
     def __call__(self, file):
         if file.size > self.max_size:
-            raise ValidationError(
+            raise exceptions.ValidationError(
                 self.message, self.error_code, params={
                     'max_size': str(
-                        convert_size(
+                        utils.convert_size(
                             self.max_size))})

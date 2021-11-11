@@ -1,5 +1,5 @@
 import logging
-from .models import Comment, Post
+from . import models as posts_and_comments_models
 
 logger = logging.getLogger('django_artisan')
 
@@ -11,6 +11,6 @@ def schedule_hard_delete(post_slug=None,
                          **kwargs) -> None:
     logger.error("type = " + type + " id = " + id)
     if 'Comment' in type:
-        Comment.all_objects.get(id=int(id)).hard_delete()
+        posts_and_comments_models.Comment.all_objects.get(id=int(id)).hard_delete()
     else:
-        Post.all_objects.get(id=int(id)).hard_delete()
+        posts_and_comments_models.Post.all_objects.get(id=int(id)).hard_delete()
