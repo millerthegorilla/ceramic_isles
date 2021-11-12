@@ -4,7 +4,7 @@ from django_q import tasks
 
 from django import urls, forms, shortcuts, http, utils, conf
 from django.template import defaultfilters
-from django.core import exceptions, mail
+from django.core import exceptions, mail, paginator as pagination
 from django.contrib import auth
 from django.views.decorators import cache
 
@@ -255,15 +255,15 @@ class ForumPostList(posts_and_comments_views.PostList):
             search = len(p_c)
             if search == 0:
                 queryset = forum_models.ForumPost.objects.order_by('-pinned')
-                paginator = paginator.Paginator(queryset, self.paginate_by)
+                paginator = pagination.Paginator(queryset, self.paginate_by)
             else:
-                paginator = paginator.Paginator(p_c, self.paginate_by)
+                paginator = pagination.Paginator(p_c, self.paginate_by)
         else:
             queryset = forum_models.ForumPost.objects.order_by('-pinned')
-            paginator = paginator.Paginator(queryset, self.paginate_by)
+            paginator = pagination.Paginator(queryset, self.paginate_by)
 
         page_number = request.GET.get('page')
-        page_obj = paginator.get_page(page_number)
+        page_obj = pagination.get_page(page_number)
         context = {
             'page_obj': page_obj,
             'search': search,
@@ -319,9 +319,9 @@ class ForumProfile(profile_views.ProfileUpdate):
             profile_user=self.request.user).avatar
         queryset = forum_models.ForumPost.objects.filter(
             author=self.request.user.profile.display_name)
-        paginator = paginator.Paginator(queryset, 6)
+        paginator = pagination.Paginator(queryset, 6)
         page_number = self.request.GET.get('page')
-        page_obj = paginator.get_page(page_number)
+        page_obj = pagination.get_page(page_number)
         context['page_obj'] = page_obj
         return context
 # END PROFILE
