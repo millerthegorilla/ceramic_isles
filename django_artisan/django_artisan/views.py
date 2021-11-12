@@ -13,7 +13,7 @@ from django.utils import timezone
 from django.views.decorators.cache import never_cache
 from django.contrib.auth import mixins
 from django.urls import reverse_lazy
-from django.core import paginator
+from django.core import paginator as pagination
 from django.conf import settings
 from django.contrib.sitemaps import ping_google
 from django.contrib.sites import models as site_models
@@ -78,7 +78,7 @@ class ArtisanForumProfile(forum_views.ForumProfile):
         #              'listed_member':self.request.user.profile.forumprofile.artisanforumprofile.listed_member})
         context['avatar'] = artisan_models.ArtisanForumProfile.objects.get(profile_user=self.request.user).avatar
         queryset = forum_models.ForumPost.objects.filter(author=self.request.user.profile.display_name)
-        paginator = paginator.Paginator(queryset, 6)
+        paginator = pagination.Paginator(queryset, 6)
         page_number = self.request.GET.get('page')
         page_obj = paginator.get_page(page_number)
         context['page_obj'] = page_obj

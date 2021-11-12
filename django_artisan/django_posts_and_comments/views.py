@@ -130,7 +130,7 @@ class PostCreate(mixins.LoginRequiredMixin, generic.edit.CreateView):
     @staticmethod
     def sanitize_post_text(text: str) -> utils.safestring.SafeString:
         return utils.safestring.mark_safe(bleach.clean(html.unescape(text),
-                                      tags=conf.conf.settings.ALLOWED_TAGS,
+                                      tags=conf.settings.ALLOWED_TAGS,
                                       attributes=conf.settings.ATTRIBUTES,
                                       styles=conf.settings.STYLES,
                                       strip=True, strip_comments=True))

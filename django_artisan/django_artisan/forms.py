@@ -60,9 +60,9 @@ class ArtisanForumProfile(ForumProfile):
         self.helper.layout.fields = self.helper.layout.fields + [
             FileClearInput(
                 'image_file', css_class="tinfo form-control form-control-lg"),
-            boostrap5.FloatingField('bio'),
-            boostrap5.FloatingField('shop_web_address'),
-            boostrap5.FloatingField('outlets'),
+            bootstrap5.FloatingField('bio'),
+            bootstrap5.FloatingField('shop_web_address'),
+            bootstrap5.FloatingField('outlets'),
             layout.Div(layout.Field('listed_member'), css_class="tinfo"),
             layout.Div(layout.Field('display_personal_page'), css_class="tinfo"),
         ]
@@ -93,10 +93,10 @@ class UserProductImage(forms.ModelForm):
             layout.Fieldset(
                             '',
                             FileInput('image_file', name="image_file"),
-                            boostrap5.FloatingField('image_title'),
-                            boostrap5.FloatingField('image_text'),
-                            boostrap5.FloatingField('image_shop_link'),
-                            boostrap5.FloatingField('image_shop_link_title'),),
+                            bootstrap5.FloatingField('image_title'),
+                            bootstrap5.FloatingField('image_text'),
+                            bootstrap5.FloatingField('image_shop_link'),
+                            bootstrap5.FloatingField('image_shop_link_title'),),
         )
         self.helper.form_id = 'id-upload-form'
         self.helper.form_method = 'post'

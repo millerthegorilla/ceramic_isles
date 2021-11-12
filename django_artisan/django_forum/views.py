@@ -33,7 +33,7 @@ class ForumPostCreate(posts_and_comments_views.PostCreate):
     def form_valid(self, form: forms.ModelForm) -> http.HttpResponseRedirect:
         post = form.save(commit=False)
         post.user_profile = self.request.user.profile.forumprofile
-        post.text = posts_and_comments_views.Post.sanitize_post_text(post.text)
+        post.text = posts_and_comments_views.PostCreate.sanitize_post_text(post.text)
         post.slug = defaultfilters.slugify(
             post.title[:60] + '-' + str(utils.dateformat.format(utils.timezone.now(), 'Y-m-d H:i:s')))
         post.save()
@@ -321,7 +321,7 @@ class ForumProfile(profile_views.ProfileUpdate):
             author=self.request.user.profile.display_name)
         paginator = pagination.Paginator(queryset, 6)
         page_number = self.request.GET.get('page')
-        page_obj = pagination.get_page(page_number)
+        page_obj = paginator.get_page(page_number)
         context['page_obj'] = page_obj
         return context
 # END PROFILE

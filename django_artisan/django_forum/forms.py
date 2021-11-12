@@ -36,7 +36,7 @@ class ForumProfileUser(profile_forms.ProfileUser):
                         or use your business name.  It *must* be different to your username.  It will be \
                         converted to an internet friendly name when you save it.</span>', initial=initl)
         self.helper.form_tag = False
-        self.helper.layout = crispy_form.layout.Layout(
+        self.helper.layout = layout.Layout(
             bootstrap5.FloatingField('display_name'),
             self.helper.layout)
 
@@ -123,7 +123,7 @@ class ForumComment(posts_and_comments_forms.Comment):
                 layout.Row(
                     layout.Column(
                         layout.Field('text', css_class="comment-form-text"),
-                        layout.Div(HTML('<span>...characters left: 500</span>'),
+                        layout.Div(layout.HTML('<span>...characters left: 500</span>'),
                             id="count", css_class="ms-auto tinfo"),
                         css_class="d-flex flex-column"),
                     css_class="d-flex flex-row align-items-end"),

@@ -52,7 +52,7 @@ class Comment(forms.ModelForm):
                 layout.Row(
                     layout.Column(
                         layout.Field('text', css_class="comment-form-text"),
-                        layout.Div(HTML('<span>...characters left: 500</span>'),
+                        layout.Div(layout.HTML('<span>...characters left: 500</span>'),
                             id="count", css_class="ms-auto tinfo"),
                         css_class="d-flex flex-column"),
                     css_class="d-flex flex-row align-items-end"),
