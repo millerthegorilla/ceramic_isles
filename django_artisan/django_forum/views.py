@@ -264,7 +264,7 @@ class ForumPostList(posts_and_comments_views.PostList):
         
         breakpoint()
         page_number = request.GET.get('page')
-        page_obj = pagination.Paginator.get_page(page_number)
+        page_obj = paginator.get_page(page_number)
         context = {
             'page_obj': page_obj,
             'search': search,

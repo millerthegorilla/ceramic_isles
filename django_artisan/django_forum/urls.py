@@ -8,7 +8,7 @@ urlpatterns = [
          name='profile_update_view'),
     urls.path(
         'create_post/',
-        forum_views.ForumPost.as_view(),
+        forum_views.ForumPostCreate.as_view(),
         name='post_create_view'),
     urls.path('posts/<slug:search_slug>',
          forum_views.ForumPostList.as_view(), name='post_list_view'),
