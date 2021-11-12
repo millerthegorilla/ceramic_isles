@@ -52,6 +52,7 @@ class CustomUserCreation(auth.forms.UserCreationForm):
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
+        breakpoint() #check self.fields for email...
         self.fields['display_name'] = forms.CharField(
             label='Display name',)
         #         help_text='<span class="tinfo">Your display name will be shown \

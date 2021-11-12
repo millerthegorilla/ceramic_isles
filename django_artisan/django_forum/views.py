@@ -337,11 +337,12 @@ class CustomRegister(users_views.Register):
 
     def form_valid(self, form: custom_reg_form.CustomUserCreation) -> http.HttpResponseRedirect:
         user = form.save()
+        breakpoint()
         user.profile.forumprofile.rules_agreed = form['rules'].value()
         user.profile.forumprofile.save(update_fields=['rules_agreed'])
         user.profile.display_name = defaultfilters.slugify(form['display_name'].value())
         user.profile.save(update_fields=['display_name'])
-        user.save()
+        user.save() ## TODO do I need this save?
         super().form_valid(form, user)
         return shortcuts.redirect('password_reset_done')
 

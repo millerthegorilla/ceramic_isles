@@ -23,6 +23,7 @@ class Register(generic.edit.CreateView):
             user = form.save()
         user.is_active = False
         user.save()
+        breakpoint()
         send_email(user)
         return shortcuts.redirect('password_reset_done')
 
