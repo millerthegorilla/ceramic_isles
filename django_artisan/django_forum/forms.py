@@ -1,4 +1,4 @@
-import crispy_forms
+from crispy_forms import helper, layout
 from crispy_bootstrap5 import bootstrap5 
 from tinymce.widgets import TinyMCE
 
@@ -54,14 +54,14 @@ class ForumProfile(profile_forms.Profile):
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self.helper = crispy_forms.helper.FormHelper()
+        self.helper = helper.FormHelper()
         self.helper.form_tag = False
-        self.helper.layout = crispy_forms.layout.Layout(
-            crispy_forms.layout.HTML('<span class="tinfo">Address details are only necessary if there is going to be mail for users</span>'),
-            crispy_forms.layout.HTML('<a class="btn btn-primary mb-3 ms-3" data-bs-toggle="collapse" \
+        self.helper.layout = layout.Layout(
+            layout.HTML('<span class="tinfo">Address details are only necessary if there is going to be mail for users</span>'),
+            layout.HTML('<a class="btn btn-primary mb-3 ms-3" data-bs-toggle="collapse" \
                      href="#collapseAddress" role="button" aria-expanded="false" \
                      aria-controls="collapseAddress">Address details</a><br>'),
-            crispy_forms.layout.Div(
+            layout.Div(
                 bootstrap5.FloatingField('address_line_1'),
                 bootstrap5.FloatingField('address_line_2'),
                 bootstrap5.FloatingField('parish'),
@@ -95,16 +95,16 @@ class ForumPost(posts_and_comments_forms.Post):
         checkbox_string = '<input type="checkbox" id="subscribe_cb" name="subscribe" value="Subscribe" ' + \
             checked_string + '> \
                               <label for="subscribe_cb" class="tinfo">Subscribe to this post...</label><br>'
-        self.helper.layout = crispy_forms.layout.Layout(
-            crispy_forms.layout.Fieldset(
+        self.helper.layout = layout.Layout(
+            layout.Fieldset(
                 'Create your post...',
                 bootstrap5.FloatingField('title'),
-                crispy_forms.layout.Field('text', css_class="mb-3 post-create-form-text"),
-                crispy_forms.layout.HTML("<div class='font-italic mb-3 tinfo'>Maximum of 2000 characters.  Click on word count to see how many characters you have used...</div>"),
-                crispy_forms.layout.Div(Field('category', css_class="col-auto"), Field('location',
+                layout.Field('text', css_class="mb-3 post-create-form-text"),
+                layout.HTML("<div class='font-italic mb-3 tinfo'>Maximum of 2000 characters.  Click on word count to see how many characters you have used...</div>"),
+                layout.Div(layout.Field('category', css_class="col-auto"), layout.Field('location',
                     css_class="col-auto"), css_class="col-8 col-sm-4 col-md-4 col-lg-3 tinfo"),
-                crispy_forms.layout.HTML(checkbox_string),
-                crispy_forms.layout.Submit('save', 'Publish Post', css_class="col-auto mt-3 mb-3"),
+                layout.HTML(checkbox_string),
+                layout.Submit('save', 'Publish Post', css_class="col-auto mt-3 mb-3"),
             )
         )
         self.helper.form_action = 'django_forum:post_create_view'
@@ -117,17 +117,17 @@ class ForumComment(posts_and_comments_forms.Comment):
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self.helper.layout = crispy_forms.layout.Layout(
-            crispy_forms.layout.Fieldset(
+        self.helper.layout = layout.Layout(
+            layout.Fieldset(
                 '<h3 class="comment-headline">Comment away...!</h3>',
-                crispy_forms.layout.Row(
-                    crispy_forms.layout.Column(
-                        crispy_forms.layout.Field('text', css_class="comment-form-text"),
-                        crispy_forms.layout.Div(HTML('<span>...characters left: 500</span>'),
+                layout.Row(
+                    layout.Column(
+                        layout.Field('text', css_class="comment-form-text"),
+                        layout.Div(HTML('<span>...characters left: 500</span>'),
                             id="count", css_class="ms-auto tinfo"),
                         css_class="d-flex flex-column"),
                     css_class="d-flex flex-row align-items-end"),
-                crispy_forms.layout.Submit('save', 'comment', css_class="col-auto mt-3"),
+                layout.Submit('save', 'comment', css_class="col-auto mt-3"),
                 css_class="tinfo")
         )
         self.helper.form_id = 'id-post-create-form'

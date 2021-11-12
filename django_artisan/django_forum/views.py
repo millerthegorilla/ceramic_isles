@@ -25,7 +25,7 @@ logger = logging.getLogger('django_artisan')
 
 
 # START POSTS AND COMMENTS
-class ForumPost(posts_and_comments_views.Post):
+class ForumPostCreate(posts_and_comments_views.PostCreate):
     model = forum_models.ForumPost
     template_name = "django_forum/posts_and_comments/forum_post_create_form.html"
     form_class = forum_forms.ForumPost
@@ -262,7 +262,6 @@ class ForumPostList(posts_and_comments_views.PostList):
             queryset = forum_models.ForumPost.objects.order_by('-pinned')
             paginator = pagination.Paginator(queryset, self.paginate_by)
         
-        breakpoint()
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
         context = {
@@ -338,7 +337,6 @@ class CustomRegister(users_views.Register):
 
     def form_valid(self, form: custom_reg_form.CustomUserCreation) -> http.HttpResponseRedirect:
         user = form.save()
-        breakpoint()
         user.profile.forumprofile.rules_agreed = form['rules'].value()
         user.profile.forumprofile.save(update_fields=['rules_agreed'])
         user.profile.display_name = defaultfilters.slugify(form['display_name'].value())
