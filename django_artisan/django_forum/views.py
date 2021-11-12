@@ -261,9 +261,10 @@ class ForumPostList(posts_and_comments_views.PostList):
         else:
             queryset = forum_models.ForumPost.objects.order_by('-pinned')
             paginator = pagination.Paginator(queryset, self.paginate_by)
-
+        
+        breakpoint()
         page_number = request.GET.get('page')
-        page_obj = pagination.get_page(page_number)
+        page_obj = pagination.Paginator.get_page(page_number)
         context = {
             'page_obj': page_obj,
             'search': search,
