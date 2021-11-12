@@ -6,6 +6,7 @@ from itertools import chain
 
 from django.contrib import auth
 from django import forms
+from django.forms import fields
 from django.urls import reverse_lazy
 from django.template import defaultfilters
 
@@ -14,7 +15,7 @@ from . import models as forum_models
 
 class CustomUserCreation(auth.forms.UserCreationForm):
     captcha = captcha.fields.ReCaptchaField(label='', widget=captcha.widgets.ReCaptchaV2Checkbox)
-    email = forms.EmailField()
+    email = fields.EmailField()
 
     class Meta(auth.forms.UserCreationForm.Meta):
         forms.fields = (*auth.forms.UserCreationForm.Meta.fields, 'email', 'captcha',)
@@ -53,7 +54,7 @@ class CustomUserCreation(auth.forms.UserCreationForm):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         breakpoint() #check self.fields for email...
-        self.fields['display_name'] = forms.CharField(
+        self.fields['display_name'] = fields.CharField(
             label='Display name',)
         #         help_text='<span class="tinfo">Your display name will be shown \
         #                    in the forum and will be part of the link to your personal page.  \
@@ -62,16 +63,16 @@ class CustomUserCreation(auth.forms.UserCreationForm):
         #                    It will be converted to an internet friendly name when you save it. \
         #                    You can change it later...</span>',
         #     )
-        self.fields['username'] = forms.CharField(
+        self.fields['username'] = fields.CharField(
             label='Username',
             help_text='<span class="tinfo">Your username is used purely \
                            for logging in, and must be different to your display name. \
                            It must be unique. \
                            No one will see your username. Letters, digits and @/./+/-/_ only.</span>',)
-        self.fields['password2'] = forms.CharField(
+        self.fields['password2'] = fields.CharField(
             label='Password again!',
             widget=forms.PasswordInput,)
-        self.fields['rules'] = forms.BooleanField(
+        self.fields['rules'] = fields.BooleanField(
             label='<span class="tinfo">I have read and agree with the <a class="tinfo" target="blank" href="/forum/rules/">Rules</a></span>')
         self.helper = crispy_forms.helper.FormHelper()
         self.helper.form_method = 'post'
