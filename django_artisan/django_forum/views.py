@@ -155,7 +155,7 @@ class ForumPostView(posts_and_comments_views.Post):
         except auth.get_user_model().DoesNotExist:
             subscribed = ''
         new_comment_form = self.comment_form_class() # type: ignore
-        comments = forum_models.ForumComment.objects.filter(post=post)
+        comments = forum_models.ForumComment.objects.filter(post_fk=post)
         user_display_name = self.request.user.profile.display_name
         category = post.get_category_display()
         cat_text = ''

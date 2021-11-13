@@ -12,20 +12,17 @@ from django.urls import reverse, reverse_lazy
 
 from django_q.tasks import schedule
 
+from django_messages import models as message_models
 from django_profile import models as profile_models
 
-from . import soft_deletion
 
-
-class Post(soft_deletion.Model):
+class Post(message_models.Message):
     """
         post class contains category  TODO: sanitize field init parameters
     """
-    text: models.TextField = models.TextField(max_length=2000)
     title: models.CharField = models.CharField(max_length=100, default='')
     # added unique and index but not tested.
     slug: models.SlugField = models.SlugField(unique=True, db_index=True, max_length=80)
-    date_created: models.DateTimeField = models.DateTimeField(auto_now_add=True)
     user_profile: models.ForeignKey = models.ForeignKey(
         profile_models.Profile, null=True, on_delete=models.SET_NULL, related_name="posts")
 
@@ -49,15 +46,12 @@ class Post(soft_deletion.Model):
         return "Post : " + f"{self.title}"
 
 
-class Comment(soft_deletion.Model):
+class Comment(message_models.Message):
     """
         a post can have many comments
     """
-    author: models.CharField = models.CharField(default='', max_length=40)
-    text: models.TextField = models.TextField(max_length=500)
-    post: models.ForeignKey = models.ForeignKey(
+    post_fk: models.ForeignKey = models.ForeignKey(
         Post, null=True, on_delete=models.SET_NULL, related_name="comments")
-    date_created: models.DateTimeField = models.DateTimeField(auto_now_add=True)
     user_profile: models.ForeignKey = models.ForeignKey(
         profile_models.Profile, null=True, on_delete=models.SET_NULL, related_name="comments")
 

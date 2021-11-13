@@ -148,7 +148,6 @@ def auto_delete_avatar_on_delete(sender: ForumProfile, instance: ForumProfile, *
 ## TODO Post and Comment should probably have common superclass somewhere.
 
 class ForumPost(posts_and_comments_models.Post):
-    author: db_models.CharField = db_models.CharField(default='', max_length=40)
     moderation: db_models.DateField = db_models.DateField(null=True, default=None, blank=True)
     pinned: db_models.SmallIntegerField = db_models.SmallIntegerField(default=0)
     subscribed_users: db_models.ManyToManyField = db_models.ManyToManyField(

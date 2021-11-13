@@ -9,6 +9,7 @@ from django.core import exceptions
 
 
 class DjangoArtisan(apps.AppConfig):
+    default_auto_field = 'django.db.models.BigAutoField'
     name = 'django_artisan'
 
     def ready(self) -> None:

@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.conf import settings
 from django.db import models as db_models
 
-from django_posts_and_comments import soft_deletion
+from django_messages import soft_deletion
 
 from . import models as forum_models
 
@@ -26,7 +26,7 @@ class ForumComment(soft_deletion.Admin):
                     'author', 'text', 'date_created', 'deleted_at')
     list_editable = ('text', )
     list_filter = ('moderation', 'active', 'date_created',
-                   'post', 'author', 'deleted_at')
+                   'post_fk', 'author', 'deleted_at')
     search_fields = ('author', 'text')
 
     def post_str(self, obj: forum_models.ForumComment) -> str:
