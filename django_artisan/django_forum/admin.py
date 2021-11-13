@@ -23,10 +23,10 @@ class ForumComment(soft_deletion.Admin):
     #     ('Text', {'fields': ['text']}),
     # ]
     list_display = ('moderation', 'active', 'post_str',
-                    'author', 'text', 'date_created') # 'deleted_at')
+                    'author', 'text', 'date_created', 'deleted_at')
     list_editable = ('text', )
     list_filter = ('moderation', 'active', 'date_created',
-                   'post', 'author') # 'deleted_at')
+                   'post', 'author', 'deleted_at')
     search_fields = ('author', 'text')
 
     def post_str(self, obj: forum_models.ForumComment) -> str:

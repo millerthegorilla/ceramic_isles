@@ -1,5 +1,6 @@
 import datetime
 import uuid
+import logging
 
 from django.db import models
 from django.contrib import admin
@@ -10,13 +11,16 @@ from django_q import tasks
 # The below is from https://adriennedomingus.com/blog/soft-deletion-in-django
 # with djangoq added... :)
 
+logger = logging.getLogger('django_artisan')
+
 
 class QuerySet(models.query.QuerySet):
     def delete(self) -> int:
+        for q in self.all():
+            q.delete()
         return super(
             QuerySet,
-            self).update(
-            deleted_at=utils.timezone.now())
+            self)
 
     def hard_delete(self) -> tuple[int, dict]:
         return super(QuerySet, self).delete()
@@ -25,7 +29,7 @@ class QuerySet(models.query.QuerySet):
         return self.filter(deleted_at=None)
 
     def dead(self) -> models.query.QuerySet:
-        return self.exclude(deleted_at=None)
+        return self.exclude(active=False)
 
 
 class Manager(models.Manager):
@@ -35,7 +39,7 @@ class Manager(models.Manager):
 
     def get_queryset(self) -> models.query.QuerySet:
         if self.alive_only:
-            return QuerySet(self.model).filter(deleted_at=None)
+            return QuerySet(self.model).filter(active=True)
         return QuerySet(self.model)
 
     def hard_delete(self) -> None:
@@ -43,6 +47,7 @@ class Manager(models.Manager):
 
 
 class Model(models.Model):
+    active: models.BooleanField = models.BooleanField(default='True')
     deleted_at = models.DateTimeField(blank=True, null=True)
     objects = Manager()
     all_objects = Manager(alive_only=False)
@@ -51,23 +56,27 @@ class Model(models.Model):
         abstract = True
 
     def delete(self) -> None:
-        self.deleted_at = utils.timezone.now()
-        self.save()
-        # slack jawed duck type hack
-        try:
-            post_slug = self.post.slug
-        except BaseException:
-            post_slug = self.slug
-        
-        tasks.schedule('django_posts_and_comments.tasks.schedule_hard_delete',
-                 name="sd_timeout_" + str(uuid.uuid4()),
-                 schedule_type="O",
-                 repeats=-1,
-                 next_run=utils.timezone.now() + conf.settings.DELETION_TIMEOUT,
-                 post_slug=post_slug,
-                 deleted_at=str(self.deleted_at),
-                 type=str(self),
-                 id=str(self.id))
+        if self.active:
+            self.deleted_at = utils.timezone.now()
+            self.active=False
+            self.save()
+            # slack jawed duck type hack
+            try:
+                post_slug = self.post.slug
+            except BaseException:
+                post_slug = self.slug
+            try:
+                tasks.schedule('django_posts_and_comments.tasks.schedule_hard_delete',
+                         name="sd_timeout_" + str(uuid.uuid4()),
+                         schedule_type="O",
+                         repeats=-1,
+                         next_run=utils.timezone.now() + conf.settings.DELETION_TIMEOUT,
+                         post_slug=post_slug,
+                         deleted_at=str(self.deleted_at),
+                         type=str(self),
+                         id=str(self.id))
+            except Exception as e:
+                logger.error("unable to schedule task : {0}".format(str(e)))
 
     def hard_delete(self) -> None:
         '''
