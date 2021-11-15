@@ -4,6 +4,7 @@ $(document).ready(function () {
 $("#id_text").keyup(function(){
   $("#count").text("...characters left: " + (500 - $(this).val().length));
 });
+
 function showEditor() {
 	$('.update-form-text').val($('#textarea').html())
 	$('#post-edit-div').show();
@@ -20,6 +21,7 @@ function showEditor() {
 	    $('#modify-post-btns').show();
 	});
 }
+
 function getCookie(name) {
 var cookieValue = null;
 if (document.cookie && document.cookie != '') {
@@ -110,7 +112,7 @@ function onInstanceInit(editor) {
     $.ajax({
       type: 'POST',
       url: "/forum/subscribe/",
-      data: { 'post_slug': lastSegment, 'data': this.checked, 'csrfmiddlewaretoken': getCookie('csrftoken') },
+      data: { 'slug': lastSegment, 'data': this.checked, 'csrfmiddlewaretoken': getCookie('csrftoken') },
       success: function (response) {
         text=$("label[for='subscribed_cb']").text();
         if(text=='Subscribe to this thread') {

@@ -14,7 +14,7 @@ urlpatterns = [
          forum_views.ForumPostList.as_view(), name='post_list_view'),
     urls.path('posts/', forum_views.ForumPostList.as_view(), name='post_list_view'),
     urls.path(
-        '<int:pk>/<slug:post_slug>/',
+        '<int:pk>/<slug:slug>/',
         forum_views.ForumPostView.as_view(),
         name='post_view'),
     urls.path('rules/', forum_views.RulesPageView.as_view(), name='rules_view'),

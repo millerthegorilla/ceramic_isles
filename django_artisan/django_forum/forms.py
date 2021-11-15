@@ -119,7 +119,7 @@ class ForumComment(posts_and_comments_forms.Comment):
         super().__init__(*args, **kwargs)
         self.helper.layout = layout.Layout(
             layout.Fieldset(
-                '<h3 class="comment-headline">Comment away...!</h3>',
+                '<h3 id="comment" class="comment-headline">Comment away...!</h3>',
                 layout.Row(
                     layout.Column(
                         layout.Field('text', css_class="comment-form-text"),

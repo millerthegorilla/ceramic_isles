@@ -4,7 +4,7 @@ from . import models as posts_and_comments_models
 logger = logging.getLogger('django_artisan')
 
 
-def schedule_hard_delete(post_slug=None,
+def schedule_hard_delete(slug=None,
                          deleted_at=None,
                          type=None,
                          id=None,

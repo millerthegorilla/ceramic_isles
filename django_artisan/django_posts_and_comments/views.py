@@ -25,7 +25,7 @@ class Post(mixins.LoginRequiredMixin, generic.FormView):
               each redirecting to this url/view with its get_context_data, for all forms.
     """
     model = posts_and_comments_models.Post
-    slug_url_kwarg = 'post_slug'
+    slug_url_kwarg = 'slug'
     slug_field = 'slug'
     template_name = 'django_posts_and_comments/post_detail.html'
     form_class = posts_and_comments_forms.Comment
@@ -40,7 +40,6 @@ class Post(mixins.LoginRequiredMixin, generic.FormView):
         elif self.request.POST['type'] == 'comment':
             comment_form = self.form_class(data=self.request.POST)
             if comment_form.is_valid():
-                breakpoint()
                 new_comment = comment_form.save(commit=False)
                 new_comment.text = bleach.clean(
                     html.unescape(new_comment.text), strip=True)

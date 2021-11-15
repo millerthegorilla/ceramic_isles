@@ -56,7 +56,7 @@ class ForumPostView(posts_and_comments_views.Post):
               the whole if clause.
     """
     model: forum_models.ForumPost = forum_models.ForumPost
-    slug_url_kwarg: str = 'post_slug'
+    slug_url_kwarg: str = 'slug'
     slug_field: str = 'slug'
     template_name: str = 'django_forum/posts_and_comments/forum_post_detail.html'
     form_class: forum_forms.ForumPost = forum_forms.ForumPost
@@ -88,13 +88,14 @@ class ForumPostView(posts_and_comments_views.Post):
                 return shortcuts.redirect(post)
             else:
                 site = site_models.Site.objects.get_current()
-                comments = forum_models.ForumComment.objects.filter(post=post).all()
+                comments = forum_models.ForumComment.objects.filter(post_fk=post).all()
                 return shortcuts.render(self.request,
-                              self.template_name,
-                              {'post': post,
-                               'comments': comments,
-                               'comment_form': comment_form,
-                               'site_url': site.domain})
+                             self.template_name,
+                             {'comment_edit': True,
+                              'post': post,
+                              'comments': comments,
+                              'comment_form': comment_form,
+                              'site_url': self.request.scheme + '://' + site.domain})
         elif self.request.POST['type'] == 'update':
             post.text = self.request.POST['update-post']
             post.category = self.request.POST['category']
@@ -193,7 +194,7 @@ def subscribe(request) -> http.JsonResponse:
     # request should be ajax and method should be POST.
     if request.is_ajax and request.method == "POST":
         try:
-            fp = forum_models.ForumPost.objects.get(slug=request.POST['post_slug'])
+            fp = forum_models.ForumPost.objects.get(slug=request.POST['slug'])
             if request.POST['data'] == 'true':
                 fp.subscribed_users.add(request.user)
             else:

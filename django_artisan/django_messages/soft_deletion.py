@@ -62,9 +62,9 @@ class Model(models.Model):
             self.save()
             # slack jawed duck type hack
             try:
-                post_slug = self.post.slug
+                slug = self.post.slug
             except BaseException:
-                post_slug = self.slug
+                slug = self.slug
             try:
                 tasks.schedule('django_posts_and_comments.tasks.schedule_hard_delete',
                          name="sd_timeout_" + str(uuid.uuid4()),

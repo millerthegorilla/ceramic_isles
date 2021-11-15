@@ -6,11 +6,12 @@ from typing import Any, Union
 from sorl import thumbnail
 from safe_imagefield import models as safe_image_models
 
-from django import urls, conf, dispatch
+from django import urls, conf, dispatch, utils
 from django.core import exceptions
 from django.db import models as db_models, DEFAULT_DB_ALIAS
 from django.db.models import signals
 from django.contrib.auth import models as auth_models
+from django.template import defaultfilters
 
 from django_profile import models as profile_models
 from django_posts_and_comments import models as posts_and_comments_models
@@ -196,14 +197,17 @@ class ForumComment(posts_and_comments_models.Comment):
     forum_post: db_models.ForeignKey = db_models.ForeignKey(
         ForumPost, on_delete=db_models.CASCADE, related_name="forum_comments")
     moderation: db_models.DateField = db_models.DateField(null=True, default=None, blank=True)
-    title_slug: db_models.SlugField = db_models.SlugField()
 
     class Meta:
         ordering = ['date_created']
         permissions = [('approve_comment', 'Approve Comment')]
 
     def save(self, force_insert=False, force_update=False, using=DEFAULT_DB_ALIAS, update_fields=None) -> None:
-        self.post = self.forum_post
+        self.post_fk = self.forum_post
+        self.author = self.user_profile.display_name
+        self.date_created = utils.timezone.now()
+        self.slug = defaultfilters.slugify(
+             self.text[:10] + str(utils.dateformat.format(self.date_created, 'Y-m-d H:i:s')))
         super().save()
 
     def get_absolute_url(self) -> str:

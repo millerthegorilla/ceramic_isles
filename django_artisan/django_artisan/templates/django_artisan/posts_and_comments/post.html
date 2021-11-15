@@ -1,5 +1,6 @@
 		{% load thumbnail %}
-		<div id='post_text' class="col-12 col-sm-11 col-md-10 col-lg-8 mx-auto my-auto">
+		{% load static %}
+		<div id='post_text' class="col-12 col-sm-11 col-md-12 col-lg-9 mx-auto my-auto">
 			<div class="row justify-content-end">
 			   
 			</div>
@@ -21,11 +22,11 @@
 			    </div>
 			</div>
 			<div class='ps-4'>
-				<div class="tinfo row justify-content-between mb-2">
+				<div class="tinfo row justify-content-start mb-2">
 					 <div class="col-auto">
 				    	<h6>Category : {{ post.get_category_display }}</h6>
 				    </div>
-				    <div class="col-auto">
+				    <div class="col-auto flex-grow-1">
 				    	<h6>Location : {{ post.get_location_display }}</h6>
 				    </div>
 				    <div class="col-auto"><input type='checkbox' id='subscribed_cb' {% if subscribed %}checked{% endif %}><label for="subscribed_cb" class="ps-2">Subscribe to this thread</label></div>
@@ -109,4 +110,10 @@
 			    	{% endthumbnail %}
 		    	{% endwith %}
 		    </div>
+		    {% if comment_edit %}
+		        {% block body_js %}
+		            <script src="{% static 'django_artisan/js/anchor.js' %}" type="application/javascript" referrerpolicy="origin"></script>
+		        {% endblock body_js %}
+			{% endif %}
+
 		</div>

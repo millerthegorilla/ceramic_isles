@@ -20,7 +20,7 @@ def send_susbcribed_email(post_id: int = None, comment_id: int = None, path_info
             href = "{0}://{1}{2}#{3}".format('https',
                                              site_models.Site.objects.get_current().domain,
                                              path_info,
-                                             comment.title)
+                                             comment.slug)
 
             email = mail.EmailMessage(
                 'A new comment has been made at {}!'.format(
@@ -28,7 +28,7 @@ def send_susbcribed_email(post_id: int = None, comment_id: int = None, path_info
                 conf.settings.SUBSCRIBED_MSG.format(href),
                 conf.settings.EMAIL_FROM_ADDRESS,
                 ['subscribed_user@ceramicisles.org'],
-                list(
+                list(   #bcc
                     post.subscribed_users.all().values_list(
                         'email',
                         flat=True)),

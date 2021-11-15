@@ -28,6 +28,6 @@ urlpatterns = [
         template_name='django_artisan/posts_and_comments/forum_post_list.html'), name='post_list_view'),
     path('forum/posts/', forum_views.ForumPostList.as_view(
         template_name='django_artisan/posts_and_comments/forum_post_list.html'), name='post_list_view'),
-    path('forum/<int:pk>/<slug:post_slug>/', forum_views.ForumPostView.as_view(
+    path('forum/<int:pk>/<slug:slug>/', forum_views.ForumPostView.as_view(
         template_name='django_artisan/posts_and_comments/forum_post_detail.html'), name='post_view'),
 ]

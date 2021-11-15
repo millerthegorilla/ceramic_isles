@@ -8,14 +8,14 @@
 			        <div class="comments ps-4">
 		                <div class="row mx-auto">
 		                	{% if not comment.moderation %}
-		                	    <a class="col-1" href="{{request.path}}#{{comment.title}}" id="{{ comment.title }}"><h2 class="text-warning">#</h2></a>
+		                	    <a class="col-1" href="{{request.path}}#{{comment.slug}}" id="{{ comment.slug }}"><h2 class="text-warning">#</h2></a>
 			                	<div id="comment-text-{{ forloop.counter }}" class="comment-text col-11">
 			                        {{ comment.text|linebreaks|urlize|safe }}
 	                            </div>
                             {% else %}
                                 <div>This comment has been reported and is awaiting moderation</div>
                             {% endif%}
-                            {% if comment.comment_author == user_display_name %}
+                            {% if comment.author == user_display_name %}
                             <div id="comment-form-buttons-{{ forloop.counter }}" class="comment-form-buttons">
                             	<form method="post" id="comment-update-form">
                             	{% csrf_token %}
@@ -50,14 +50,13 @@
                         <div class="row justify-content-between mb-3">
                         	<div class="col-auto">
 		                	    {% thumbnail comment.user_profile.forumprofile.avatar.image_file "40x40" crop="center" as im %}
-                                    <img src="{{ im.url }}" height="{{ im.height }}" width="{{ im.width }}" class="rounded-circle" value="image-{{ forloop.counter }}"></img>
+                                    <img src="{{ im.url }}" height="{{ im.height }}" width="{{ im.width }}" class="rounded-circle" value="image-{{ forloop.counter }}" title="{{comment.author}}"></img>
                                 {% endthumbnail %}
 	                            <span class="tinfo fs-6 font-weight-normal">
-		                            {{ comment.author }}
 		                            {{ comment.date_created }}
 		                        </span>
 		                    </div>
-			                {% if comment.comment_author == user_display_name %}
+			                {% if comment.author == user_display_name %}
 		                    <div id="comment-modify-btns-{{ forloop.counter }}" class="col-auto">
 			                	<a href="#" class="tinfo" data-bs-toggle="modal" data-bs-target="#commentModal" data-bs-whatever="{{comment.id}}">Delete Comment</a>
 			                	<a id="{{ forloop.counter }}" class="comment-edit tinfo" href="#">Edit Comment</a>
