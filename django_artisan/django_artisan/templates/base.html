@@ -11,8 +11,8 @@
          <meta name="keywords" content="ceramicists, potters, clay, sculptors, wares, china, pottery, pots, sculptures, raku, stoneware, earthenware, pit firings, handmade items, for sale, pottery, arts, crafts, artisan, pictures, work, potters, Jersey, Guernsey, Alderney, Sark, Channel Islands">
          <meta name="author" content="ceramic isles">
         <link href="{% static 'django_artisan/css/styles.css' %}" rel="stylesheet">
-        <link href="{% static 'django_forum_app/css/styles.css' %}" rel="stylesheet">
-        <link href="{% static 'django_users_app/css/styles.css' %}" rel="stylesheet">
+        <link href="{% static 'django_forum/css/styles.css' %}" rel="stylesheet">
+        <link href="{% static 'django_users/css/styles.css' %}" rel="stylesheet">
         <link rel="preconnect" href="https://fonts.gstatic.com">
         <link href="https://fonts.googleapis.com/css2?family=Akaya+Kanadaka&family=Lobster+Two&family=Ubuntu:ital,wght@0,300;1,300&display=swap" rel="stylesheet">
         <script
@@ -42,8 +42,8 @@
                     <ul class="list-unstyled">
                       <li><a href="{% url 'django_artisan:about_view' %}" class="text-purple">About {{siteName}}</a></li>
                       {% if user.is_authenticated and '/email/' not in request.path %}
-                        <li><a href="{% url 'django_forum_app:post_list_view' %}" class="text-primary">Forum Posts</a></li>
-                        <li><a href="{% url 'django_forum_app:post_create_view' %}" class="text-white">Create Post</a></li>
+                        <li><a href="{% url 'django_forum:post_list_view' %}" class="text-primary">Forum Posts</a></li>
+                        <li><a href="{% url 'django_forum:post_create_view' %}" class="text-white">Create Post</a></li>
                         <li><a href="{% url 'django_artisan:profile_update_view' %}" class="text-success">Profile</a></li>
                         {% if user.profile.display_name %}
                           <li><a href="{% url 'django_artisan:personal_page_view' user.profile.display_name %}" class="text-muted">Personal Page</a></li>

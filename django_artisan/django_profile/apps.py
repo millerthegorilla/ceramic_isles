@@ -1,5 +1,6 @@
-from django.apps import AppConfig
+from django import apps
 
 
-class DjangoProfileConfig(AppConfig):
+class DjangoProfileConfig(apps.AppConfig):
+    default_auto_field = 'django.db.models.BigAutoField'
     name = 'django_profile'

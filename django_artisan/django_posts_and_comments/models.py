@@ -1,89 +1,82 @@
 import uuid
 
 from django.db import models
-from django.contrib.auth.models import User
-from django.urls import reverse_lazy
-from django.template.defaultfilters import slugify
-from django_profile.models import Profile
+from django.dispatch import receiver
+from django.template import defaultfilters
 from django.contrib.contenttypes import fields
 from django.db.models.constraints import UniqueConstraint
+from django.db.models.signals import post_save
 from django.utils import timezone
 from django.conf import settings
+from django.urls import reverse, reverse_lazy
 
 from django_q.tasks import schedule
 
-from .soft_deletion import SoftDeletionModel
+from django_messages import models as message_models
+from django_profile import models as profile_models
 
 
-class Post(SoftDeletionModel):
+class Post(message_models.Message):
     """
         post class contains category  TODO: sanitize field init parameters
     """
-    text = models.TextField(max_length=2000)
-    title = models.CharField(max_length=100, default='')
-    slug = models.SlugField(unique=True, db_index=True, max_length=80)    # added unique and index but not tested.
-    date_created = models.DateTimeField(auto_now_add=True)
-    user_profile = models.ForeignKey(Profile, null=True, on_delete=models.SET_NULL, related_name="posts")
+    title: models.CharField = models.CharField(max_length=100, default='')
+    # added unique and index but not tested.
+    user_profile: models.ForeignKey = models.ForeignKey(
+        profile_models.Profile, null=True, on_delete=models.SET_NULL, related_name="posts")
 
     class Meta:
-        UniqueConstraint(fields=['title', 'date_created'], name='unique_post')
-    
-    def post_author(self):
+        UniqueConstraint(fields=['title', 'created_at'], name='unique_post')
+
+    def post_author(self) -> str:
         return self.user_profile.display_name
 
-    def get_absolute_url(self):
-        return reverse_lazy('django_posts_and_comments:post_view', args=(self.id, self.slug,))
+    def get_absolute_url(self) -> str:
+        return reverse_lazy(
+            'django_posts_and_comments:post_view', args=(
+                self.id, self.slug,))
 
-    def delete(self):
-        super().delete()
-        breakpoint()
+    def delete(self) -> None:
         for comment in self.comments.all():
-            comment.delete()
-        # schedule(schedule_hard_delete, name="sd_timeout_" + str(uuid.uuid4()),
-        #                                schedule_type="O",
-        #                                repeats=-1,
-        #                                next_run=timezone.now() + settings.DELETION_TIMEOUT,
-        #                                kwargs={'post_slug': self.post.slug, 
-        #                                        'deleted_at': str(self.deleted_at),
-        #                                        'type': 'Post',
-        #                                        'id': self.id })
-
-    def __str__(self):
+            comment.delete()   ## -> calls softdeletionModel.delete
+        super().delete() ## so does this...   Model.delete sets field on model and schedules
+                         ## a hard delete
+    def __str__(self) -> str:
         return "Post : " + f"{self.title}"
 
-class Comment(SoftDeletionModel):
+
+class Comment(message_models.Message):
     """
         a post can have many comments
     """
-    text = models.TextField(max_length=500)
-    post = models.ForeignKey(Post, null=True, on_delete=models.SET_NULL, related_name="comments")
-    date_created = models.DateTimeField(auto_now_add=True)
-    user_profile = models.ForeignKey(Profile, null=True, on_delete=models.SET_NULL, related_name="comments")
+    post_fk: models.ForeignKey = models.ForeignKey(
+        Post, null=True, on_delete=models.SET_NULL, related_name="comments")
+    user_profile: models.ForeignKey = models.ForeignKey(
+        profile_models.Profile, null=True, on_delete=models.SET_NULL, related_name="comments")
 
-    def save(self, post=None, **kwargs):
-        if post is not None:
-            self.post = post
-        super().save(**kwargs)
+    # def save(self, **kwargs) -> None:
+    #     super().save(**kwargs)
 
-    def comment_author(self):
-        return self.user_profile.display_name
+    # class Meta:
+    #     ordering = ['created_at']
 
-    def __str__(self):
-        return "Comment for " + f"{self.post.title}"  ## TODO check for query - fetch_related...
-    
-    # def delete(self):
-    #     super().delete()
-    #     schedule(schedule_hard_delete, name="sd_timeout_" + str(uuid.uuid4()),
-    #                                    schedule_type="O",
-    #                                    repeats=-1,
-    #                                    next_run=timezone.now() + settings.DELETION_TIMEOUT,
-    #                                    kwargs={'post_slug': self.post.slug, 
-    #                                            'deleted_at': str(self.deleted_at),
-    #                                            'type': 'Comment',
-    #                                            'id': self.id })
+    # def comment_author(self) -> str:
+    #     return self.user_profile.display_name
 
-def schedule_hard_delete(post_slug=None, deleted_at=None, type=None, id=None):
-    if type == 'Comment':
-        Comment.objects.get(id=id).hard_delete()
-    else:
-        Post.objects.get(id=id).hard_delete()
+    def __str__(self) -> str:
+        # TODO check for query - fetch_related...
+        return "Comment for " + f"{self.post_fk.title}"
+
+
+# @receiver(post_save, sender=Comment)
+# def create_comment_slug(sender: Comment, instance: Comment, created, **kwargs) -> None:
+#     if created:
+#         instance.title = defaultfilters.slugify(
+#             instance.text[:10] + str(dateformat.format(instance.created_at, 'Y-m-d H:i:s')))
+        #         instance.save()
+
+# def scheduled_hard_delete(post_slug=None, deleted_at=None, type=None, id=None) -> None:
+#     if type == 'Comment':
+#         Comment.objects.get(id=id).hard_delete()
+#     else:
+#         Post.objects.get(id=id).hard_delete()

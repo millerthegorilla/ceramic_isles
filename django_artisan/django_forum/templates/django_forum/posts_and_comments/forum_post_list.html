@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}{{ siteName }} - Forum Posts{% endblock title %}
+{% block content %}
+    {% if page_obj.object_list.count == 0 and is_a_search is False %}
+        <div class="row">
+            <div class="col-auto mx-auto mt-5">
+                <p><h3>There are currently no posts in the forum.  Why not <a href="{% url 'django_forum:post_create_view' %}" class="tinfo">add</a> one...?</h3></p>
+            </div>
+        </div>
+    {% else %}
+        <div class="container-fluid main-container-post">
+            <div class="row">
+                <div class="col-auto mx-auto headline-text">
+                    <h2>Forum Posts...</h2>
+                    <p>Search the posts for content, author or category.</p>  
+                    <form class="mb-2" action="{% url 'django_forum:post_list_view' 'search' %}" class="form-autocomplete">
+                        <input class="me-2" id="q" name="q" type="text" list="datalistOptions" class="autocomplete" autocomplete="on">
+                        <input type="submit" value="Search!">
+                    </form>
+                    {% if is_a_search is True %}
+                        {% if search > 0 %}
+                            <h5>Search Results</h5>
+                        {% else %}
+                            <h5>There are no search results</h5>
+                            <h5>so here are the Posts...</h5>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+            {% include './post_list.html' %}
+            {% if is_a_search is True and search > 0 %}
+                <a href='{% url "django_forum:post_list_view" %}' class="btn btn-primary">Clear Search Results</a>
+            {% endif %}
+        </div>
+    {% endif %} 
+{% endblock %}

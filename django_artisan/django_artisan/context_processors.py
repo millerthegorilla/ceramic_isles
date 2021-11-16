@@ -1,7 +1,11 @@
-from django.conf import settings
+from typing import Any, Dict
 
-def navbarSpiel(request):
-    return { 'navbarSpiel': settings.NAVBAR_SPIEL }
+from django import conf
+from django import http
 
-def siteLogo(request):
-	return { 'siteLogo': settings.SITE_LOGO }
+def navbarSpiel(request: http.HttpRequest) -> Dict[str, Any]:
+    return {'navbarSpiel': conf.settings.NAVBAR_SPIEL}
+
+
+def siteLogo(request: http.HttpRequest) -> Dict[str, Any]:
+    return {'siteLogo': conf.settings.SITE_LOGO}

@@ -1,0 +1,81 @@
+		<div id='post_text' class="col-12 col-sm-11 col-md-10 col-lg-8 mx-auto my-auto">
+			<div class="row justify-content-end">
+			    <div class="col-auto"><input type='checkbox' id='subscribed_cb' {{ subscribed }}><label for="subscribed_cb" class="ps-2">Subscribe to this thread</label></div>
+			</div>
+			<div class="row align-items-end tinfo">
+				<div class="col-auto">
+				        <h3><span id="post_title">{{ post.title|safe }}</span><span class="text-dark ps-2">by</span></h3>
+			    </div>
+			    <div class="col-auto">
+			    	<h4>{{ post.post_author }}<span class="text-dark ps-3">on</span></h4>
+			    </div>
+			    <div class="col-auto">
+			    	<h6>{{ post.created_at }}</h6>
+			    </div>
+			</div>
+			<div class="row ms-auto">
+				{% if not post.moderation_date %}
+			    <div id="textarea" class="col-auto">{{ post.text|safe }}</div>
+			    {% else %}
+			    <div>This post has been reported and is awaiting moderation_date.</div>
+			    {% endif %}
+			    {% if post.post_author == user_display_name %}
+				    <div class="ms-auto">
+		    		    <form method="post">
+		    		    	{% csrf_token %}
+		    		    	<div id="post-edit-div">
+		    		    		<input type="textarea" name="update-post" class="update-form-text"></input>
+				    		    <input type="hidden" name="type" value="update">
+				    		    <div class="mt-3">
+				                    <button id="editor-cancel-btn" type="button" class="ms-auto col-auto btn btn-secondary me-2">Cancel</button>
+				                    <button id="editor-submit-btn" type="submit" class="me-auto col-auto btn btn-primary">
+				                    Save Post</button>
+				                </div>
+			                </div>
+		                </form>
+		            </div>
+                {% else %}
+	                {% if not post.moderation_date and post.post_author != user_display_name %}
+	                <div class="ms-auto">
+	                    <form method="post" id="form-report-post">
+	                    	{% csrf_token %}
+	                    	<div class="tinfo">
+	                            <input type="hidden" name="type" value="post-report">
+	                            <a class="report-post text-warning" href="#">Report Post for Moderation</a>
+	                    	</div>
+	                    </form>
+	                </div>
+	                {% endif %}
+                {% endif %}
+		    </div>
+		    <div class="row justify-content-end">
+	    		{% if post.post_author == user_display_name %}
+	    		    <div id="modify-post-btns">
+			    		<button id="delete-btn" type="button" class="btn btn-secondary col-auto me-2" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">Delete Post</button>
+		    		    <button id="editor-btn" class="me-auto col-auto btn btn-primary">Edit Post</button>
+	    		    </div>
+	    		{% endif %}
+		    </div>
+		    <!-- Confirm Delete Post Modal -->
+		    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+		      <div class="modal-dialog">
+		        <div class="modal-content">
+		          <div class="modal-header">
+		            <h5 class="modal-title" id="confirmDeleteModalLabel">Confirm Post Deletion</h5>
+		            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		          </div>
+		          <div class="modal-body">
+		            <h4>Warning!</h4><p>You are about to delete this post.  This action cannot be undone!  Proceed carefully...</p>
+		          </div>
+		          <div class="modal-footer">
+		            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+		            <form method="post">
+		            {% csrf_token %}
+		            <input type="hidden" name="type" value="post">
+		            <button type="submit" class="btn btn-primary">Delete Post</button>
+		            </form>
+		          </div>
+		        </div>
+		      </div>
+		    </div>
+		</div>

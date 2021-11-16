@@ -3,24 +3,24 @@ import logging
 from django.contrib import admin
 from django.urls import include, path
 from django_email_verification import urls as mail_urls
-from django_users_app import urls as users_app_urls
-from django_forum_app import urls as forum_app_urls
+from django_users import urls as users_app_urls
+from django_forum import urls as forum_app_urls
 from django_artisan import urls as artisan_app_urls
 from django.conf import settings
 from django.conf.urls.static import static
-from django.urls import re_path
+from django.urls import re_path, URLResolver
 from django.contrib.staticfiles import views
 from django.contrib.sitemaps.views import sitemap
-from django_artisan.sitemaps import StaticViewSitemap, PersonalPageSiteMap
-from django_forum_app.views import CustomRegisterView
+from django_artisan.sitemaps import StaticView, PersonalPage
+from django_forum.views import CustomRegister
 
-logger = logging.getLogger('django')
+logger = logging.getLogger('django_artisan')
 
-sitemaps = { 'main': StaticViewSitemap,
-             'personalpage': PersonalPageSiteMap }
+sitemaps = {'main': StaticView,
+            'personalpage': PersonalPage}
 
 urlpatterns = [
-    path('users/accounts/register/', CustomRegisterView.as_view(), name='register'),
+    path('users/accounts/register/', CustomRegister.as_view(), name='register'),
     path('', include(artisan_app_urls)),
     path('forum/', include(forum_app_urls)),
     path('users/', include(users_app_urls)),
@@ -36,10 +36,12 @@ try:
 except NameError:
     logger.info("settings.DEBUG is not defined")
 else:
-    if settings.DEBUG == True:
+    if settings.DEBUG:
         logger.info("Django is in debug mode")
-        urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-        urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+        urlpatterns += static(settings.MEDIA_URL,
+                              document_root=settings.MEDIA_ROOT)
+        urlpatterns += static(settings.STATIC_URL,
+                              document_root=settings.STATIC_ROOT)
         import debug_toolbar
         urlpatterns = [
             path('__debug__/', include(debug_toolbar.urls)),

@@ -1,24 +1,25 @@
-from django.forms import ModelForm
-from django.contrib.auth.models import User
-from django.db import IntegrityError
-from django.contrib import messages
-from django.conf import settings
-from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Submit, Row, Column, Field, Fieldset, Div
-from crispy_bootstrap5.bootstrap5 import FloatingField
+import logging
 
-from .models import Profile
-from safe_imagefield.forms import SafeImageField    ## TODO: need to setup clamav.conf properly
+from crispy_forms import helper, layout
+from crispy_bootstrap5 import bootstrap5
+
+from django import forms, db
+from django.contrib.auth import models as auth_models
+
+from . import models as profile_models
+# TODO: need to setup clamav.conf properly
 
 
-class ProfileUserForm(ModelForm):
-    # def clean_username(self, *args, **kwargs):    
+logger = logging.getLogger('django_artisan')
+
+class ProfileUser(forms.ModelForm):
+    # def clean_username(self, *args, **kwargs):
     #     username = self.cleaned_data['username']
     #     if User.objects.filter(username=username):
     #         self.add_error('username', 'Error, That username already exists!')
     #     return username
-   
-    def __init__(self, *args, **kwargs):
+
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         try:
             self.initial = kwargs['initial']
@@ -26,61 +27,60 @@ class ProfileUserForm(ModelForm):
             pass
         for fieldname in ['username', 'email']:
             self.fields[fieldname].help_text = None
-        self.helper = FormHelper()
+        self.helper = helper.FormHelper()
         self.helper.form_tag = False
-        self.helper.css_class =''
-        self.helper.layout = Layout(
-                FloatingField('username'),
-                FloatingField('email'),
-                FloatingField('first_name'),
-                FloatingField('last_name'),
+        self.helper.css_class = ''
+        self.helper.layout = layout.Layout(
+            bootstrap5.FloatingField('username'),
+            bootstrap5.FloatingField('email'),
+            bootstrap5.FloatingField('first_name'),
+            bootstrap5.FloatingField('last_name'),
         )
 
-    def clean_username(self, *args, **kwargs):
+    def clean_username(self, *args, **kwargs) -> str:
         username = self.cleaned_data['username']
         if username != self.initial['username']:
             try:
-                User.objects.get(username=username)
-            except User.DoesNotExist:
+                auth_models.User.objects.get(username=username)
+            except auth_models.User.DoesNotExist:
                 return username
-            except IntegrityError as e:
+            except db.IntegrityError as e:
                 error_message = e.__cause__
-                messages.error(None, error_message)
+                logger.error(error_message)
             self.valid = False
             self.add_error('username', 'Error, That username already exists!')
         return username
 
-    def clean_email(self):
+    def clean_email(self) -> str:
         email = self.cleaned_data['email']
         if email != self.initial['email']:
             try:
-                User.objects.get(email=email)
-            except User.DoesNotExist:
+                auth_models.User.objects.get(email=email)
+            except auth_models.User.DoesNotExist:
                 return email
-            except IntegrityError as e:
+            except db.IntegrityError as e:
                 error_message = e.__cause__
-                messages.error(None, error_message)
-            self.valid = False 
+                logger.error(error_message)
+            self.valid = False
             self.add_error('email', 'Error! That email already exists!')
         return email
 
     class Meta:
-        model = User
+        model = auth_models.User
         fields = ['username', 'email', 'first_name', 'last_name']
-    
 
 
-class ProfileDetailForm(ModelForm):
+class Profile(forms.ModelForm):
     class Meta:
-        model = Profile
+        model = profile_models.Profile
         fields = ['profile_user', 'display_name']
         exclude = ['profile_user']
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self.helper = FormHelper()
-        self.helper.css_class =''
+        self.helper = helper.FormHelper()
+        self.helper.css_class = ''
         self.helper.form_tag = False
-        self.helper.layout = Layout(
-                FloatingField('display_name'),
+        self.helper.layout = layout.Layout(
+            bootstrap5.FloatingField('display_name'),
         )

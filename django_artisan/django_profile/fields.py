@@ -1,9 +1,9 @@
-from crispy_forms.layout import Field
+from crispy_forms import layout
 
 
-class FloatingField(Field):
-	template = 'fields/profile_floating_field.html'
+class FloatingField(layout.Field):
+    template = 'fields/profile_floating_field.html'
 
 
-class FileInput(Field):
-	template = 'fields/profile_file_input.html'
+class FileInput(layout.Field):
+    template = 'fields/profile_file_input.html'

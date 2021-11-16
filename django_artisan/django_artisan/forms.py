@@ -1,142 +1,151 @@
-from safe_imagefield.forms import SafeImageField    ## TODO: need to setup clamav.conf properly
-from django.core.exceptions import ValidationError
-from crispy_forms.layout import Layout, Submit, Row, Column, Field, Fieldset, HTML, Div
-from crispy_forms.helper import FormHelper
-from crispy_bootstrap5.bootstrap5 import FloatingField
+# TODO: need to setup clamav.conf properly
+from safe_imagefield import forms as safe_image_forms
+from django.core import exceptions
+from crispy_forms import layout
+from crispy_forms import helper
+from crispy_bootstrap5 import bootstrap5
 
 from django.conf import settings
 from django import forms
-
-from django_forum_app.forms import ForumProfileDetailForm
+from django.utils.translation import ugettext as _
+from django_forum.forms import ForumProfile
+from django.contrib.auth.models import User
 
 from .models import ArtisanForumProfile, UserProductImage
 from .fields import FileClearInput, FileInput
+from typing import Any, Dict
 
 
 MAX_NUMBER_OF_IMAGES = settings.MAX_USER_IMAGES
 
 
-class ArtisanForumProfileDetailForm(ForumProfileDetailForm):
-    image_file = SafeImageField(allowed_extensions=('jpg','png'), 
-                               check_content_type=True, 
-                               scan_viruses=True, 
-                               media_integrity=True,
-                               max_size_limit=2621440)
+class ArtisanForumProfile(ForumProfile):
+    image_file = safe_image_forms.SafeImageField(allowed_extensions=('jpg', 'png'),
+                                                 check_content_type=True,
+                                                 scan_viruses=True,
+                                                 media_integrity=True,
+                                                 max_size_limit=2621440)
 
-    class Meta(ForumProfileDetailForm.Meta):
+    class Meta(ForumProfile.Meta):
         model = ArtisanForumProfile
-        fields = ForumProfileDetailForm.Meta.fields + [
-                                                  'image_file', \
-                                                  'bio', \
-                                                  'shop_web_address', \
-                                                  'outlets', \
-                                                  'listed_member', \
-                                                  'display_personal_page', \
-                                                 ]
-    def __init__(self, *args, **kwargs):
+        fields = ForumProfile.Meta.fields + [
+            'image_file',
+            'bio',
+            'shop_web_address',
+            'outlets',
+            'listed_member',
+            'display_personal_page',
+        ]
+
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.fields['image_file'].widget.is_required = False
         self.fields['image_file'].required = False
         self.fields['image_file'].help_text = '<span class="text-white">A single image for your personal page, click Update Profile to upload it...</span>'
         self.fields['bio'] = forms.fields.CharField(
-                label="Biographical Information",
-                help_text='<span class="text-white">Biographical detail is a maximum 500 character space to display \
+            label="Biographical Information",
+            help_text='<span class="text-white">Biographical detail is a maximum 500 character space to display \
                                      on your personal page.</span>',
-                widget=forms.Textarea(),
-                required=False)
+            widget=forms.Textarea(),
+            required=False)
         self.fields['shop_web_address'] = forms.fields.CharField(
-                label='Your Online Shop Web Address',
-                help_text='<span class="tinfo">Your shop web address to be displayed on your personal page</span>',
-                required=False)
+            label='Your Online Shop Web Address',
+            help_text='<span class="tinfo">Your shop web address to be displayed on your personal page</span>',
+            required=False)
         self.fields['outlets'] = forms.fields.CharField(
-                label='Outlets that sell your wares',
-                help_text='<span class="tinfo">A comma separated list of outlets that sell your stuff, for your personal page.</span>',
-                required=False)
+            label='Outlets that sell your wares',
+            help_text='<span class="tinfo">A comma separated list of outlets that sell your stuff, for your personal page.</span>',
+            required=False)
         # add to the super class fields
-        self.helper.layout.fields = self.helper.layout.fields + [ 
-            FileClearInput('image_file', css_class="tinfo form-control form-control-lg"),
-            FloatingField('bio'),
-            FloatingField('shop_web_address'),
-            FloatingField('outlets'),
-            Div(Field('listed_member'), css_class="tinfo"),
-            Div(Field('display_personal_page'), css_class="tinfo"),
+        self.helper.layout.fields = self.helper.layout.fields + [
+            FileClearInput(
+                'image_file', css_class="tinfo form-control form-control-lg"),
+            bootstrap5.FloatingField('bio'),
+            bootstrap5.FloatingField('shop_web_address'),
+            bootstrap5.FloatingField('outlets'),
+            layout.Div(layout.Field('listed_member'), css_class="tinfo"),
+            layout.Div(layout.Field('display_personal_page'), css_class="tinfo"),
         ]
         self.helper.form_id = 'id-profile-form'
         self.helper.form_method = 'post'
         self.helper.form_class = 'col-auto tinfo'
 
 
-class UserProductImageForm(forms.ModelForm):
-    image_file = SafeImageField(allowed_extensions=('jpg','png'), 
-                               check_content_type=True, 
-                               scan_viruses=True, 
-                               media_integrity=True,
-                               max_size_limit=2621440)
+class UserProductImage(forms.ModelForm):
+    image_file = safe_image_forms.SafeImageField(allowed_extensions=('jpg', 'png'),
+                                                 check_content_type=True,
+                                                 scan_viruses=True,
+                                                 media_integrity=True,
+                                                 max_size_limit=2621440)
+
     class Meta:
         model = UserProductImage
-        fields = ['image_file', 'image_title', 'image_text', 'image_shop_link', 'image_shop_link_title']
+        fields = ['image_file', 'image_title', 'image_text',
+                  'image_shop_link', 'image_shop_link_title']
 
-    def __init__(self, instance=None, user=None, *args, **kwargs):
+    def __init__(self, instance: UserProductImage = None, user: User = None, *args, **kwargs) -> None:
         self.user = user
         super().__init__(*args, **kwargs)
         self.fields['image_file'].validators.append(self.restrict_amount)
-        self.helper = FormHelper()
+        self.helper = helper.FormHelper()
         self.helper.form_tag = False
-        self.helper.layout = Layout(
-            Fieldset(
-                '',
-                FileInput('image_file', name="image_file"),
-                FloatingField('image_title'),
-                FloatingField('image_text'),
-                FloatingField('image_shop_link'),
-                FloatingField('image_shop_link_title'),),
+        self.helper.layout = layout.Layout(
+            layout.Fieldset(
+                            '',
+                            FileInput('image_file', name="image_file"),
+                            bootstrap5.FloatingField('image_title'),
+                            bootstrap5.FloatingField('image_text'),
+                            bootstrap5.FloatingField('image_shop_link'),
+                            bootstrap5.FloatingField('image_shop_link_title'),),
         )
         self.helper.form_id = 'id-upload-form'
         self.helper.form_method = 'post'
         self.helper.form_class = 'col-auto col-xs-3'
 
-
-    def restrict_amount(self, value):
+    def restrict_amount(self, count: int) -> None:
         if self.user is not None:
-            if UserProductImage.objects.filter(user_profile=self.user.profile.forumprofile).count() >= MAX_NUMBER_OF_IMAGES:
-                raise ValidationError('User already has {} images'.format(MAX_NUMBER_OF_IMAGES))
+            if UserProductImage.objects.filter(
+                    user_profile=self.user.profile.forumprofile).count() >= MAX_NUMBER_OF_IMAGES:
+                raise exceptions.ValidationError(
+                    'User already has {} images'.format(MAX_NUMBER_OF_IMAGES))
 
 
-# handles deletion
-class UserProductImagesForm(forms.ModelForm):
-    image_file = SafeImageField(allowed_extensions=('jpg','png'), 
-                               check_content_type=True, 
-                               scan_viruses=True, 
-                               media_integrity=True,
-                               max_size_limit=2621440)
-    class Meta:
-        model = UserProductImage
-        fields = ['image_file', 'image_text', 'image_shop_link']
-    
-    def __init__(self, user=None, *args, **kwargs):
-        self.user = user
-        super().__init__(*args, **kwargs)
-        self.fields['image_file'].validators.append(self.restrict_amount)
+# handles deletion  ## TODO is this even used?
+# class UserProductImageDelete(forms.ModelForm):
+#     image_file = safe_image_forms.SafeImageField(allowed_extensions=('jpg', 'png'),
+#                                                  check_content_type=True,
+#                                                  scan_viruses=True,
+#                                                  media_integrity=True,
+#                                                  max_size_limit=2621440)
 
-        self.helper = FormHelper()
-        self.helper.layout = Layout(
-            Fieldset(
-                '',
-                FileInput('image_file', css_class="col-auto"),
-                FloatingField('image_text', css_class="col-auto"),
-                FloatingField('image_shop_link', css_class="col-auto"),),        
-        )
-        self.helper.form_id = 'id-upload-form'
-        self.helper.form_method = 'post'
-        self.helper.form_class = 'col-12'
+#     class Meta:
+#         model = UserProductImage
+#         fields = ['image_file', 'image_text', 'image_shop_link']
 
+#     def __init__(self, user: User = None, *args, **kwargs) -> None:
+#         self.user = user
+#         super().__init__(*args, **kwargs)
+#         self.fields['image_file'].validators.append(self.restrict_amount)
 
-    def restrict_amount(self, value):
-        if self.user is not None:
-            if UserProductImage.objects.filter(user_profile=self.user.profile.forumprofile).count() >= MAX_NUMBER_OF_IMAGES:
-                raise ValidationError(_('User already has {0} images'.format(MAX_NUMBER_OF_IMAGES)),
-                                      code='max_image_limit',
-                                      params={'value':'3'})
+#         self.helper = helper.FormHelper()
+#         self.helper.layout = layout.Layout(
+#             layout.Fieldset(
+#                     '',
+#                     FileInput('image_file', css_class="col-auto"),
+#                     boostrap5.FloatingField('image_text', css_class="col-auto"),
+#                     boostrap5.FloatingField('image_shop_link', css_class="col-auto"),),
+#         )
+#         self.helper.form_id = 'id-upload-form'
+#         self.helper.form_method = 'post'
+#         self.helper.form_class = 'col-12'
 
-    def clean(self, *args, **kwargs):
-        cleaned_data = super().clean()
+#     def restrict_amount(self) -> None:
+#         if self.user is not None:
+#             if UserProductImage.objects.filter(
+#                     user_profile=self.user.profile.forumprofile).count() >= MAX_NUMBER_OF_IMAGES:
+#                 raise exceptions.ValidationError(_('User already has {0} images'.format(
+#                     MAX_NUMBER_OF_IMAGES)), code='max_image_limit', params={'value': '3'})
+
+#     def clean(self) -> Dict[str, Any]:
+#         cleaned_data = super().clean()
+#         return cleaned_data

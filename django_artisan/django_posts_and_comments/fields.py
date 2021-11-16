@@ -1,11 +1,11 @@
-from crispy_forms.layout import Field
+from crispy_forms import layout
 
 
-# TODO: refactor the name FloatField to FloatingField so as not to clash with django model FloatField
-class FloatingField(Field):
-	template = 'fields/posts_and_comments_floating_field.html'
+# TODO: refactor the name FloatField to FloatingField so as not to clash
+# with django model FloatField
+class FloatingField(layout.Field):
+    template = 'fields/posts_and_comments_floating_field.html'
 
 
-class FileInput(Field):
-	template = 'fields/posts_and_comments_file_input.html'
-
+class FileInput(layout.Field):
+    template = 'fields/posts_and_comments_file_input.html'
