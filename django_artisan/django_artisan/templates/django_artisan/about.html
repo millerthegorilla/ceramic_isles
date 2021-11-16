@@ -21,8 +21,8 @@
 				    <div class="card card-bg border-primary text-primary p-3 mb-3 ms-2">
 					    <div class="col-auto mx-auto ps-5">
 					    	<div class="row">
-					    	    {% if event.date %}
-					    	        {{ event.date }} - {{ event.time }}
+					    	    {% if event.event_date %}
+					    	        {{ event.event_date }} - {{ event.time }}
 					    	    {% else %}
 					    	        {{ event.every }} - {{ event.time }}
 					    	    {% endif %}

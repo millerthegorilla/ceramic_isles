@@ -201,6 +201,6 @@ class Event(models.Model):
     text: models.CharField = models.CharField(max_length=400)
     time: models.TimeField = models.TimeField(auto_now_add=False)
     every: models.CharField = models.CharField(max_length=40, blank=True, null=True)
-    date: models.DateField = models.DateField(auto_now_add=False, blank=True, null=True)
+    event_date: models.DateField = models.DateField(auto_now_add=False, blank=True, null=True)
     repeating: models.BooleanField = models.BooleanField(default=False)
     active:models.BooleanField = models.BooleanField(default=True)

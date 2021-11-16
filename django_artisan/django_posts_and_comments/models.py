@@ -26,7 +26,7 @@ class Post(message_models.Message):
         profile_models.Profile, null=True, on_delete=models.SET_NULL, related_name="posts")
 
     class Meta:
-        UniqueConstraint(fields=['title', 'date_created'], name='unique_post')
+        UniqueConstraint(fields=['title', 'created_at'], name='unique_post')
 
     def post_author(self) -> str:
         return self.user_profile.display_name
@@ -58,7 +58,7 @@ class Comment(message_models.Message):
     #     super().save(**kwargs)
 
     # class Meta:
-    #     ordering = ['date_created']
+    #     ordering = ['created_at']
 
     # def comment_author(self) -> str:
     #     return self.user_profile.display_name
@@ -72,7 +72,7 @@ class Comment(message_models.Message):
 # def create_comment_slug(sender: Comment, instance: Comment, created, **kwargs) -> None:
 #     if created:
 #         instance.title = defaultfilters.slugify(
-#             instance.text[:10] + str(dateformat.format(instance.date_created, 'Y-m-d H:i:s')))
+#             instance.text[:10] + str(dateformat.format(instance.created_at, 'Y-m-d H:i:s')))
         #         instance.save()
 
 # def scheduled_hard_delete(post_slug=None, deleted_at=None, type=None, id=None) -> None:

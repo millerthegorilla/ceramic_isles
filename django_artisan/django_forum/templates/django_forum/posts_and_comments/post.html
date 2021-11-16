@@ -10,14 +10,14 @@
 			    	<h4>{{ post.post_author }}<span class="text-dark ps-3">on</span></h4>
 			    </div>
 			    <div class="col-auto">
-			    	<h6>{{ post.date_created }}</h6>
+			    	<h6>{{ post.created_at }}</h6>
 			    </div>
 			</div>
 			<div class="row ms-auto">
-				{% if not post.moderation %}
+				{% if not post.moderation_date %}
 			    <div id="textarea" class="col-auto">{{ post.text|safe }}</div>
 			    {% else %}
-			    <div>This post has been reported and is awaiting moderation.</div>
+			    <div>This post has been reported and is awaiting moderation_date.</div>
 			    {% endif %}
 			    {% if post.post_author == user_display_name %}
 				    <div class="ms-auto">
@@ -35,7 +35,7 @@
 		                </form>
 		            </div>
                 {% else %}
-	                {% if not post.moderation and post.post_author != user_display_name %}
+	                {% if not post.moderation_date and post.post_author != user_display_name %}
 	                <div class="ms-auto">
 	                    <form method="post" id="form-report-post">
 	                    	{% csrf_token %}

@@ -18,7 +18,7 @@
 			    	<h3><span class="text-dark ps-3">on</span></h3>
 			    </div>
 			    <div class="col-auto">
-			    	<h4>{{ post.date_created }}</h4>
+			    	<h4>{{ post.created_at }}</h4>
 			    </div>
 			</div>
 			<div class='ps-4'>
@@ -32,7 +32,7 @@
 				    <div class="col-auto"><input type='checkbox' id='subscribed_cb' {% if subscribed %}checked{% endif %}><label for="subscribed_cb" class="ps-2">Subscribe to this thread</label></div>
 				</div>
 				<div class="row ms-auto mb-2">
-					{% if not post.moderation %}
+					{% if not post.moderation_date %}
 				    <div id="textarea" class="col-auto">{{ post.text|safe }}</div>
 				    {% else %}
 				    <div>This post has been reported and is awaiting moderation.</div>
@@ -57,7 +57,7 @@
 			                </form>
 			            </div>
 	                {% else %}
-		                {% if not post.moderation and post.post_author != user_display_name %}
+		                {% if not post.moderation_date and post.post_author != user_display_name %}
 		                <div class="ms-auto">
 		                    <form method="post" id="form-report-post">
 		                    	{% csrf_token %}

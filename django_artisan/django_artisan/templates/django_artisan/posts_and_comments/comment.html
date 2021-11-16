@@ -7,7 +7,7 @@
 		        <div class="row mx-auto">
 			        <div class="comments ps-4">
 		                <div class="flex-column mx-auto">
-		                	{% if not comment.moderation %}
+		                	{% if not comment.moderation_date %}
                                 <div class="d-flex">
                                     <a href="/people/{{comment.author}}/">{% thumbnail comment.user_profile.forumprofile.avatar.image_file "40x40" crop="center" as im %}
                                         <img src="{{ im.url }}" height="{{ im.height }}" width="{{ im.width }}" class="rounded-circle me-1" value="image-{{ forloop.counter }}" title="{{comment.author}}"></img></a>
@@ -39,7 +39,7 @@
                                     </div>
                               	</form>
                             </div>
-                            {% elif not comment.moderation %}
+                            {% elif not comment.moderation_date %}
                             <div class="ms-auto">
 			                    <form method="post" id="form-report-comment">
 			                    	{% csrf_token %}
@@ -55,7 +55,7 @@
                         <div class="row justify-content-end mb-3">
                             <div class="col-auto">
                                 <span class="tinfo fs-6 font-weight-normal">
-		                            {{ comment.date_created }}
+		                            {{ comment.created_at }}
                                 </span>
                             </div>
 			                {% if comment.author == user_display_name %}

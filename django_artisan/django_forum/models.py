@@ -149,13 +149,13 @@ def auto_delete_avatar_on_delete(sender: ForumProfile, instance: ForumProfile, *
 ## TODO Post and Comment should probably have common superclass somewhere.
 
 class ForumPost(posts_and_comments_models.Post):
-    moderation: db_models.DateField = db_models.DateField(null=True, default=None, blank=True)
+    moderation_date: db_models.DateField = db_models.DateField(null=True, default=None, blank=True)
     pinned: db_models.SmallIntegerField = db_models.SmallIntegerField(default=0)
     subscribed_users: db_models.ManyToManyField = db_models.ManyToManyField(
         auth_models.User, blank=True, related_name="subscribed_posts")
 
     class Meta:
-        ordering = ['-date_created']
+        ordering = ['-created_at']
         permissions = [('approve_post', 'Approve Post')]
 
     category: db_models.CharField = db_models.CharField(
@@ -196,18 +196,18 @@ class ForumComment(posts_and_comments_models.Comment):
     # author: models.CharField = models.CharField(default='', max_length=40)
     forum_post: db_models.ForeignKey = db_models.ForeignKey(
         ForumPost, on_delete=db_models.CASCADE, related_name="forum_comments")
-    moderation: db_models.DateField = db_models.DateField(null=True, default=None, blank=True)
+    moderation_date: db_models.DateField = db_models.DateField(null=True, default=None, blank=True)
 
     class Meta:
-        ordering = ['date_created']
+        ordering = ['created_at']
         permissions = [('approve_comment', 'Approve Comment')]
 
     def save(self, force_insert=False, force_update=False, using=DEFAULT_DB_ALIAS, update_fields=None) -> None:
         self.post_fk = self.forum_post
         self.author = self.user_profile.display_name
-        self.date_created = utils.timezone.now()
+        self.created_at = utils.timezone.now()
         self.slug = defaultfilters.slugify(
-             self.text[:10] + str(utils.dateformat.format(self.date_created, 'Y-m-d H:i:s')))
+             self.text[:10] + str(utils.dateformat.format(self.created_at, 'Y-m-d H:i:s')))
         super().save()
 
     def get_absolute_url(self) -> str:
@@ -221,7 +221,7 @@ class ForumComment(posts_and_comments_models.Comment):
 #     if created:
 #         instance.author = instance.comment_author()
 #         instance.title = slugify(
-#             instance.text[:10] + str(dateformat.format(instance.date_created, 'Y-m-d H:i:s')))
+#             instance.text[:10] + str(dateformat.format(instance.created_at, 'Y-m-d H:i:s')))
 #         instance.save()
 
 # END POSTS AND COMMENTS

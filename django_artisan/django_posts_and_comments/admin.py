@@ -6,16 +6,16 @@ from django.contrib import admin
 
 # @admin.register(Comment)
 # class CommentAdmin(admin.ModelAdmin):  # Admin):
-#     #fields = ('moderation', 'active', 'author', 'title', 'text', 'date_created', 'deleted_at', 'user_profile')
+#     #fields = ('moderation', 'active', 'author', 'title', 'text', 'created_at', 'deleted_at', 'user_profile')
 #     # fieldsets = [
 #     #     ('Moderation', {'fields': ['moderation']}),
 #     #     ('Active', {'fields': ['active']}),
 #     #     ('Author', {'fields': ['author']}),
 #     #     ('Text', {'fields': ['text']}),
 #     # ]
-#     list_display = ('author', 'text', 'date_created') # 'deleted_at')
+#     list_display = ('author', 'text', 'created_at') # 'deleted_at')
 #     list_editable = ('text', )
-#     list_filter = ('date_created',
+#     list_filter = ('created_at',
 #                    'post', 'author') # 'deleted_at')
 #     search_fields = ('author', 'text')
 

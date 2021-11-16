@@ -15,17 +15,17 @@ logger = logging.getLogger('django_artisan')
 
 @admin.register(forum_models.ForumComment)
 class ForumComment(soft_deletion.Admin):
-    #fields = ('moderation', 'active', 'author', 'title', 'text', 'date_created', 'deleted_at', 'user_profile')
+    #fields = ('moderation', 'active', 'author', 'title', 'text', 'created_at', 'deleted_at', 'user_profile')
     # fieldsets = [
     #     ('Moderation', {'fields': ['moderation']}),
     #     ('Active', {'fields': ['active']}),
     #     ('Author', {'fields': ['author']}),
     #     ('Text', {'fields': ['text']}),
     # ]
-    list_display = ('moderation', 'active', 'post_str',
-                    'author', 'text', 'date_created', 'deleted_at')
+    list_display = ('moderation_date', 'active', 'post_str',
+                    'author', 'text', 'created_at', 'deleted_at')
     list_editable = ('text', )
-    list_filter = ('moderation', 'active', 'date_created',
+    list_filter = ('moderation_date', 'active', 'created_at',
                    'post_fk', 'author', 'deleted_at')
     search_fields = ('author', 'text')
 
@@ -50,7 +50,7 @@ class ForumComment(soft_deletion.Admin):
         #         idx += 1
         #     except Exception as e:
         #         logger.error("Error approving moderation : {0}".format(e))
-        updated = queryset.update(moderation=None)
+        updated = queryset.update(moderation_date=None)
 
         self.message_user(request,
                           utils.translation.ngettext(
@@ -63,10 +63,10 @@ class ForumComment(soft_deletion.Admin):
 
 @admin.register(forum_models.ForumPost)
 class ForumPost(soft_deletion.Admin):
-    list_display = ('pinned', 'moderation', 'active', 'author',
-                    'title', 'text', 'date_created', 'deleted_at')
-    list_filter = ('pinned', 'moderation', 'active',
-                   'date_created', 'author', 'deleted_at')
+    list_display = ('pinned', 'moderation_date', 'active', 'author',
+                    'title', 'text', 'created_at', 'deleted_at')
+    list_filter = ('pinned', 'moderation_date', 'active',
+                   'created_at', 'author', 'deleted_at')
     search_fields = ('author', 'text', 'title')
 
     actions = ['approve_post']
@@ -74,9 +74,9 @@ class ForumPost(soft_deletion.Admin):
     def approve_post(self, request: http.HttpRequest, queryset: db_models.QuerySet):
         idx = 0
         for q in queryset:
-            q.moderation = None
+            q.moderation_date = None
             try:
-                q.save(update_fields=['moderation'])
+                q.save(update_fields=['moderation_date'])
                 idx += 1
             except Exception as e:
                 logger.error("Error approving moderation : {0}".format(e))

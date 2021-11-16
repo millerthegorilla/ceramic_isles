@@ -29,7 +29,7 @@
                                         <a href="{{ post.get_absolute_url|safe }}" class="tinfo">{{ post.title }}</a>
                                     </td>
                                     <td data-label="PostLeader">
-                                        {% if not post.moderation %}
+                                        {% if not post.moderation_date %}
                                             {{ post.text|striptags|safe|slice:":40" }}...
                                         {% else %}
                                              Post is awaiting moderation
@@ -45,7 +45,7 @@
                                         {{ post.comments.count }}
                                     </td>
                                     <td data-label="Date">
-                                        {{ post.date_created|date }}
+                                        {{ post.created_at|date }}
                                     </td>
                             </tr>
                         {% endfor %}

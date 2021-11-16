@@ -70,7 +70,7 @@ class Image(admin.ModelAdmin):
 class Event(admin.ModelAdmin):
     list_display = (
         'active', 'title',
-        'text', 'date',
+        'text', 'event_date',
         'repeating'
     )
     actions = ['approve_event', 'disapprove_event']

@@ -118,14 +118,14 @@ class ForumPostView(posts_and_comments_views.Post):
                 logger.error("Error accessing comment : {0}".format(e))
                 return http.HttpResponse(status=500)
         elif self.request.POST['type'] == 'post-report':
-            post.moderation = utils.timezone.now()
-            post.save(update_fields=['moderation'])
+            post.moderation_date = utils.timezone.now()
+            post.save(update_fields=['moderation_date'])
             ForumPostView.send_mod_mail('Post')
             return shortcuts.redirect(post)
         elif self.request.POST['type'] == 'comment-report':
             comment = forum_models.ForumComment.objects.get(id=self.request.POST['id'])
-            comment.moderation = utils.timezone.now()
-            comment.save(update_fields=['moderation'])
+            comment.moderation_date = utils.timezone.now()
+            comment.save(update_fields=['moderation_date'])
             ForumPostView.send_mod_mail('Comment')
             return shortcuts.redirect(post)
         else:
