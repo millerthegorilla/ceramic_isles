@@ -59,19 +59,14 @@ class Model(models.Model):
         if self.active:
             self.deleted_at = utils.timezone.now()
             self.active=False
-            self.save()
-            # slack jawed duck type hack
+            self.save(update_fields['deleted_at', 'active'])
             try:
-                slug = self.post.slug
-            except BaseException:
-                slug = self.slug
-            try:
-                tasks.schedule('django_posts_and_comments.tasks.schedule_hard_delete',
+                tasks.schedule('django_messages.tasks.schedule_hard_delete',
                          name="sd_timeout_" + str(uuid.uuid4()),
                          schedule_type="O",
                          repeats=-1,
                          next_run=utils.timezone.now() + conf.settings.DELETION_TIMEOUT,
-                         post_slug=post_slug,
+                         slug=self.slug,
                          deleted_at=str(self.deleted_at),
                          type=str(self),
                          id=str(self.id))

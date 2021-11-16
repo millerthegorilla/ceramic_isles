@@ -1,11 +1,19 @@
+import logging
+
+import django_q
+
 from django import conf
 from django.contrib.sites import models as site_models
-from django.core import mail
+from django.core import mail, exceptions
 
 from . import models as forum_models
 
+logger = logging.getLogger('django_artisan')
 
-def send_susbcribed_email(post_id: int = None, comment_id: int = None, path_info: str = None) -> None:
+def send_susbcribed_email(post_id: int = None, 
+                          comment_id: int = None, 
+                          path_info: str = None,
+                          s_name: str = None) -> str:
     post = comment = None
     posts = forum_models.ForumPost.objects.filter(id=post_id)
     if posts.count():
@@ -37,3 +45,11 @@ def send_susbcribed_email(post_id: int = None, comment_id: int = None, path_info
             )
             email.content_subtype = "html"
             email.send()
+            return 'Email Sent!'
+    else:
+        return 'No Email Sent - either post or comment has been deleted...'
+    #     try:
+    #         schedule = django_q.models.Schedule.objects.get(name=s_name).delete()
+    #     except exceptions.ObjectDoesNotExist as e:
+    #         logger.error("Schedule doesn't exist : " + str(e))
+       # remove scheduled job

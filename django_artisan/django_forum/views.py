@@ -77,13 +77,15 @@ class ForumPostView(posts_and_comments_views.Post):
                 new_comment.forum_post = post
                 new_comment.user_profile = self.request.user.profile.forumprofile
                 new_comment.save()
+                sname: str = "subscribe_timeout" + str(uuid.uuid4())
                 tasks.schedule('django_forum.tasks.send_susbcribed_email',
-                             name="subscribe_timeout" + str(uuid.uuid4()),
+                             name=sname,
                              schedule_type="O",
                              repeats=-1,
                              next_run=utils.timezone.now() + conf.settings.COMMENT_WAIT,
                              post_id=post.id,
                              comment_id=new_comment.id,
+                             s_name=sname,
                              path_info=self.request.path_info)
                 return shortcuts.redirect(post)
             else:
