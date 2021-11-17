@@ -1,34 +1,36 @@
 # TODO: need to setup clamav.conf properly
+#from typing import Any, Dict
+
 from safe_imagefield import forms as safe_image_forms
-from django.core import exceptions
 from crispy_forms import layout
 from crispy_forms import helper
 from crispy_bootstrap5 import bootstrap5
 
+from django.core import exceptions
 from django.conf import settings
 from django import forms
 from django.utils.translation import ugettext as _
-from django_forum.forms import ForumProfile
 from django.contrib.auth.models import User
 
-from .models import ArtisanForumProfile, UserProductImage
-from .fields import FileClearInput, FileInput
-from typing import Any, Dict
+from django_forum import forms as forum_forms
+
+from . import models as artisan_models
+from . import fields as artisan_fields
 
 
 MAX_NUMBER_OF_IMAGES = settings.MAX_USER_IMAGES
 
 
-class ArtisanForumProfile(ForumProfile):
+class ArtisanForumProfile(forum_forms.ForumProfile):
     image_file = safe_image_forms.SafeImageField(allowed_extensions=('jpg', 'png'),
                                                  check_content_type=True,
                                                  scan_viruses=True,
                                                  media_integrity=True,
                                                  max_size_limit=2621440)
 
-    class Meta(ForumProfile.Meta):
-        model = ArtisanForumProfile
-        fields = ForumProfile.Meta.fields + [
+    class Meta(forum_forms.ForumProfile.Meta):
+        model = artisan_models.ArtisanForumProfile
+        fields = forum_forms.ForumProfile.Meta.fields + [
             'image_file',
             'bio',
             'shop_web_address',
@@ -58,7 +60,7 @@ class ArtisanForumProfile(ForumProfile):
             required=False)
         # add to the super class fields
         self.helper.layout.fields = self.helper.layout.fields + [
-            FileClearInput(
+            artisan_fields.FileClearInput(
                 'image_file', css_class="tinfo form-control form-control-lg"),
             bootstrap5.FloatingField('bio'),
             bootstrap5.FloatingField('shop_web_address'),
@@ -79,11 +81,11 @@ class UserProductImage(forms.ModelForm):
                                                  max_size_limit=2621440)
 
     class Meta:
-        model = UserProductImage
+        model= artisan_models.UserProductImage
         fields = ['image_file', 'image_title', 'image_text',
                   'image_shop_link', 'image_shop_link_title']
 
-    def __init__(self, instance: UserProductImage = None, user: User = None, *args, **kwargs) -> None:
+    def __init__(self, instance: 'UserProductImage' = None, user: User = None, *args, **kwargs) -> None:
         self.user = user
         super().__init__(*args, **kwargs)
         self.fields['image_file'].validators.append(self.restrict_amount)
@@ -92,7 +94,7 @@ class UserProductImage(forms.ModelForm):
         self.helper.layout = layout.Layout(
             layout.Fieldset(
                             '',
-                            FileInput('image_file', name="image_file"),
+                            artisan_fields.FileInput('image_file', name="image_file"),
                             bootstrap5.FloatingField('image_title'),
                             bootstrap5.FloatingField('image_text'),
                             bootstrap5.FloatingField('image_shop_link'),
@@ -103,8 +105,8 @@ class UserProductImage(forms.ModelForm):
         self.helper.form_class = 'col-auto col-xs-3'
 
     def restrict_amount(self, count: int) -> None:
-        if self.user is not None:
-            if UserProductImage.objects.filter(
+        if artisan_models.UserProductImage.objects.count() and self.user is not None:
+            if artisan_models.UserProductImage.objects.filter(
                     user_profile=self.user.profile.forumprofile).count() >= MAX_NUMBER_OF_IMAGES:
                 raise exceptions.ValidationError(
                     'User already has {} images'.format(MAX_NUMBER_OF_IMAGES))

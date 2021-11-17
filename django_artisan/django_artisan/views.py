@@ -1,24 +1,23 @@
 import random
 import logging
-import PIL
+from PIL import Image, ImageOps
 from sorl.thumbnail import delete
 from django_q.tasks import async_task
 import typing
 
-from django.db import models as db_models
-from django.shortcuts import render, redirect
-from django.views import generic
-from django.utils.decorators import method_decorator
-from django.utils import timezone
-from django.views.decorators.cache import never_cache
-from django.contrib.auth import mixins
-from django.urls import reverse_lazy
+from django import http, forms
 from django.core import paginator as pagination
 from django.conf import settings
+from django.contrib.auth import mixins
 from django.contrib.sitemaps import ping_google
 from django.contrib.sites import models as site_models
-from django import http
-from django import forms
+from django.db import models as db_models
+from django.shortcuts import render, redirect
+from django.urls import reverse_lazy
+from django.utils.decorators import method_decorator
+from django.utils import timezone
+from django.views import generic
+from django.views.decorators.cache import never_cache
 
 from django_forum import forms as forum_forms
 from django_forum import views as forum_views
@@ -58,8 +57,8 @@ class ArtisanForumProfile(forum_views.ForumProfile):
                    async_task(ping_google_func)
                 obj = form.save()
                 if obj.image_file:
-                    img = PIL.Image.open(obj.image_file.path)
-                    img = PIL.ImageOps.expand(img, border=10, fill='white')
+                    img = Image.open(obj.image_file.path)
+                    img = ImageOps.expand(img, border=10, fill='white')
                     img.save(obj.image_file.path)
             return super().form_valid(form)
             #return redirect(self.success_url)
@@ -91,8 +90,10 @@ class AboutPage(generic.list.ListView):
     template_name = 'django_artisan/about.html'
     
     def get_context_data(self, **kwargs) -> dict:
+        site = site_models.Site.objects.get_current()
         data = super().get_context_data(**kwargs)
         data['about_text'] = settings.ABOUT_US_SPIEL
+        data['site_url'] = (self.request.scheme or 'https') + '://' + site.domain
         qs = artisan_models.ArtisanForumProfile.objects.all().exclude(profile_user__is_superuser=True).exclude(listed_member=False) \
                                        .values_list('display_name', 'avatar__image_file')
         if qs.count:
@@ -192,8 +193,8 @@ class UserProductImageUpload(mixins.LoginRequiredMixin, generic.edit.FormView):
         obj = form.save(commit=False)
         obj.user_profile = self.request.user.profile.forumprofile.artisanforumprofile
         obj.save()
-        img = PIL.Image.open(obj.image_file.path)
-        img = PIL.ImageOps.expand(img, border=10, fill='white')
+        img = Image.open(obj.image_file.path)
+        img = ImageOps.expand(img, border=10, fill='white')
         img.save(obj.image_file.path)
         return redirect('django_artisan:image_update')
 

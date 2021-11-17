@@ -3,7 +3,7 @@
 {% load static %}
 {% block content %}
 {% load thumbnail %}
-<div class="container-fluid people-page">
+<div class="container-fluid people-page ps-5 pt-3">
 	{% if name is None and bio == "" and profile_image_file is None and images.count == 0 and outlets == '' and shop_link == '' %}
 	<div class="col-12 col-sm-10 col-md-8 col-lg-5 mx-auto mt-5 text-white">
 		<span><h3 class="ms-3">{{ display_name }}...</h3><h4>has yet to upload any details or images or their work.</h4></span>
@@ -12,15 +12,23 @@
 		<div class="row mb-3">
 			<div class="p3 col-11 col-sm-10 col-md-8 col-lg-5 text-white">
 				<h4 class="ms-3 profile-names">{{ name|cut:"None" }}</h4><br>
-				<div class="ps-3">
+				<div class="ps-5">
 					<div>{{ bio }}</div>
-					{% if shop_link %}
-					<div>You can buy my work here... <a class="text-warning" target="_blank" href="{{ shop_link }}">{{ shop_link }}</a></div>
-					{% endif %}
-					{% if outlets %}
-					<div>Or at one of the following outlets:</div>
-					<div>{{ outlets }}</div>
-					{% endif %}
+					<div>
+						<strong>
+							<div class="ms-2 mt-2">
+								{% if shop_link %}
+								<div>You can buy my work here... <a class="text-warning" target="_blank" href="{{ shop_link }}">{{ shop_link }}</a></div>
+								{% endif %}
+						    </div>
+						    <div class="ms-2 mt-2">
+								{% if outlets %}
+								<div>Or at one of the following outlets:</div>
+								<div>{{ outlets }}</div>
+								{% endif %}
+							</div>
+					    </strong>
+					</div>
 				</div>
 			</div>
 			<div class="ms-3 col-auto">

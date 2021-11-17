@@ -97,7 +97,7 @@ class ForumPostView(posts_and_comments_views.Post):
                               'post': post,
                               'comments': comments,
                               'comment_form': comment_form,
-                              'site_url': self.request.scheme + '://' + site.domain})
+                              'site_url': (self.request.scheme or 'https') + '://' + site.domain})
         elif self.request.POST['type'] == 'update':
             post.text = self.request.POST['update-post']
             post.category = self.request.POST['category']

@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 {% block title %}{{ siteName }} - About{% endblock title %}
 {% block content %}
+{% load thumbnail %}
+{% load static %}
 <div class="container-fluid">
 	<div class="row mx-auto">
 		<div class="col-auto mx-auto">
@@ -36,10 +38,17 @@
 					    </div>
 					</div>
 					{% empty %}
-					<div class="col-auto text-white mb-3">
+					<div class="col-auto text-white mb-3 ps-5">
 					    <h3>There are no events at the moment.</h3>
 					</div>
 					{% endfor %}
+				    <div class="row justify-content-center mt-5 mb-5">
+				    	{% with site_url|add:'/static/django_artisan/images/nouveau_line.png' as banner_url %}
+					    	{% thumbnail banner_url "3000x240" format='PNG' as im %}
+					        	<img src="{{ im.url }}" width='100%' height='50' title="This post is pinned!">
+					    	{% endthumbnail %}
+				    	{% endwith %}
+				    </div>
 					{% include './people.html' %}
 				</div>
 			</div>

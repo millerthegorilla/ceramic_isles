@@ -159,7 +159,7 @@ def auto_delete_file_on_delete(sender: UserProductImage, instance: UserProductIm
     fp = instance.image_file.path
     fd = os.path.dirname(fp)
     if instance.image_file:
-        thumbnaildelete(instance.image_file)  # removes from cache - sorl thumbnail
+        thumbnail.delete(instance.image_file)  # removes from cache - sorl thumbnail
         if len(os.listdir(fd)) == 0:
             os.rmdir(fd)
 
@@ -175,7 +175,6 @@ def auto_delete_file_on_change(sender: UserProductImage, instance:UserProductIma
         return False
 
     try:
-        breakpoint()
         old_image_field = UserProductImage.objects.get(pk=instance.pk)
     except UserProductImage.DoesNotExist as e:
         logger.info("New UserProductImage being installed?: {0}".format(e))
