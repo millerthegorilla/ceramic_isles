@@ -24,6 +24,13 @@ html_strip = elasticsearch_dsl.analyzer(
 @registry.register_document
 class ForumComment(django_elasticsearch_dsl.Document):
 
+    author_name = django_elasticsearch_dsl.fields.TextField(attr="get_author_name")
+
+    text = django_elasticsearch_dsl.fields.TextField(
+        attr='text',
+        analyzer=html_strip,
+    )
+
     class Index:
         # Name of the Elasticsearch index
         name = 'forum_comments_index'
@@ -38,8 +45,6 @@ class ForumComment(django_elasticsearch_dsl.Document):
 
         model = forum_models.ForumComment
         fields = [
-            'text',
-            'author',
         ]
 
         """
@@ -56,6 +61,9 @@ class ForumComment(django_elasticsearch_dsl.Document):
 
 @registry.register_document
 class ForumPost(django_elasticsearch_dsl.Document):
+
+    author_name = django_elasticsearch_dsl.fields.TextField(attr="get_author_name")
+
     text = django_elasticsearch_dsl.fields.TextField(
         attr='text',
         analyzer=html_strip,
@@ -84,5 +92,4 @@ class ForumPost(django_elasticsearch_dsl.Document):
         model = forum_models.ForumPost
         fields = [
             'title',
-            'author',
         ]

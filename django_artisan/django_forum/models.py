@@ -174,9 +174,12 @@ class ForumPost(posts_and_comments_models.Post):
         return urls.reverse_lazy(
             'django_forum:post_view', args=(
                 self.id, self.slug,)) # type: ignore
+    
+    def get_author_name(self) -> str:
+        return self.author.user_profile.display_name
 
     def __str__(self) -> str:
-        return f"Post by {self.author}"
+        return f"Post by {self.author.user_profile.display_name}"
 
     def category_label(self) -> str:
         return conf.settings.CATEGORY(self.category).label
@@ -215,6 +218,9 @@ class ForumComment(posts_and_comments_models.Comment):
 
     def get_category_display(self) -> str:
         return 'Comment'
+
+    def get_author_name(self) -> str:
+        return self.author.user_profile.display_name
 
 # @dispatch.receiver(post_save, sender=ForumComment)
 # def save_author_on_comment_creation(sender: ForumComment, instance: ForumComment, created, **kwargs) -> None:

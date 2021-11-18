@@ -21,11 +21,10 @@
 			    {% endif %}
 			    {% if post.post_author == user_display_name %}
 				    <div class="ms-auto">
-		    		    <form method="post">
+		    		    <form method="post" action="update-post">
 		    		    	{% csrf_token %}
 		    		    	<div id="post-edit-div">
 		    		    		<input type="textarea" name="update-post" class="update-form-text"></input>
-				    		    <input type="hidden" name="type" value="update">
 				    		    <div class="mt-3">
 				                    <button id="editor-cancel-btn" type="button" class="ms-auto col-auto btn btn-secondary me-2">Cancel</button>
 				                    <button id="editor-submit-btn" type="submit" class="me-auto col-auto btn btn-primary">

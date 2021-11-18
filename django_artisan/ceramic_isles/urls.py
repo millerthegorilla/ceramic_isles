@@ -4,8 +4,8 @@ from django.contrib import admin
 from django.urls import include, path
 from django_email_verification import urls as mail_urls
 from django_users import urls as users_app_urls
-from django_forum import urls as forum_app_urls
-from django_artisan import urls as artisan_app_urls
+from django_forum import urls as forum_urls
+from django_artisan import urls as artisan_urls
 from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import re_path, URLResolver
@@ -21,8 +21,9 @@ sitemaps = {'main': StaticView,
 
 urlpatterns = [
     path('users/accounts/register/', CustomRegister.as_view(), name='register'),
-    path('', include(artisan_app_urls)),
-    path('forum/', include(forum_app_urls)),
+   # path('', include(artisan_urls)),
+   # path('forum/', include(forum_urls)),
+    path('messages/', include(message_urls))
     path('users/', include(users_app_urls)),
     path('email/', include(mail_urls)),
     path('admin/', admin.site.urls),

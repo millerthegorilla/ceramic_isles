@@ -12,7 +12,7 @@ from django.views import generic
 from django.contrib.sites import models as site_models
 
 # Create your views here.
-from django_posts_and_comments import views as posts_and_comments_views
+from django_messages import views as messages_views
 from django_profile import views as profile_views
 from django_users import views as users_views
 
@@ -25,7 +25,11 @@ logger = logging.getLogger('django_artisan')
 
 
 # START POSTS AND COMMENTS
-class ForumPostCreate(posts_and_comments_views.PostCreate):
+class ForumPostUpdate():
+    model = forum_models.ForumPost
+    template_name = "django_forum/posts_and_comments/forum_post_create_form.html"
+
+class ForumPostCreate(messages_views.MessageCreate):
     model = forum_models.ForumPost
     template_name = "django_forum/posts_and_comments/forum_post_create_form.html"
     form_class = forum_forms.ForumPost
