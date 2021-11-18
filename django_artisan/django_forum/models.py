@@ -14,7 +14,7 @@ from django.contrib.auth import models as auth_models
 from django.template import defaultfilters
 
 from django_profile import models as profile_models
-from django_posts_and_comments import models as posts_and_comments_models
+from django_messages import models as messages_models
 
 
 # _: Any
@@ -93,7 +93,7 @@ class ForumProfile(profile_models.Profile):
     disconnect dummy profile
 """
 signals.post_save.disconnect(profile_models.create_user_profile, sender=auth_models.User)
-signals.post_save.disconnect(profile_models.save_user_profile, sender=auth_models.User)
+# signals.post_save.disconnect(profile_models.save_user_profile, sender=auth_models.User)
 """
     Custom signals to create and update user profile
 """
@@ -109,15 +109,20 @@ def create_user_forum_profile(sender: auth_models.User, instance: auth_models.Us
                     randint(
                         1,
                         4))))
-    instance.profile.save()
-
-
-@dispatch.receiver(signals.post_save, sender=auth_models.User)
-def save_user_forum_profile(sender: auth_models.User, instance: auth_models.User, **kwargs) -> None:
     try:
         instance.profile.save()
     except (exceptions.ObjectDoesNotExist, exceptions.FieldError) as e:
         logger.error("Error saving forum profile : {0}".format(e))
+
+
+# @dispatch.receiver(signals.post_save, sender=auth_models.User)
+# def save_user_forum_profile(sender: auth_models.User, instance: auth_models.User, **kwargs) -> None:
+#     try:
+#         instance.profile.save()
+#     except (exceptions.ObjectDoesNotExist, exceptions.FieldError) as e:
+#         logger.error("Error saving forum profile : {0}".format(e))
+
+signals.post_save.connect(create_user_forum_profile, sender=auth_models.User)
 
 
 @dispatch.receiver(signals.pre_delete, sender=ForumProfile)
@@ -148,27 +153,17 @@ def auto_delete_avatar_on_delete(sender: ForumProfile, instance: ForumProfile, *
 
 ## TODO Post and Comment should probably have common superclass somewhere.
 
-class ForumPost(posts_and_comments_models.Post):
+class ForumPost(messages_models.Message):
+    title: db_models.CharField = db_models.CharField(max_length=100, default='')
     moderation_date: db_models.DateField = db_models.DateField(null=True, default=None, blank=True)
     pinned: db_models.SmallIntegerField = db_models.SmallIntegerField(default=0)
     subscribed_users: db_models.ManyToManyField = db_models.ManyToManyField(
         auth_models.User, blank=True, related_name="subscribed_posts")
 
-    class Meta:
+    class Meta(messages_models.Message.Meta):
         ordering = ['-created_at']
         permissions = [('approve_post', 'Approve Post')]
-
-    category: db_models.CharField = db_models.CharField(
-        max_length=2,
-        choices=conf.settings.CATEGORY.choices,
-        default=conf.settings.CATEGORY.GENERAL,
-    )
-
-    location: db_models.CharField = db_models.CharField(
-        max_length=2,
-        choices=conf.settings.LOCATION.choices,
-        default=conf.settings.LOCATION.ANY_ISLE,
-    )
+        messages_models.Message._meta.get_field('text').max_length = 3000
 
     def get_absolute_url(self) -> str:
         return urls.reverse_lazy(
@@ -176,26 +171,21 @@ class ForumPost(posts_and_comments_models.Post):
                 self.id, self.slug,)) # type: ignore
     
     def get_author_name(self) -> str:
-        return self.author.user_profile.display_name
+        return 'bob-holnes'
+        #return self.author.user_profile.display_name
 
     def __str__(self) -> str:
-        return f"Post by {self.author.user_profile.display_name}"
-
-    def category_label(self) -> str:
-        return conf.settings.CATEGORY(self.category).label
-
-    def location_label(self) -> str:
-        return conf.settings.LOCATION(self.location).label
+        return f"Post by bob-holnes" #{self.author.user_profile.display_name}"
 
 
-@dispatch.receiver(signals.post_save, sender=ForumPost)
-def save_author_on_post_creation(sender: ForumPost, instance: ForumPost, created, **kwargs) -> None:
-    if created:
-        instance.author = instance.post_author()
-        instance.save()
+# @dispatch.receiver(signals.post_save, sender=ForumPost)
+# def save_author_on_post_creation(sender: ForumPost, instance: ForumPost, created, **kwargs) -> None:
+#     if created:
+#         instance.author = instance.post_author()
+#         instance.save()
 
 
-class ForumComment(posts_and_comments_models.Comment):
+class ForumComment(messages_models.Message):
     # author: models.CharField = models.CharField(default='', max_length=40)
     forum_post: db_models.ForeignKey = db_models.ForeignKey(
         ForumPost, on_delete=db_models.CASCADE, related_name="forum_comments")

@@ -8,7 +8,7 @@ from django.core.exceptions import ValidationError
 from django.conf import settings
 
 from django_profile import forms as profile_forms
-from django_posts_and_comments import forms as posts_and_comments_forms
+from django_messages import forms as messages_forms
 
 from . import models as forum_models
 
@@ -78,10 +78,10 @@ class ForumProfile(profile_forms.Profile):
 
 # START POST AND COMMENTS
 
-class ForumPost(posts_and_comments_forms.Post):
-    class Meta(posts_and_comments_forms.Post.Meta):
+class ForumPost(messages_forms.Message):
+    class Meta(messages_forms.Message.Meta):
         model = forum_models.ForumPost
-        fields = posts_and_comments_forms.Post.Meta.fields + ['category', 'location']
+        fields = messages_forms.Message.Meta.fields + ['title']
         widgets = {'text': TinyMCE()}
         labels = {'category': 'Choose a category for your post...',
                   'location': 'Which island...?'}
@@ -110,10 +110,10 @@ class ForumPost(posts_and_comments_forms.Post):
         self.helper.form_action = 'django_forum:post_create_view'
 
 
-class ForumComment(posts_and_comments_forms.Comment):
+class ForumComment(messages_forms.Message):
     class Meta:
         model = forum_models.ForumComment
-        fields = posts_and_comments_forms.Comment.Meta.fields + []
+        fields = messages_forms.Message.Meta.fields
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)

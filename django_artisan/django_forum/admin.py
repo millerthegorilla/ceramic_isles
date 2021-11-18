@@ -26,7 +26,7 @@ class ForumComment(soft_deletion.Admin):
                     'author', 'text', 'created_at', 'deleted_at')
     list_editable = ('text', )
     list_filter = ('moderation_date', 'active', 'created_at',
-                   'post_fk', 'author', 'deleted_at')
+                   'forum_post', 'author', 'deleted_at')
     search_fields = ('author', 'text')
 
     def post_str(self, obj: forum_models.ForumComment) -> str:

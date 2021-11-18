@@ -44,8 +44,6 @@ class ForumComment(django_elasticsearch_dsl.Document):
         """
 
         model = forum_models.ForumComment
-        fields = [
-        ]
 
         """
           the commented code below allows searched comments to return a post as the 'found'
@@ -69,13 +67,13 @@ class ForumPost(django_elasticsearch_dsl.Document):
         analyzer=html_strip,
     )
 
-    category = django_elasticsearch_dsl.fields.TextField(
-        attr='category_label'
-    )
+    # category = django_elasticsearch_dsl.fields.TextField(
+    #     attr='category_label'
+    # )
 
-    location = django_elasticsearch_dsl.fields.TextField(
-        attr='location_label'
-    )
+    # location = django_elasticsearch_dsl.fields.TextField(
+    #     attr='location_label'
+    # )
 
     class Index:
         # Name of the Elasticsearch index

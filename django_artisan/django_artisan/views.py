@@ -5,7 +5,7 @@ from sorl.thumbnail import delete
 from django_q.tasks import async_task
 import typing
 
-from django import http, forms
+from django import http, forms, shortcuts
 from django.core import paginator as pagination
 from django.conf import settings
 from django.contrib.auth import mixins
@@ -28,6 +28,29 @@ from . import forms as artisan_forms
 
 logger = logging.getLogger('django_artisan')
 
+
+class ArtisanForumPostCreate(forum_views.ForumPostCreate):
+    model = artisan_models.ArtisanForumPost
+    form_class = artisan_forms.ArtisanForumPost
+
+    def form_valid(self, form: forms.ModelForm) -> http.HttpResponseRedirect:
+        breakpoint()
+        post = form.save()
+        super().form_valid(form, post)
+
+    def form_invalid(self, form):
+        breakpoint()
+        pass
+
+    # def get(self, request: http.HttpRequest) -> http.HttpResponse:
+    #     breakpoint()
+    #     form = self.form_class(user_name=self.request.user.username, post=post)
+    #     return shortcuts.render(self.request, self.template_name, {form: form})
+
+"""
+    pings_google to recrawl site when user opts to list on about page
+    or to display personal page
+"""
 def ping_google_func() -> None:
     try:
         ping_google()

@@ -21,6 +21,29 @@ from safe_imagefield import models as safe_image_models
 logger = logging.getLogger('django_artisan')
 
 
+class ArtisanForumPost(forum_models.ForumPost):
+    category: models.CharField = models.CharField(
+        max_length=2,
+        choices=conf.settings.CATEGORY.choices,
+        default=conf.settings.CATEGORY.GENERAL,
+    )
+
+    location: models.CharField = models.CharField(
+        max_length=2,
+        choices=conf.settings.LOCATION.choices,
+        default=conf.settings.LOCATION.ANY_ISLE,
+    )
+
+    def category_label(self) -> str:
+        return conf.settings.CATEGORY(self.category).label
+
+    def location_label(self) -> str:
+        return conf.settings.LOCATION(self.location).label
+
+
+"""
+   for upload_to in UserProductImage and ArtisanForumProfile
+"""
 def user_directory_path(instance : typing.Union['ArtisanForumProfile', 'UserProductImage'], filename: str) -> str:
     if isinstance(instance, ArtisanForumProfile):
         return 'uploads/users/{0}/{1}'.format(
@@ -28,7 +51,6 @@ def user_directory_path(instance : typing.Union['ArtisanForumProfile', 'UserProd
     else:
         return 'uploads/users/{0}/{1}'.format(
             instance.user_profile.display_name, filename)
-
 
 class ArtisanForumProfile(forum_models.ForumProfile):
     bio: models.TextField = models.TextField('biographical information, max 500 chars',
@@ -56,12 +78,11 @@ class ArtisanForumProfile(forum_models.ForumProfile):
     disconnect dummy profile
 """
 signals.post_save.disconnect(forum_models.create_user_forum_profile, sender=auth_models.User)
-signals.post_save.disconnect(forum_models.save_user_forum_profile, sender=auth_models.User)
+# signals.post_save.disconnect(forum_models.save_user_forum_profile, sender=auth_models.User)
+
 """
     Custom signals to create and update user profile
 """
-
-
 @receiver(signals.post_save, sender=auth_models.User)
 def create_user_artisan_forum_profile(sender, instance: auth_models.User, created: bool, **kwargs):
     if created:
@@ -72,8 +93,10 @@ def create_user_artisan_forum_profile(sender, instance: auth_models.User, create
                     randint(
                         1,
                         4))))
-    instance.profile.save()
-
+    try:
+        instance.profile.save()
+    except (exceptions.ObjectDoesNotExist, exceptions.FieldError) as e:
+        logger.error("Error saving ArtisanForumProfile : {0}".format(e))
 
 @receiver(signals.post_save, sender=auth_models.User)
 def save_user_artisan_forum_profile(sender, instance: auth_models.User, **kwargs):
@@ -82,7 +105,11 @@ def save_user_artisan_forum_profile(sender, instance: auth_models.User, **kwargs
     except (exceptions.ObjectDoesNotExist, exceptions.FieldError) as e:
         logger.error("Error saving ArtisanForumProfile : {0}".format(e))
 
+signals.post_save.connect(create_user_artisan_forum_profile, sender=auth_models.User)
 
+"""
+    Custom signal to delete underlying filesystem image file
+"""
 @receiver(signals.pre_delete, sender=ArtisanForumProfile)
 def auto_delete_image_file_on_delete(sender: ArtisanForumProfile, instance: ArtisanForumProfile, **kwargs):
     """

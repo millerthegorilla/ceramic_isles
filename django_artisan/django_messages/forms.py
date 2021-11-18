@@ -9,7 +9,7 @@ from . import models as messages_models
 class Message(forms.ModelForm):
     class Meta:
         model = messages_models.Message
-        fields = ['text']
+        fields = ['text',]
         # labels = {
         #     'text': '',
         # }

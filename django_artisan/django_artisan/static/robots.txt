@@ -6,7 +6,7 @@ Disallow: /**/media/
 Disallow: /**/static/
 Disallow: /**/templates/
 Disallow: /**/django_artisan/
-Disallow: /**/django_posts_and_comments/
+Disallow: /**/django_messages/
 Disallow: /**/django_forum/
 Disallow: /**/django_users/
 Disallow: /**/django_profile/

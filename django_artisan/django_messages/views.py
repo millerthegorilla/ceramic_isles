@@ -120,7 +120,8 @@ class MessageCreate(mixins.LoginRequiredMixin, generic.edit.CreateView):
     #template_name = 'django_messages/message_create_form.html'
     form_class = messages_forms.Message
 
-    def form_valid(self, form, **kwargs) -> http.HttpResponseRedirect:
+    def form_valid(self, form, post: messages_models.Message = None, **kwargs) -> http.HttpResponseRedirect:
+        super().form_valid(form)
         message = form.save(commit=False)
         message.text = sanitize_post_text(message.text)
         message.author = self.request.user

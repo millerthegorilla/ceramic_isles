@@ -12,13 +12,44 @@ from django import forms
 from django.utils.translation import ugettext as _
 from django.contrib.auth.models import User
 
+from django_forum import models as forum_models
 from django_forum import forms as forum_forms
+from django_messages import forms as messages_forms
 
 from . import models as artisan_models
 from . import fields as artisan_fields
 
 
-MAX_NUMBER_OF_IMAGES = settings.MAX_USER_IMAGES
+class ArtisanForumPost(messages_forms.Message):
+    class Meta(messages_forms.Message.Meta):
+        model = artisan_models.ArtisanForumPost
+        fields = forum_forms.ForumPost.Meta.fields + ['category', 'location']
+        widgets = forum_forms.ForumPost.Meta.widgets
+        labels = {'category': 'Choose a category for your post...',
+                  'location': 'Which island...?'}
+
+    def __init__(self, user_name: str = None, post: artisan_models.ArtisanForumPost = None, **kwargs) -> None:
+        checked_string = ''
+        super().__init__(**kwargs)
+        if post and user_name and post.subscribed_users.filter(
+                username=user_name).count():
+            checked_string = 'checked'
+        checkbox_string = '<input type="checkbox" id="subscribe_cb" name="subscribe" value="Subscribe" ' + \
+            checked_string + '> \
+                              <label for="subscribe_cb" class="tinfo">Subscribe to this post...</label><br>'
+        self.helper.layout = layout.Layout(
+            layout.Fieldset(
+                'Create your post...',
+                bootstrap5.FloatingField('title'),
+                layout.Field('text', css_class="mb-3 post-create-form-text"),
+                layout.HTML("<div class='font-italic mb-3 tinfo'>Maximum of 2000 characters.  Click on word count to see how many characters you have used...</div>"),
+                layout.Div(layout.Field('category', css_class="col-auto"), layout.Field('location',
+                    css_class="col-auto"), css_class="col-8 col-sm-4 col-md-4 col-lg-3 tinfo"),
+                layout.HTML(checkbox_string),
+                layout.Submit('save', 'Publish Post', css_class="col-auto mt-3 mb-3"),
+            )
+        )
+        self.helper.form_action = 'django_forum:post_create_view'
 
 
 class ArtisanForumProfile(forum_forms.ForumProfile):
@@ -71,6 +102,9 @@ class ArtisanForumProfile(forum_forms.ForumProfile):
         self.helper.form_id = 'id-profile-form'
         self.helper.form_method = 'post'
         self.helper.form_class = 'col-auto tinfo'
+
+
+MAX_NUMBER_OF_IMAGES = settings.MAX_USER_IMAGES
 
 
 class UserProductImage(forms.ModelForm):

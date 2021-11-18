@@ -59,7 +59,7 @@ class Model(models.Model):
         if self.active:
             self.deleted_at = utils.timezone.now()
             self.active=False
-            self.save(update_fields['deleted_at', 'active'])
+            self.save(update_fields=['deleted_at', 'active'])
             try:
                 tasks.schedule('django_messages.tasks.schedule_hard_delete',
                          name="sd_timeout_" + str(uuid.uuid4()),

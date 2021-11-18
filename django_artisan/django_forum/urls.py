@@ -3,6 +3,13 @@ from django import urls
 from . import views as forum_views 
 
 app_name = "django_forum"
+
+post_patterns = [
+    urls.path('update_post/', forum_views.ForumPostUpdate.as_view(),
+               name='post_update'),
+    
+]
+
 urlpatterns = [
     urls.path('profile/', forum_views.ForumProfile.as_view(),
          name='profile_update_view'),
@@ -23,6 +30,8 @@ urlpatterns = [
     # path('autocomplete/', autocomplete, name='autocomplete')  # experimental
     # autocomplete
 ]
+
+
 
 # NEEDED FOR ADDITION OF DISPLAY_NAME AND RULES
 # the following goes in the project top level urls.py

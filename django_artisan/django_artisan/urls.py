@@ -5,6 +5,7 @@ from django.urls import path, include
 from django_forum import views as forum_views
 
 from . import views as artisan_views
+from . import models as artisan_models
 
 admin.site.site_header = settings.SITE_NAME + ' admin'
 admin.site.site_title = settings.SITE_NAME + ' admin'
@@ -24,9 +25,8 @@ urlpatterns = [
          artisan_views.UserProductImageUpload.as_view(), name='image_update'),
     path('users/accounts/profile/images/update/<slug:unique_id>/',
          artisan_views.UserProductImageDelete.as_view(), name='remove_images'),
-    path('forum/posts/<slug:search_slug>', forum_views.ForumPostList.as_view(
-        template_name='django_artisan/posts_and_comments/forum_post_list.html'), name='post_list_view'),
-    path('forum/posts/', forum_views.ForumPostList.as_view(
+    path('forum/create_post/', artisan_views.ArtisanForumPostCreate.as_view(), name='post_create_view'),
+    path('forum/posts/', forum_views.ForumPostList.as_view(model=artisan_models.ArtisanForumPost,
         template_name='django_artisan/posts_and_comments/forum_post_list.html'), name='post_list_view'),
     path('forum/<int:pk>/<slug:slug>/', forum_views.ForumPostView.as_view(
         template_name='django_artisan/posts_and_comments/forum_post_detail.html'), name='post_view'),

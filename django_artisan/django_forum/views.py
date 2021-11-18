@@ -25,22 +25,25 @@ logger = logging.getLogger('django_artisan')
 
 
 # START POSTS AND COMMENTS
-class ForumPostUpdate():
+class ForumPostUpdate(messages_views.MessageUpdate):
     model = forum_models.ForumPost
-    template_name = "django_forum/posts_and_comments/forum_post_create_form.html"
+    template_name = "django_forum/posts_and_comments/forum_post_detail.html"
+    form_class = forum_forms.ForumPost
 
 class ForumPostCreate(messages_views.MessageCreate):
     model = forum_models.ForumPost
     template_name = "django_forum/posts_and_comments/forum_post_create_form.html"
     form_class = forum_forms.ForumPost
 
-    def form_valid(self, form: forms.ModelForm) -> http.HttpResponseRedirect:
-        post = form.save(commit=False)
+    def form_valid(self, form: forms.ModelForm, post: forum_models.ForumPost) -> http.HttpResponseRedirect:
+        breakpoint()
+        if post is None:
+            post = form.save(commit=False)
         post.user_profile = self.request.user.profile.forumprofile
-        post.text = posts_and_comments_views.PostCreate.sanitize_post_text(post.text)
         post.slug = defaultfilters.slugify(
             post.title[:60] + '-' + str(utils.dateformat.format(utils.timezone.now(), 'Y-m-d H:i:s')))
         post.save()
+        super().form_valid(post, form)
         if 'subscribe' in self.request.POST:
             post.subscribed_users.add(self.request.user)
         return shortcuts.redirect(self.get_success_url(post))
@@ -53,7 +56,7 @@ class ForumPostCreate(messages_views.MessageCreate):
 
 @utils.decorators.method_decorator(cache.never_cache, name='dispatch')
 @utils.decorators.method_decorator(cache.never_cache, name='get')
-class ForumPostView(posts_and_comments_views.Post):
+class ForumPostView(messages_views.MessageView):
     """
         TODO: Replace superclass form processing if conditions with separate urls/views
               and overload them individually here, where necessary, instead of redefining
@@ -218,7 +221,7 @@ def subscribe(request) -> http.JsonResponse:
 
 
 @utils.decorators.method_decorator(cache.never_cache, name='dispatch')
-class ForumPostList(posts_and_comments_views.PostList):
+class ForumPostList(messages_views.MessageList):
     model = forum_models.ForumPost
     template_name = 'django_forum/posts_and_comments/forum_post_list.html'
     paginate_by = 5
@@ -253,9 +256,9 @@ class ForumPostList(posts_and_comments_views.PostList):
             queryset_p = forum_documents.ForumPost.search().query(
                 elasticsearch_dsl.Q(t, text=terms) |
                 elasticsearch_dsl.Q(t, author=terms) |
-                elasticsearch_dsl.Q(t, title=terms) |
-                elasticsearch_dsl.Q(t, category=terms) |
-                elasticsearch_dsl.Q(t, location=terms)).to_queryset()
+                elasticsearch_dsl.Q(t, title=terms)).to_queryset()
+                # elasticsearch_dsl.Q(t, category=terms) |
+                # elasticsearch_dsl.Q(t, location=terms))
             queryset_c = forum_documents.ForumComment.search().query(
                 elasticsearch_dsl.Q(t, text=terms) | elasticsearch_dsl.Q(t, author=terms)).to_queryset()
             p_c = list(queryset_p) + list(queryset_c)
