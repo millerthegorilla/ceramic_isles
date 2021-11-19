@@ -19,7 +19,7 @@
 			    {% else %}
 			    <div>This post has been reported and is awaiting moderation_date.</div>
 			    {% endif %}
-			    {% if forumpost.author.profile.display_name == user_display_name %}
+			    {% if forumpost.author.profile.display_name == user.profile.display_name %}
 				    <div class="ms-auto">
 		    		    <form method="post" action="update-post">
 		    		    	{% csrf_token %}
@@ -34,7 +34,7 @@
 		                </form>
 		            </div>
                 {% else %}
-	                {% if not forumpost.moderation_date and forumpost.author.profile.display_name != user_display_name %}
+	                {% if not forumpost.moderation_date and forumpost.author.profile.display_name != user.profile.display_name %}
 	                <div class="ms-auto">
 	                    <form method="post" id="form-report-post">
 	                    	{% csrf_token %}
@@ -48,7 +48,7 @@
                 {% endif %}
 		    </div>
 		    <div class="row justify-content-end">
-	    		{% if forumpost.author.profile.display_name == user_display_name %}
+	    		{% if forumpost.author.profile.display_name == user.profile.display_name %}
 	    		    <div id="modify-post-btns">
 			    		<button id="delete-btn" type="button" class="btn btn-secondary col-auto me-2" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">Delete Post</button>
 		    		    <button id="editor-btn" class="me-auto col-auto btn btn-primary">Edit Post</button>

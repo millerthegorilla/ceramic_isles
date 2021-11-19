@@ -6,38 +6,38 @@
 			</div>
 			<div class="row align-items-end tinfo post-headline mb-2">
 				<div class="col-auto">
-				    <h1><span id="post_title">{{ forumpost.title|safe }}</span></h1> 
+				    <h1><span id="post_title">{{ artisanforumpost.title|safe }}</span></h1> 
 			    </div>
 			    <div class="col-auto">
 			    	<h1><span class="text-dark ps-2">by</span></h1>
 			    </div>
 			    <div class="col-auto">
-			    	<h3>{{ forumpost.author.profile.display_name }}</h3>
+			    	<h3>{{ artisanforumpost.author.profile.display_name }}</h3>
 			    </div>
 			    <div class="col-auto">
 			    	<h3><span class="text-dark ps-3">on</span></h3>
 			    </div>
 			    <div class="col-auto">
-			    	<h4>{{ forumpost.created_at }}</h4>
+			    	<h4>{{ artisanforumpost.created_at }}</h4>
 			    </div>
 			</div>
 			<div class='ps-4'>
 				<div class="tinfo row justify-content-start mb-2">
 					 <div class="col-auto">
-				    	<h6>Category : {{ forumpost.get_category_display }}</h6>
+				    	<h6>Category : {{ artisanforumpost.get_category_display }}</h6>
 				    </div>
 				    <div class="col-auto flex-grow-1">
-				    	<h6>Location : {{ forumpost.get_location_display }}</h6>
+				    	<h6>Location : {{ artisanforumpost.get_location_display }}</h6>
 				    </div>
 				    <div class="col-auto"><input type='checkbox' id='subscribed_cb' {% if subscribed %}checked{% endif %}><label for="subscribed_cb" class="ps-2">Subscribe to this thread</label></div>
 				</div>
 				<div class="row ms-auto mb-2">
-					{% if not forumpost.moderation_date %}
-				    <div id="textarea" class="col-auto">{{ forumpost.text|safe }}</div>
+					{% if not artisanforumpost.moderation_date %}
+				    <div id="textarea" class="col-auto">{{ artisanforumpost.text|safe }}</div>
 				    {% else %}
 				    <div>This post has been reported and is awaiting moderation.</div>
 				    {% endif %}
-				    {% if forumpost.author.profile.display_name == user_display_name %}
+				    {% if artisanforumpost.author.profile.display_name == user.profile.display_name %}
 					    <div class="ms-auto">
 			    		    <form method="post">
 			    		    	{% csrf_token %}
@@ -57,7 +57,7 @@
 			                </form>
 			            </div>
 	                {% else %}
-		                {% if not forumpost.moderation_date and forumpost.author.profile.display_name != user_display_name %}
+		                {% if not artisanforumpost.moderation_date and artisanforumpost.author.profile.display_name != user.profile.display_name %}
 		                <div class="ms-auto">
 		                    <form method="post" id="form-report-post">
 		                    	{% csrf_token %}
@@ -71,7 +71,7 @@
 	                {% endif %}
 			    </div>
 			    <div class="row justify-content-end mb-3">
-		    		{% if forumpost.author.profile.display_name == user_display_name %}
+		    		{% if artisanforumpost.author.profile.display_name == user.profile.display_name %}
 		    		    <div id="modify-post-btns">
 		    		    	<div class="d-flex justify-content-end">
 				    			<button id="delete-btn" type="button" class="btn btn-secondary col-auto me-2" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">Delete Post</button>

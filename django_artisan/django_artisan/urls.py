@@ -26,8 +26,7 @@ urlpatterns = [
     path('users/accounts/profile/images/update/<slug:unique_id>/',
          artisan_views.UserProductImageDelete.as_view(), name='remove_images'),
     path('forum/create_post/', artisan_views.ArtisanForumPostCreate.as_view(), name='post_create_view'),
-    path('forum/posts/', forum_views.ForumPostList.as_view(model=artisan_models.ArtisanForumPost,
+    path('forum/posts/', artisan_views.ArtisanForumPostList.as_view(model=artisan_models.ArtisanForumPost,
         template_name='django_artisan/posts_and_comments/forum_post_list.html'), name='post_list_view'),
-    path('forum/<int:pk>/<slug:slug>/', forum_views.ForumPostView.as_view(
-        template_name='django_artisan/posts_and_comments/forum_post_detail.html'), name='post_view'),
+    path('forum/<int:pk>/<slug:slug>/', artisan_views.ArtisanForumPostView.as_view(), name='post_view'),
 ]

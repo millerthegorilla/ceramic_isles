@@ -49,7 +49,7 @@ class ArtisanForumPost(messages_forms.Message):
                 layout.Submit('save', 'Publish Post', css_class="col-auto mt-3 mb-3"),
             )
         )
-        self.helper.form_action = 'django_forum:post_create_view'
+        self.helper.form_action = 'django_artisan:post_create_view'
 
 
 class ArtisanForumProfile(forum_forms.ForumProfile):

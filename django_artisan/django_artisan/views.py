@@ -7,15 +7,14 @@ import typing
 
 from django import http, forms, shortcuts, urls
 from django.core import paginator as pagination
-from django.conf import settings
+from django import conf
 from django.contrib.auth import mixins
 from django.contrib.sitemaps import ping_google
 from django.contrib.sites import models as site_models
 from django.db import models as db_models
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
-from django.utils.decorators import method_decorator
-from django.utils import timezone
+from django.utils import timezone, decorators
 from django.views import generic
 from django.views.decorators import cache
 
@@ -30,13 +29,42 @@ from . import forms as artisan_forms
 logger = logging.getLogger('django_artisan')
 
 
-@utils.decorators.method_decorator(cache.never_cache, name='dispatch')
-@utils.decorators.method_decorator(cache.never_cache, name='get')
-class ForumPostView(messages_views.MessageView):
-    
+@decorators.method_decorator(cache.never_cache, name='dispatch')
+@decorators.method_decorator(cache.never_cache, name='get')
+class ArtisanForumPostView(forum_views.ForumPostView):
+    model: artisan_models.ArtisanForumPost = artisan_models.ArtisanForumPost
+    slug_url_kwarg: str = 'slug'
+    slug_field: str = 'slug'
+    template_name: str = 'django_artisan/posts_and_comments/forum_post_detail.html'
+    form_class: artisan_forms.ArtisanForumPost = artisan_forms.ArtisanForumPost
+
+    def get_context_data(self, **kwargs):
+        context_data = super(ArtisanForumPostView, self).get_context_data(**kwargs)
+        category = self.object.get_category_display()
+        cat_text = ''
+        for i in [(cat.value, cat.label) for cat in conf.settings.CATEGORY]:
+            if i[1] == category:
+                cat_text = cat_text + '<option value="' + \
+                    str(i[0]) + '" selected>' + str(i[1]) + '</option>'
+            else:
+                cat_text = cat_text + '<option value="' + \
+                    str(i[0]) + '">' + str(i[1]) + '</option>'
+        location = self.object.get_location_display()
+        loc_text = ''
+        for i in [(loc.value, loc.label) for loc in conf.settings.LOCATION]:
+            if i[1] == location:
+                loc_text = loc_text + '<option value="' + \
+                    str(i[0]) + '" selected>' + str(i[1]) + '</option>'
+            else:
+                loc_text = loc_text + '<option value="' + \
+                    str(i[0]) + '">' + str(i[1]) + '</option>'
+        context_data['category_opts'] = cat_text
+        context_data['location_opts'] = loc_text
+        return context_data
 
 
-method_decorator(cache.never_cache, name='dispatch')
+
+@decorators.method_decorator(cache.never_cache, name='dispatch')
 class ArtisanForumPostList(forum_views.ForumPostList):
      model = artisan_models.ArtisanForumPost
      template_name = 'django_forum/posts_and_comments/forum_post_list.html'
@@ -114,7 +142,7 @@ def ping_google_func() -> None:
     except Exception as e:
         logger.error("unable to ping_google : {0}".format(e))
 
-@method_decorator(cache.never_cache, name='dispatch')
+@decorators.method_decorator(cache.never_cache, name='dispatch')
 class ArtisanForumProfile(forum_views.ForumProfile):
     """
         ForumProfile subclasses LoginRequiredMixin
@@ -171,7 +199,7 @@ class AboutPage(generic.list.ListView):
     def get_context_data(self, **kwargs) -> dict:
         site = site_models.Site.objects.get_current()
         data = super().get_context_data(**kwargs)
-        data['about_text'] = settings.ABOUT_US_SPIEL
+        data['about_text'] = conf.settings.ABOUT_US_SPIEL
         data['site_url'] = (self.request.scheme or 'https') + '://' + site.domain
         qs = artisan_models.ArtisanForumProfile.objects.all().exclude(profile_user__is_superuser=True).exclude(listed_member=False) \
                                        .values_list('display_name', 'avatar__image_file')
