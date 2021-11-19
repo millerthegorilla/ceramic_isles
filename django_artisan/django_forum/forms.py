@@ -137,16 +137,19 @@ class ForumComment(messages_forms.Message):
 
 ## TODO add choices field to search page
 class ForumPostListSearch(forms.Form):
-    PUBLISHED_ANY = ''
-    PUBLISHED_TODAY = '1'
-    PUBLISHED_WEEK = '7'
+    DATE_ANY = ''
+    DATE_TODAY = '1'
+    DATE_WEEK = '7'
 
-    PUBLISHED_CHOICES = (
-        (PUBLISHED_ANY, 'Any'),
-        (PUBLISHED_TODAY, 'Today'),
-        (PUBLISHED_WEEK, 'This week'),
+    DATE_CHOICES = (
+        (DATE_ANY, 'Any'),
+        (DATE_TODAY, 'Today'),
+        (DATE_WEEK, 'This week'),
     )
 
     q = forms.CharField(label='Search Query')
     published = forms.ChoiceField(
-        choices=PUBLISHED_CHOICES, required=False, initial=PUBLISHED_ANY)
+        choices=DATE_CHOICES, required=False, initial=DATE_ANY)
+    
+    class Meta():
+        fields = []

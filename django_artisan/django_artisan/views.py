@@ -5,7 +5,7 @@ from sorl.thumbnail import delete
 from django_q.tasks import async_task
 import typing
 
-from django import http, forms, shortcuts
+from django import http, forms, shortcuts, urls
 from django.core import paginator as pagination
 from django.conf import settings
 from django.contrib.auth import mixins
@@ -17,7 +17,8 @@ from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.utils import timezone
 from django.views import generic
-from django.views.decorators.cache import never_cache
+from django.views.decorators import cache
+
 
 from django_forum import forms as forum_forms
 from django_forum import views as forum_views
@@ -29,18 +30,73 @@ from . import forms as artisan_forms
 logger = logging.getLogger('django_artisan')
 
 
+@utils.decorators.method_decorator(cache.never_cache, name='dispatch')
+@utils.decorators.method_decorator(cache.never_cache, name='get')
+class ForumPostView(messages_views.MessageView):
+    
+
+
+method_decorator(cache.never_cache, name='dispatch')
+class ArtisanForumPostList(forum_views.ForumPostList):
+     model = artisan_models.ArtisanForumPost
+     template_name = 'django_forum/posts_and_comments/forum_post_list.html'
+     paginate_by = 5
+
+     def get(self, request: http.HttpRequest,
+                   subclass_queryset: db_models.QuerySet = None) -> http.HttpResponse:
+         site = site_models.Site.objects.get_current()
+         search = 0
+         p_c = None
+         is_a_search = False
+         form = artisan_forms.ArtisanForumPostListSearch(request.GET)
+         if form.is_valid():
+             is_a_search = True
+             terms = form.cleaned_data['q'].split(' ')
+             if len(terms) > 1:
+                 t = 'terms'
+             else:
+                 t = 'match'
+                 terms = terms[0]
+             queryset = forum_documents.ForumPost.search().query(
+                 elasticsearch_dsl.Q(t, category=terms) |
+                 elasticsearch_dsl.Q(t, location=terms)).to_queryset()
+             search = len(queryset)
+             if search == 0:
+                 queryset = artisan_models.ArtisanForumPost.objects.order_by('-pinned')
+             else:
+                 queryset = queryset = queryset + super().get(subclass_queryset=queryset)
+                 if subclass_queryset:
+                     return queryset
+         else:
+             queryset = artisan_models.ArtisanForumPost.objects.order_by('-pinned')
+         
+         paginator = pagination.Paginator(queryset, self.paginate_by)
+         
+         page_number = request.GET.get('page')
+         page_obj = paginator.get_page(page_number)
+         context = {
+             'page_obj': page_obj,
+             'search': search,
+             'is_a_search': is_a_search,
+             'site_url': (request.scheme or 'https') + '://' + site.domain}
+         return shortcuts.render(request, self.template_name, context)
+
 class ArtisanForumPostCreate(forum_views.ForumPostCreate):
     model = artisan_models.ArtisanForumPost
     form_class = artisan_forms.ArtisanForumPost
 
     def form_valid(self, form: forms.ModelForm) -> http.HttpResponseRedirect:
-        breakpoint()
         post = form.save()
-        super().form_valid(form, post)
+        return super().form_valid(form, post)
 
     def form_invalid(self, form):
         breakpoint()
         pass
+
+    def get_success_url(self, post: artisan_models.ArtisanForumPost, *args, **kwargs) -> str:
+        return urls.reverse_lazy(
+            'django_artisan:post_view', args=(
+                post.id, post.slug,))
 
     # def get(self, request: http.HttpRequest) -> http.HttpResponse:
     #     breakpoint()
@@ -58,7 +114,7 @@ def ping_google_func() -> None:
     except Exception as e:
         logger.error("unable to ping_google : {0}".format(e))
 
-@method_decorator(never_cache, name='dispatch')
+@method_decorator(cache.never_cache, name='dispatch')
 class ArtisanForumProfile(forum_views.ForumProfile):
     """
         ForumProfile subclasses LoginRequiredMixin
@@ -204,7 +260,7 @@ class UserProductImageUpload(mixins.LoginRequiredMixin, generic.edit.FormView):
     template_name = 'django_artisan/profile/images/image_update.html'
     success_url = reverse_lazy('django_artisan:image_update')
     
-    @never_cache
+    @cache.never_cache
     def get(self, request: http.HttpRequest, *args, **kwargs) -> http.HttpResponse:
         form = self.form_class()
         message = 'Choose a file and add some accompanying text and a shop link if you have one'

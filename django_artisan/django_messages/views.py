@@ -120,20 +120,22 @@ class MessageCreate(mixins.LoginRequiredMixin, generic.edit.CreateView):
     #template_name = 'django_messages/message_create_form.html'
     form_class = messages_forms.Message
 
-    def form_valid(self, form, post: messages_models.Message = None, **kwargs) -> http.HttpResponseRedirect:
-        super().form_valid(form)
-        message = form.save(commit=False)
+    def form_valid(self, form, message: messages_models.Message = None, **kwargs) -> http.HttpResponseRedirect:
+        if message is None:
+            message = form.save(commit=False)
+        breakpoint()
         message.text = sanitize_post_text(message.text)
         message.author = self.request.user
         message.slug = defaultfilters.slugify(
             message.text[:10] + '-' + str(utils.dateformat.format(utils.timezone.now(), 'Y-m-d H:i:s')))
+        #super().form_valid(form)
         try:
             message.save()
+            return shortcuts.redirect(self.get_success_url(message))
         except db.IntegrityError as e:
             logger.error("Unable to create message : " + str(e))
-        return shortcuts.redirect(self.get_success_url(message))
 
-    def get_success_url(self, post, *args, **kwargs) -> str:
+    def get_success_url(self, message, *args, **kwargs) -> str:
         return urls.reverse_lazy(
             'django_messages:message_view', args=(
                 message.id, message.slug,))

@@ -146,6 +146,15 @@ class UserProductImage(forms.ModelForm):
                     'User already has {} images'.format(MAX_NUMBER_OF_IMAGES))
 
 
+class ArtisanForumPostListSearch(forum_forms.ForumPostListSearch):
+    category = forms.ChoiceField(
+        choices=settings.CATEGORY.choices, required=False, initial=settings.CATEGORY.GENERAL)
+    location = forms.ChoiceField(
+        choices=settings.LOCATION.choices, required=False, initial=settings.LOCATION.ANY_ISLE)
+
+    class Meta(forum_forms.ForumPostListSearch.Meta):
+        fields = forum_forms.ForumPostListSearch.Meta.fields
+
 # handles deletion  ## TODO is this even used?
 # class UserProductImageDelete(forms.ModelForm):
 #     image_file = safe_image_forms.SafeImageField(allowed_extensions=('jpg', 'png'),

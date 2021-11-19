@@ -171,11 +171,11 @@ class ForumPost(messages_models.Message):
                 self.id, self.slug,)) # type: ignore
     
     def get_author_name(self) -> str:
-        return 'bob-holnes'
+        return self.author
         #return self.author.user_profile.display_name
 
     def __str__(self) -> str:
-        return f"Post by bob-holnes" #{self.author.user_profile.display_name}"
+        return f"{self.author.profile.display_name}"
 
 
 # @dispatch.receiver(signals.post_save, sender=ForumPost)
