@@ -1,9 +1,7 @@
-import random
-import logging
+import random, logging, elasticsearch_dsl, typing
 from PIL import Image, ImageOps
 from sorl.thumbnail import delete
 from django_q.tasks import async_task
-import typing
 
 from django import http, forms, shortcuts, urls
 from django.core import paginator as pagination
@@ -24,7 +22,8 @@ from django_forum import views as forum_views
 from django_forum import models as forum_models
 
 from . import models as artisan_models
-from . import forms as artisan_forms 
+from . import forms as artisan_forms
+from . import documents as artisan_documents 
 
 logger = logging.getLogger('django_artisan')
 
@@ -63,51 +62,51 @@ class ArtisanForumPostView(forum_views.ForumPostView):
         return context_data
 
 
-
 @decorators.method_decorator(cache.never_cache, name='dispatch')
 class ArtisanForumPostList(forum_views.ForumPostList):
-     model = artisan_models.ArtisanForumPost
-     template_name = 'django_forum/posts_and_comments/forum_post_list.html'
-     paginate_by = 5
+    model = artisan_models.ArtisanForumPost
+    template_name = 'django_forum/posts_and_comments/forum_post_list.html'
+    paginate_by = 5
 
-     def get(self, request: http.HttpRequest,
-                   subclass_queryset: db_models.QuerySet = None) -> http.HttpResponse:
-         site = site_models.Site.objects.get_current()
-         search = 0
-         p_c = None
-         is_a_search = False
-         form = artisan_forms.ArtisanForumPostListSearch(request.GET)
-         if form.is_valid():
-             is_a_search = True
-             terms = form.cleaned_data['q'].split(' ')
-             if len(terms) > 1:
-                 t = 'terms'
-             else:
-                 t = 'match'
-                 terms = terms[0]
-             queryset = forum_documents.ForumPost.search().query(
-                 elasticsearch_dsl.Q(t, category=terms) |
-                 elasticsearch_dsl.Q(t, location=terms)).to_queryset()
-             search = len(queryset)
-             if search == 0:
-                 queryset = artisan_models.ArtisanForumPost.objects.order_by('-pinned')
-             else:
-                 queryset = queryset = queryset + super().get(subclass_queryset=queryset)
-                 if subclass_queryset:
-                     return queryset
-         else:
-             queryset = artisan_models.ArtisanForumPost.objects.order_by('-pinned')
+    def get(self, request: http.HttpRequest) -> typing.Union[tuple, http.HttpResponse]:
+        site = site_models.Site.objects.get_current()
+        search = 0
+        p_c = None
+        is_a_search = False
+        form = artisan_forms.ArtisanForumPostListSearch(request.GET)
+        if form.is_valid():
+            is_a_search = True
+            terms = form.cleaned_data['q'].split(' ')
+            if len(terms) > 1:
+                t = 'terms'
+            else:
+                t = 'match'
+                terms = terms[0]
+            queryset = artisan_documents.ArtisanForumPost.search().query(
+                elasticsearch_dsl.Q(t, text=terms) |
+                elasticsearch_dsl.Q(t, author=terms) |
+                elasticsearch_dsl.Q(t, title=terms) |
+                elasticsearch_dsl.Q(t, category=terms) |
+                elasticsearch_dsl.Q(t, location=terms)).to_queryset()
+            time_range = eval('form.' + form['published'].value())  #### TODO !!! eval is evil.  
+            search = len(queryset)
+            if search and time_range:
+                queryset = queryset.filter(created_at__lt=time_range[0], created_at__gt=time_range[1])
+            elif not search:
+                queryset = artisan_models.ArtisanForumPost.objects.order_by('-pinned')
+        else:
+            queryset = artisan_models.ArtisanForumPost.objects.order_by('-pinned')
          
-         paginator = pagination.Paginator(queryset, self.paginate_by)
+        paginator = pagination.Paginator(queryset, self.paginate_by)
          
-         page_number = request.GET.get('page')
-         page_obj = paginator.get_page(page_number)
-         context = {
-             'page_obj': page_obj,
-             'search': search,
-             'is_a_search': is_a_search,
-             'site_url': (request.scheme or 'https') + '://' + site.domain}
-         return shortcuts.render(request, self.template_name, context)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        context = {
+            'page_obj': page_obj,
+            'search': search,
+            'is_a_search': is_a_search,
+            'site_url': (request.scheme or 'https') + '://' + site.domain}
+        return shortcuts.render(request, self.template_name, context)
 
 class ArtisanForumPostCreate(forum_views.ForumPostCreate):
     model = artisan_models.ArtisanForumPost

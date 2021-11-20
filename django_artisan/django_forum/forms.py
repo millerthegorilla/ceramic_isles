@@ -1,8 +1,11 @@
+from collections import namedtuple
+from datetime import datetime, timedelta, timezone
+
 from crispy_forms import helper, layout
 from crispy_bootstrap5 import bootstrap5 
 from tinymce.widgets import TinyMCE
 
-from django import forms
+from django import forms, utils
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.conf import settings
@@ -137,19 +140,41 @@ class ForumComment(messages_forms.Message):
 
 ## TODO add choices field to search page
 class ForumPostListSearch(forms.Form):
-    DATE_ANY = ''
-    DATE_TODAY = '1'
-    DATE_WEEK = '7'
+    DATE_ANY = 0
+    DATE_TODAY = (utils.timezone.now(), utils.timezone.now() - timedelta(1))
+    DATE_WEEK = (utils.timezone.now(), utils.timezone.now() - timedelta(7))
+    DATE_WEEK_LAST = (utils.timezone.now() - timedelta(7), utils.timezone.now() - timedelta(14))
+    DATE_MONTH_LAST = (datetime(utils.timezone.now().year, utils.timezone.now().month - 1, 1),
+                       datetime(utils.timezone.now().year, utils.timezone.now().month, ))
+    DATE_YEAR_NOW = (utils.timezone.now(), datetime(utils.timezone.now().year, 1, 1, tzinfo=timezone.utc))
+    DATE_YEAR_LAST = (datetime(utils.timezone.now().year - 1, 12, 31, tzinfo=timezone.utc), 
+                      datetime(utils.timezone.now().year - 1, 1, 1, tzinfo=timezone.utc))
+
+
+    from dateparser import parse
+
+    def __init__(self, *args, **kwargs):
+        self.DATES = {}
+        self.DATES['DATE_ANY'] = DATE_ANY
+        self.DATES['DATE_TODAY'] = DATE_TODAY
+        self.DATES['DATE_WEEK'] = DATE_WEEK
+        self.DATES['DATE_WEEK_LAST'] = DATE_WEEK_LAST
+        self.DATES['DATE_MONTH_LAST'] = DATE_MONTH_LAST
+        self.DATES['DATE_YEAR_NOW'] = DATE_YEAR_NOW
+        self.DATES['DATE_YEAR_LAST'] = DATE_YEAR_LAST  
 
     DATE_CHOICES = (
-        (DATE_ANY, 'Any'),
-        (DATE_TODAY, 'Today'),
-        (DATE_WEEK, 'This week'),
+        ('DATE_ANY', 'Any'),
+        ('DATE_TODAY', 'Today'),
+        ('DATE_WEEK', 'This week'),
+        ('DATE_WEEK_LAST', 'Last week'),
+        ('DATE_LAST_MONTH', 'Last month'),
+        ('DATE_YEAR_NOW', 'This year'),
+        ('DATE_YEAR_LAST', 'Last year'),
     )
 
     q = forms.CharField(label='Search Query')
-    published = forms.ChoiceField(
-        choices=DATE_CHOICES, required=False, initial=DATE_ANY)
+    published = forms.ChoiceField(choices=DATE_CHOICES, required=False, initial=DATE_ANY)
     
     class Meta():
         fields = []

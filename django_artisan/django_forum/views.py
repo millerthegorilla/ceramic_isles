@@ -67,8 +67,8 @@ class ForumPostView(messages_views.MessageView):
     #extra_context = { 'site_url':Site.objects.get_current().domain }
 
     def post(self, *args, **kwargs) -> typing.Union[http.HttpResponse, http.HttpResponseRedirect]:
-        post = forum_models.ForumPost.objects.get(pk=kwargs['pk'])
-        if self.request.POST['type'] == 'post' and self.request.user.profile.display_name == post.author:
+        post = self.model.objects.get(pk=kwargs['pk'])
+        if self.request.POST['type'] == 'post' and self.request.user == post.author:
             post.delete()
             return shortcuts.redirect(urls.reverse_lazy('django_forum:post_list_view'))
         elif self.request.POST['type'] == 'comment':
@@ -103,8 +103,6 @@ class ForumPostView(messages_views.MessageView):
                               'site_url': (self.request.scheme or 'https') + '://' + site.domain})
         elif self.request.POST['type'] == 'update':
             post.text = self.request.POST['update-post']
-            post.category = self.request.POST['category']
-            post.location = self.request.POST['location']
             post.save(update_fields=['text', 'location', 'category'])
             return shortcuts.redirect(post)
         elif self.request.POST['type'] == 'rem-comment':
@@ -150,84 +148,19 @@ class ForumPostView(messages_views.MessageView):
             fail_silently=False,
         )
 
-    def get(self, *args, **kwargs) -> http.HttpResponse:
+    def get(self, request: http.HttpRequest, pk:int = None, slug:str = None) -> http.HttpResponse:
         self.object = self.get_object()
-        #post = forum_models.ForumPost.objects.get(pk=kwargs['pk'])
-        #form = self.form_class(user_name=self.request.user.username, post=post) # type: ignore
-        # subscribed = ''
-        # try:
-        #     if post.subscribed_users.get(username=self.request.user.username): # type: ignore
-        #         subscribed = 'checked'
-        # except auth.get_user_model().DoesNotExist:
-        #     subscribed = ''
-        # site = site_models.Site.objects.get_current()
-        # new_comment_form = self.comment_form_class() # type: ignore
-        # comments = forum_models.ForumComment.objects.filter(forum_post=post)
-        # user_display_name = self.request.user.profile.display_name
-        # category = post.get_category_display()
-        # cat_text = ''
-        # for i in [(cat.value, cat.label) for cat in conf.settings.CATEGORY]:
-        #     if i[1] == category:
-        #         cat_text = cat_text + '<option value="' + \
-        #             str(i[0]) + '" selected>' + str(i[1]) + '</option>'
-        #     else:
-        #         cat_text = cat_text + '<option value="' + \
-        #             str(i[0]) + '">' + str(i[1]) + '</option>'
-        # location = post.get_location_display()
-        # loc_text = ''
-        # for i in [(loc.value, loc.label) for loc in conf.settings.LOCATION]:
-        #     if i[1] == location:
-        #         loc_text = loc_text + '<option value="' + \
-        #             str(i[0]) + '" selected>' + str(i[1]) + '</option>'
-        #     else:
-        #         loc_text = loc_text + '<option value="' + \
-        #             str(i[0]) + '">' + str(i[1]) + '</option>'
         context = self.get_context_data()
         return shortcuts.render(self.request,
                       self.template_name,
                       context)
-                                            # form, 
-                                            # post, 
-                                            # subscribed, 
-                                            # comments, 
-                                            # new_comment_form,
-                                            # user_display_name,
-                                            # site))
 
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
-        # queryset = kwargs.pop('object_list', None)
-        # if queryset is None:
-        #     self.object_list = self.model.objects.all()
-          # try:
-          #     if context_datapost.subscribed_users.get(username=self.request.user.username): # type: ignore
-          #         context_data['subscribed'] = 'checked'
-          # except auth.get_user_model().DoesNotExist:
-          #     context_data['subscribed'] = ''
         site = site_models.Site.objects.get_current()
         context_data['site_url'] = (self.request.scheme or 'https') + '://' + site.domain
         context_data['comment_form'] = self.comment_form_class() # type: ignore
-          #context_data['comments'] = forum_models.ForumComment.objects.filter(forum_post=post)
-          #context_data['user_display_name'] = self.request.user.profile.display_name
         return context_data
-
-    # def get_context_data(self, form,
-    #                            post,
-    #                            subscribed,
-    #                            comments,
-    #                            new_comment_form,
-    #                            user_display_name,
-    #                            site) -> dict:
-    #     return {'form': form,
-    #                'post': post,
-    #                # 'category_opts': cat_text,
-    #                # 'location_opts': loc_text,
-    #                'subscribed': subscribed,
-    #                'comments': comments,
-    #                'comment_form': new_comment_form,
-    #                'user_display_name': user_display_name,
-    #                'site_url': (self.request.scheme or 'https') + '://' + site.domain}
-
 
 def subscribe(request) -> http.JsonResponse:
     # request should be ajax and method should be POST.
@@ -261,8 +194,7 @@ class ForumPostList(messages_views.MessageList):
        comments.  The search indexes are defined in documents.py.
     """
 
-    def get(self, request: http.HttpRequest,
-                  subclass_queryset: db_models.QuerySet = None) -> http.HttpResponse:
+    def get(self, request: http.HttpRequest) -> typing.Union[tuple, http.HttpResponse]:
         '''
             I had a function that tested for the existence of a search slug
             and then performed the search if necessary.  I have refactored that
@@ -289,16 +221,16 @@ class ForumPostList(messages_views.MessageList):
                 elasticsearch_dsl.Q(t, author=terms) |
                 elasticsearch_dsl.Q(t, title=terms)).to_queryset()
             search = len(queryset)
-            if search == 0:
+            if not search:
                 queryset = forum_models.ForumPost.objects.order_by('-pinned')
             else:
-                queryset = queryset = queryset + super().get(subclass_queryset=queryset)
-                if subclass_queryset:
-                    return queryset
+                time_range = eval('form.' + form['published'].value())
+                if time_range:
+                    queryset = queryset.filter(date__range=[time_range[0], time_range[1]])    
         else:
             queryset = forum_models.ForumPost.objects.order_by('-pinned')
         
-        paginator = pagination.Paginator(queryset, self.paginate_by)
+        paginator = pagination.Paginator(queryset_list, self.paginate_by)
         
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)

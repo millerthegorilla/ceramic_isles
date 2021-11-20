@@ -1,13 +1,10 @@
-import os
-import uuid
-import logging
+import os, uuid, logging, typing
 from random import randint
-import typing
 
 from django_q import tasks
 from sorl import thumbnail
 
-from django import conf
+from django import conf, urls
 from django.contrib.auth import models as auth_models
 from django.db import models, transaction
 from django.dispatch import receiver
@@ -39,6 +36,11 @@ class ArtisanForumPost(forum_models.ForumPost):
 
     def location_label(self) -> str:
         return conf.settings.LOCATION(self.location).label
+
+    def get_absolute_url(self) -> str:
+        return urls.reverse_lazy(
+            'django_artisan:post_view', args=(
+                self.id, self.slug,)) # type: ignore
 
 
 """

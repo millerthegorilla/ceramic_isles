@@ -60,14 +60,14 @@ html_strip = elasticsearch_dsl.analyzer(
 
 
 @registry.register_document
-class ArtisanForumPost(ForumPost):
+class ArtisanForumPost(django_elasticsearch_dsl.Document):
 
-    # author_name = django_elasticsearch_dsl.fields.TextField(attr="get_author_name")
+    author_name = django_elasticsearch_dsl.fields.TextField(attr="get_author_name")
 
-    # text = django_elasticsearch_dsl.fields.TextField(
-    #     attr='text',
-    #     analyzer=html_strip,
-    # )
+    text = django_elasticsearch_dsl.fields.TextField(
+        attr='text',
+        analyzer=html_strip,
+    )
 
     category = django_elasticsearch_dsl.fields.TextField(
         attr='category_label'
@@ -77,18 +77,17 @@ class ArtisanForumPost(ForumPost):
         attr='location_label'
     )
 
-    class Index(ForumPost.Index):
+    class Index:
         # Name of the Elasticsearch index
         name = 'artisan_forum_posts_index'
         # See Elasticsearch Indices API reference for available settings
         settings = {'number_of_shards': 1,
                     'number_of_replicas': 0}
 
-    class Django(ForumPost.Django):
+    class Django:
         """
             I no longer have an autocomplete defined as the amount of requests goes
             through the roof.
         """
         model = artisan_models.ArtisanForumPost
-        fields = [
-        ]
+        fields = ['title']
