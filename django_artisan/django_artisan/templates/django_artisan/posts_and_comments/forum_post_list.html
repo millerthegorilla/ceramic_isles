@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}{{ siteName }} - Forum Posts{% endblock title %}
 {% block content %}
+{% load crispy_forms_tags %}
     {% if page_obj.object_list.count == 0 and is_a_search is False %}
         <div class="row">
             <div class="col-auto mx-auto mt-5">
@@ -16,10 +17,14 @@
                 <p class="col-auto">Search the posts for content, author or category.</p>
             </div>
             <div class="row justify-content-center">
-                <form class="mb-2 col-auto d-flex flex-wrap justify-content-center" action="{% url 'django_artisan:post_list_view' %}" class="form-autocomplete">
+                <!--<form class="mb-2 col-auto d-flex flex-wrap justify-content-center" action="{% url 'django_artisan:post_list_view' %}" class="form-autocomplete">
                     <input class="col-auto me-2 mb-2 mb-sm-0 mb-lg-0" id="q" name="q" type="text" list="datalistOptions" class="autocomplete" autocomplete="on">
                     <select name="published" class="col-auto me-2 mb-2 mb-sm-0 mb-lg-0" id="id-publish-date"><option value="DATE_ANY">Any date</option><option value="DATE_TODAY">Today</option><option value="DATE_WEEK">This week</option><option value="DATE_YEAR_NOW">This year</option><option value="DATE_YEAR_LAST">Last year</option></select>
                     <input type="submit" value="Search!">
+                </form>-->
+                <form method="post" class="search-form">
+                  {% crispy form %}
+                  {% csrf_token %}
                 </form>
             </div>
             <div class="row justify-content-center">

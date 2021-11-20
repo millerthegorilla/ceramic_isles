@@ -153,7 +153,26 @@ class ArtisanForumPostListSearch(forum_forms.ForumPostListSearch):
         choices=settings.LOCATION.choices, required=False, initial=settings.LOCATION.ANY_ISLE)
 
     class Meta(forum_forms.ForumPostListSearch.Meta):
-        fields = forum_forms.ForumPostListSearch.Meta.fields
+        fields = forum_forms.ForumPostListSearch.Meta.fields + [ 'category', 'published', 'location']
+
+    def __init__(self, *args, **kwargs) -> None:
+        breakpoint()
+        super().__init__(*args, **kwargs)
+        self.helper = helper.FormHelper()
+        self.helper.layout = layout.Layout(
+            layout.Fieldset(
+                '',
+                layout.Field('q', css_class="col-12"),
+                layout.Field('published', css_class="mb-3 col-lg-auto col-12"),
+                layout.Field('category', css_class="mb-3 col-lg-auto col-12"),
+                layout.Field('location', css_class="mb-3 col-lg-auto col-12"),
+                css_class="row justify-content-center"
+            ),
+            layout.Submit('Search', 'search')
+        )
+        self.helper.form_id = 'id-search-form'
+        self.helper.form_method = 'post'
+        self.helper.form_class = 'search-form col-12 col-sm-12 col-md-10 col-lg-6 text-white'
 
 # handles deletion  ## TODO is this even used?
 # class UserProductImageDelete(forms.ModelForm):

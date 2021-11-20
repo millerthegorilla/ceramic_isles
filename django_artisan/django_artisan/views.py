@@ -102,11 +102,16 @@ class ArtisanForumPostList(forum_views.ForumPostList):
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
         context = {
+            'form': form,
             'page_obj': page_obj,
             'search': search,
             'is_a_search': is_a_search,
             'site_url': (request.scheme or 'https') + '://' + site.domain}
         return shortcuts.render(request, self.template_name, context)
+
+    def post(self, request, *args, **kwargs):
+        breakpoint()
+        pass
 
 class ArtisanForumPostCreate(forum_views.ForumPostCreate):
     model = artisan_models.ArtisanForumPost

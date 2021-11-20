@@ -140,28 +140,31 @@ class ForumComment(messages_forms.Message):
 
 ## TODO add choices field to search page
 class ForumPostListSearch(forms.Form):
+    date_end_of_last_month = datetime(utils.timezone.now().year, utils.timezone.now().month, 1) - timedelta(1)
     DATE_ANY = 0
     DATE_TODAY = (utils.timezone.now(), utils.timezone.now() - timedelta(1))
     DATE_WEEK = (utils.timezone.now(), utils.timezone.now() - timedelta(7))
     DATE_WEEK_LAST = (utils.timezone.now() - timedelta(7), utils.timezone.now() - timedelta(14))
-    DATE_MONTH_LAST = (datetime(utils.timezone.now().year, utils.timezone.now().month - 1, 1),
-                       datetime(utils.timezone.now().year, utils.timezone.now().month, ))
+    DATE_MONTH_LAST = (datetime(utils.timezone.now().year, utils.timezone.now().month - 1, 1, tzinfo=timezone.utc),
+                       datetime(utils.timezone.now().year, utils.timezone.now().month - 1, 
+                                date_end_of_last_month.day, tzinfo=timezone.utc))
     DATE_YEAR_NOW = (utils.timezone.now(), datetime(utils.timezone.now().year, 1, 1, tzinfo=timezone.utc))
     DATE_YEAR_LAST = (datetime(utils.timezone.now().year - 1, 12, 31, tzinfo=timezone.utc), 
                       datetime(utils.timezone.now().year - 1, 1, 1, tzinfo=timezone.utc))
 
 
-    from dateparser import parse
+    #from dateparser import parse
 
     def __init__(self, *args, **kwargs):
+        super().__init__()
         self.DATES = {}
-        self.DATES['DATE_ANY'] = DATE_ANY
-        self.DATES['DATE_TODAY'] = DATE_TODAY
-        self.DATES['DATE_WEEK'] = DATE_WEEK
-        self.DATES['DATE_WEEK_LAST'] = DATE_WEEK_LAST
-        self.DATES['DATE_MONTH_LAST'] = DATE_MONTH_LAST
-        self.DATES['DATE_YEAR_NOW'] = DATE_YEAR_NOW
-        self.DATES['DATE_YEAR_LAST'] = DATE_YEAR_LAST  
+        self.DATES['DATE_ANY'] = self.DATE_ANY
+        self.DATES['DATE_TODAY'] = self.DATE_TODAY
+        self.DATES['DATE_WEEK'] = self.DATE_WEEK
+        self.DATES['DATE_WEEK_LAST'] = self.DATE_WEEK_LAST
+        self.DATES['DATE_MONTH_LAST'] = self.DATE_MONTH_LAST
+        self.DATES['DATE_YEAR_NOW'] = self.DATE_YEAR_NOW
+        self.DATES['DATE_YEAR_LAST'] = self.DATE_YEAR_LAST
 
     DATE_CHOICES = (
         ('DATE_ANY', 'Any'),

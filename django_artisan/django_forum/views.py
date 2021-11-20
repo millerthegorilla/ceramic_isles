@@ -235,6 +235,7 @@ class ForumPostList(messages_views.MessageList):
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
         context = {
+            'form': form,
             'page_obj': page_obj,
             'search': search,
             'is_a_search': is_a_search,
