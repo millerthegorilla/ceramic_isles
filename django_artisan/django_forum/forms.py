@@ -89,9 +89,9 @@ class ForumPost(messages_forms.Message):
         labels = {'category': 'Choose a category for your post...',
                   'location': 'Which island...?'}
 
-    def __init__(self, user_name: str = None, post: forum_models.ForumPost = None, **kwargs) -> None:
+    def __init__(self, user_name: str = None, post: forum_models.ForumPost = None, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
         checked_string = ''
-        super().__init__(**kwargs)
         if post and user_name and post.subscribed_users.filter(
                 username=user_name).count():
             checked_string = 'checked'
@@ -145,18 +145,19 @@ class ForumPostListSearch(forms.Form):
     DATE_TODAY = (utils.timezone.now(), utils.timezone.now() - timedelta(1))
     DATE_WEEK = (utils.timezone.now(), utils.timezone.now() - timedelta(7))
     DATE_WEEK_LAST = (utils.timezone.now() - timedelta(7), utils.timezone.now() - timedelta(14))
-    DATE_MONTH_LAST = (datetime(utils.timezone.now().year, utils.timezone.now().month - 1, 1, tzinfo=timezone.utc),
+    DATE_MONTH_LAST = (datetime(utils.timezone.now().year, utils.timezone.now().month - 1, 
+                                date_end_of_last_month.day, tzinfo=timezone.utc),
                        datetime(utils.timezone.now().year, utils.timezone.now().month - 1, 
-                                date_end_of_last_month.day, tzinfo=timezone.utc))
+                                1, tzinfo=timezone.utc))
     DATE_YEAR_NOW = (utils.timezone.now(), datetime(utils.timezone.now().year, 1, 1, tzinfo=timezone.utc))
     DATE_YEAR_LAST = (datetime(utils.timezone.now().year - 1, 12, 31, tzinfo=timezone.utc), 
                       datetime(utils.timezone.now().year - 1, 1, 1, tzinfo=timezone.utc))
 
 
-    #from dateparser import parse
+    #from dateparser import parse  TODO add search verbs to allow time phrases to be passed
 
     def __init__(self, *args, **kwargs):
-        super().__init__()
+        super().__init__(*args, **kwargs)
         self.DATES = {}
         self.DATES['DATE_ANY'] = self.DATE_ANY
         self.DATES['DATE_TODAY'] = self.DATE_TODAY
@@ -170,8 +171,8 @@ class ForumPostListSearch(forms.Form):
         ('DATE_ANY', 'Any'),
         ('DATE_TODAY', 'Today'),
         ('DATE_WEEK', 'This week'),
-        ('DATE_WEEK_LAST', 'Last week'),
-        ('DATE_LAST_MONTH', 'Last month'),
+        ('DATE_WEEK_LAST', 'A week ago'),
+        ('DATE_MONTH_LAST', 'Last month'),
         ('DATE_YEAR_NOW', 'This year'),
         ('DATE_YEAR_LAST', 'Last year'),
     )

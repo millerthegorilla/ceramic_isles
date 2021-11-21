@@ -92,9 +92,11 @@ class ArtisanForumPostList(forum_views.ForumPostList):
             search = len(queryset)
             if search and time_range:
                 queryset = queryset.filter(created_at__lt=time_range[0], created_at__gt=time_range[1])
-            elif not search:
+                search = len(queryset)
+            if not search:
                 queryset = artisan_models.ArtisanForumPost.objects.order_by('-pinned')
         else:
+            form.errors.clear()
             queryset = artisan_models.ArtisanForumPost.objects.order_by('-pinned')
          
         paginator = pagination.Paginator(queryset, self.paginate_by)
@@ -109,31 +111,20 @@ class ArtisanForumPostList(forum_views.ForumPostList):
             'site_url': (request.scheme or 'https') + '://' + site.domain}
         return shortcuts.render(request, self.template_name, context)
 
-    def post(self, request, *args, **kwargs):
-        breakpoint()
-        pass
 
 class ArtisanForumPostCreate(forum_views.ForumPostCreate):
     model = artisan_models.ArtisanForumPost
     form_class = artisan_forms.ArtisanForumPost
 
     def form_valid(self, form: forms.ModelForm) -> http.HttpResponseRedirect:
-        post = form.save()
-        return super().form_valid(form, post)
-
-    def form_invalid(self, form):
         breakpoint()
-        pass
+        post = form.save(commit=False)
+        return super().form_valid(form, post)
 
     def get_success_url(self, post: artisan_models.ArtisanForumPost, *args, **kwargs) -> str:
         return urls.reverse_lazy(
             'django_artisan:post_view', args=(
                 post.id, post.slug,))
-
-    # def get(self, request: http.HttpRequest) -> http.HttpResponse:
-    #     breakpoint()
-    #     form = self.form_class(user_name=self.request.user.username, post=post)
-    #     return shortcuts.render(self.request, self.template_name, {form: form})
 
 """
     pings_google to recrawl site when user opts to list on about page

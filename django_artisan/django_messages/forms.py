@@ -32,4 +32,4 @@ class Message(forms.ModelForm):
         self.helper.form_id = 'id-message-create-form'
         self.helper.form_method = 'post'
         self.helper.form_class = 'col-auto'
-        self.helper.form_action = 'django_messages:message_create_view'
+        self.helper.form_action = 'django_messages:message_create'

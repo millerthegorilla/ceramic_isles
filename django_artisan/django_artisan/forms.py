@@ -20,17 +20,17 @@ from . import models as artisan_models
 from . import fields as artisan_fields
 
 
-class ArtisanForumPost(messages_forms.Message):
-    class Meta(messages_forms.Message.Meta):
+class ArtisanForumPost(forum_forms.ForumPost):
+    class Meta(forum_forms.ForumPost.Meta):
         model = artisan_models.ArtisanForumPost
         fields = forum_forms.ForumPost.Meta.fields + ['category', 'location']
         widgets = forum_forms.ForumPost.Meta.widgets
         labels = {'category': 'Choose a category for your post...',
                   'location': 'Which island...?'}
 
-    def __init__(self, user_name: str = None, post: artisan_models.ArtisanForumPost = None, **kwargs) -> None:
+    def __init__(self, user_name: str = None, post: artisan_models.ArtisanForumPost = None, *args, **kwargs) -> None:
+        super().__init__(user_name=user_name, post=post, *args, **kwargs)
         checked_string = ''
-        super().__init__(**kwargs)
         if post and user_name and post.subscribed_users.filter(
                 username=user_name).count():
             checked_string = 'checked'
@@ -147,31 +147,28 @@ class UserProductImage(forms.ModelForm):
 
 
 class ArtisanForumPostListSearch(forum_forms.ForumPostListSearch):
-    category = forms.ChoiceField(
-        choices=settings.CATEGORY.choices, required=False, initial=settings.CATEGORY.GENERAL)
-    location = forms.ChoiceField(
-        choices=settings.LOCATION.choices, required=False, initial=settings.LOCATION.ANY_ISLE)
+    # category = forms.ChoiceField(
+    #     choices=settings.CATEGORY.choices, required=False, initial=settings.CATEGORY.GENERAL)
+    # location = forms.ChoiceField(
+    #     choices=settings.LOCATION.choices, required=False, initial=settings.LOCATION.ANY_ISLE)
 
     class Meta(forum_forms.ForumPostListSearch.Meta):
-        fields = forum_forms.ForumPostListSearch.Meta.fields + [ 'category', 'published', 'location']
+        fields = forum_forms.ForumPostListSearch.Meta.fields + ['search']
 
     def __init__(self, *args, **kwargs) -> None:
-        breakpoint()
         super().__init__(*args, **kwargs)
         self.helper = helper.FormHelper()
         self.helper.layout = layout.Layout(
             layout.Fieldset(
                 '',
-                layout.Field('q', css_class="col-12"),
-                layout.Field('published', css_class="mb-3 col-lg-auto col-12"),
-                layout.Field('category', css_class="mb-3 col-lg-auto col-12"),
-                layout.Field('location', css_class="mb-3 col-lg-auto col-12"),
-                css_class="row justify-content-center"
+                layout.Field('q', wrapper_class="col-12 col-sm-8 col-md-6 col-lg-4"),
+                layout.Field('published', wrapper_class="mb-3 col-lg-auto col-12", css_class=""),
+                layout.Submit('Search', 'search', css_class="col-auto mt-3"),
+                css_class="text-white row justify-content-center align-items-center"
             ),
-            layout.Submit('Search', 'search')
         )
         self.helper.form_id = 'id-search-form'
-        self.helper.form_method = 'post'
+        self.helper.form_method = 'get'
         self.helper.form_class = 'search-form col-12 col-sm-12 col-md-10 col-lg-6 text-white'
 
 # handles deletion  ## TODO is this even used?

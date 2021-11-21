@@ -37,11 +37,12 @@ class ForumPostCreate(messages_views.MessageCreate):
     form_class = forum_forms.ForumPost
 
     def form_valid(self, form: forms.ModelForm, post: forum_models.ForumPost) -> http.HttpResponseRedirect:
+        breakpoint()
         if post is None:
             post = form.save(commit=False)
-        super().form_valid(form, post)
         if 'subscribe' in self.request.POST:
             post.subscribed_users.add(self.request.user)
+        super().form_valid(form, post)
         return shortcuts.redirect(self.get_success_url(post))
 
     def get_success_url(self, post: forum_models.ForumPost, *args, **kwargs) -> str:
@@ -203,89 +204,48 @@ class ForumPostList(messages_views.MessageList):
             So, TODO profile this method vs the original from commit id
             1d5cbccde9f7b183e4d886d7e644712b79db60cd 
         '''
-        site = site_models.Site.objects.get_current()
-        search = 0
-        p_c = None
-        is_a_search = False
-        form = forum_forms.ForumPostListSearch(request.GET)
-        if form.is_valid():
-            is_a_search = True
-            terms = form.cleaned_data['q'].split(' ')
-            if len(terms) > 1:
-                t = 'terms'
+        def get(self, request: http.HttpRequest) -> typing.Union[tuple, http.HttpResponse]:
+            site = site_models.Site.objects.get_current()
+            search = 0
+            p_c = None
+            is_a_search = False
+            form = artisan_forms.ArtisanForumPostListSearch(request.GET)
+            if form.is_valid():
+                is_a_search = True
+                terms = form.cleaned_data['q'].split(' ')
+                if len(terms) > 1:
+                    t = 'terms'
+                else:
+                    t = 'match'
+                    terms = terms[0]
+                queryset = forum_documents.ForumPost.search().query(
+                    elasticsearch_dsl.Q(t, text=terms) |
+                    elasticsearch_dsl.Q(t, author=terms) |
+                    elasticsearch_dsl.Q(t, title=terms) |
+                    elasticsearch_dsl.Q(t, category=terms) |
+                    elasticsearch_dsl.Q(t, location=terms)).to_queryset()
+                time_range = eval('form.' + form['published'].value())  #### TODO !!! eval is evil.  
+                search = len(queryset)
+                if search and time_range:
+                    queryset = queryset.filter(created_at__lt=time_range[0], created_at__gt=time_range[1])
+                    search = len(queryset)
+                if not search:
+                    queryset = forum_models.ForumPost.objects.order_by('-pinned')
             else:
-                t = 'match'
-                terms = terms[0]
-            queryset = forum_documents.ForumPost.search().query(
-                elasticsearch_dsl.Q(t, text=terms) |
-                elasticsearch_dsl.Q(t, author=terms) |
-                elasticsearch_dsl.Q(t, title=terms)).to_queryset()
-            search = len(queryset)
-            if not search:
+                form.errors.clear()
                 queryset = forum_models.ForumPost.objects.order_by('-pinned')
-            else:
-                time_range = eval('form.' + form['published'].value())
-                if time_range:
-                    queryset = queryset.filter(date__range=[time_range[0], time_range[1]])    
-        else:
-            queryset = forum_models.ForumPost.objects.order_by('-pinned')
-        
-        paginator = pagination.Paginator(queryset_list, self.paginate_by)
-        
-        page_number = request.GET.get('page')
-        page_obj = paginator.get_page(page_number)
-        context = {
-            'form': form,
-            'page_obj': page_obj,
-            'search': search,
-            'is_a_search': is_a_search,
-            'site_url': (request.scheme or 'https') + '://' + site.domain}
-        return shortcuts.render(request, self.template_name, context)
-        # site = site_models.Site.objects.get_current()
-        # search = 0
-        # p_c = None
-        # is_a_search = False
-        # form = forum_forms.ForumPostListSearch(request.GET)
-        # if form.is_valid():
-        #     is_a_search = True
-        #     terms = form.cleaned_data['q'].split(' ')
-        #     if len(terms) > 1:
-        #         t = 'terms'
-        #     else:
-        #         t = 'match'
-        #         terms = terms[0]
-        #     queryset_p = forum_documents.ForumPost.search().query(
-        #         elasticsearch_dsl.Q(t, text=terms) |
-        #         elasticsearch_dsl.Q(t, author=terms) |
-        #         elasticsearch_dsl.Q(t, title=terms)).to_queryset()
-        #         # elasticsearch_dsl.Q(t, category=terms) |
-        #         # elasticsearch_dsl.Q(t, location=terms))
-        #     queryset_c = forum_documents.ForumComment.search().query(
-        #         elasticsearch_dsl.Q(t, text=terms) | elasticsearch_dsl.Q(t, author=terms)).to_queryset()
-        #     p_c = list(queryset_p) + list(queryset_c)
-        #     search = len(p_c)
-        #     if search == 0:
-        #         queryset = forum_models.ForumPost.objects.order_by('-pinned')
-        #         if subclass_queryset:
-        #             queryset = queryset + subclass_queryset
-        #         paginator = pagination.Paginator(queryset, self.paginate_by)
-        #     else:
-        #         paginator = pagination.Paginator(p_c, self.paginate_by)
-        # else:
-        #     queryset = forum_models.ForumPost.objects.order_by('-pinned')
-        #     paginator = pagination.Paginator(queryset, self.paginate_by)
-        
-        # page_number = request.GET.get('page')
-        # page_obj = paginator.get_page(page_number)
-        # context = {
-        #     'page_obj': page_obj,
-        #     'search': search,
-        #     'is_a_search': is_a_search,
-        #     'site_url': (request.scheme or 'https') + '://' + site.domain}
-        # return shortcuts.render(request, self.template_name, context)
-            # # TODO: show form errors?
-            # breakpoint()
-            # return shortcuts.render(request, self.template_name, {'form': form, 'is_a_search': False })
+             
+            paginator = pagination.Paginator(queryset, self.paginate_by)
+             
+            page_number = request.GET.get('page')
+            page_obj = paginator.get_page(page_number)
+            context = {
+                'form': form,
+                'page_obj': page_obj,
+                'search': search,
+                'is_a_search': is_a_search,
+                'site_url': (request.scheme or 'https') + '://' + site.domain}
+            return shortcuts.render(request, self.template_name, context)
 
 ## autocomplete now removed to reduce number of requests
 # def autocomplete(request):
