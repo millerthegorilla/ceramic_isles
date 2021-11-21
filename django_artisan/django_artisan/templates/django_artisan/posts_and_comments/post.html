@@ -29,7 +29,7 @@
 				    <div class="col-auto flex-grow-1">
 				    	<h6>Location : {{ artisanforumpost.get_location_display }}</h6>
 				    </div>
-				    <div class="col-auto"><input type='checkbox' id='subscribed_cb' {% if subscribed %}checked{% endif %}><label for="subscribed_cb" class="ps-2">Subscribe to this thread</label></div>
+				    <div class="col-auto"><input type='checkbox' id='subscribed_cb' {% if subscribed %}checked{% endif %}><label for="subscribed_cb" class="ps-2">{% if subscribed %}Subscribed{% else %}Subscribe{% endif %} to this thread</label></div>
 				</div>
 				<div class="row ms-auto mb-2">
 					{% if not artisanforumpost.moderation_date %}
@@ -75,7 +75,7 @@
 		    		    <div id="modify-post-btns">
 		    		    	<div class="d-flex justify-content-end">
 				    			<button id="delete-btn" type="button" class="btn btn-secondary col-auto me-2" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">Delete Post</button>
-			    		    	<button id="editor-btn" class="col-auto btn btn-primary">Edit Post</button>
+			    		    	<button id="editor-btn" class="col-auto btn btn-primary">Edit Post</button><!--edit handled by ajax in forum app-->
 		    		    	</div>
 		    		    </div>
 		    		{% endif %}

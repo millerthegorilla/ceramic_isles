@@ -80,14 +80,13 @@ class ArtisanForumProfile(forum_models.ForumProfile):
     disconnect dummy profile
 """
 signals.post_save.disconnect(forum_models.create_user_forum_profile, sender=auth_models.User)
-signals.post_save.disconnect(forum_models.save_user_forum_profile, sender=auth_models.User)
+#signals.post_save.disconnect(forum_models.save_user_forum_profile, sender=auth_models.User)
 
 """
     Custom signals to create and update user profile
 """
 @receiver(signals.post_save, sender=auth_models.User)
-def create_user_artisan_forum_profile(sender, instance: auth_models.User, created: bool, **kwargs):
-    breakpoint()
+def create_user_artisan_forum_profile(sender, instance: auth_models.User, created: bool = False, **kwargs):
     if created:
         ArtisanForumProfile.objects.create(
             profile_user=instance,
@@ -101,16 +100,16 @@ def create_user_artisan_forum_profile(sender, instance: auth_models.User, create
     except (exceptions.ObjectDoesNotExist, exceptions.FieldError) as e:
         logger.error("Error saving ArtisanForumProfile : {0}".format(e))
 
-@receiver(signals.post_save, sender=auth_models.User)
-def save_user_artisan_forum_profile(sender, instance: auth_models.User, **kwargs):
-    breakpoint()
-    try:
-        instance.profile.save()
-    except (exceptions.ObjectDoesNotExist, exceptions.FieldError) as e:
-        logger.error("Error saving ArtisanForumProfile : {0}".format(e))
+# @receiver(signals.post_save, sender=auth_models.User)
+# def save_user_artisan_forum_profile(sender, instance: auth_models.User, **kwargs):
+#     breakpoint()
+#     try:
+#         instance.profile.save()
+#     except (exceptions.ObjectDoesNotExist, exceptions.FieldError) as e:
+#         logger.error("Error saving ArtisanForumProfile : {0}".format(e))
 
-signals.pre_save.connect(create_user_artisan_forum_profile, sender=auth_models.User)
-signals.pre_save.connect(save_user_artisan_forum_profile, sender=auth_models.User)
+signals.post_save.connect(create_user_artisan_forum_profile, sender=auth_models.User)
+#signals.pre_save.connect(save_user_artisan_forum_profile, sender=auth_models.User)
 
 """
     Custom signal to delete underlying filesystem image file

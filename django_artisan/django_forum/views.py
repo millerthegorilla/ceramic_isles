@@ -36,8 +36,7 @@ class ForumPostCreate(messages_views.MessageCreate):
     template_name = "django_forum/posts_and_comments/forum_post_create_form.html"
     form_class = forum_forms.ForumPost
 
-    def form_valid(self, form: forms.ModelForm, post: forum_models.ForumPost) -> http.HttpResponseRedirect:
-        breakpoint()
+    def form_valid(self, form: forum_forms.ForumPost, post: forum_models.ForumPost) -> http.HttpResponseRedirect:
         if post is None:
             post = form.save(commit=False)
         if 'subscribe' in self.request.POST:
@@ -161,6 +160,7 @@ class ForumPostView(messages_views.MessageView):
         site = site_models.Site.objects.get_current()
         context_data['site_url'] = (self.request.scheme or 'https') + '://' + site.domain
         context_data['comment_form'] = self.comment_form_class() # type: ignore
+        context_data['subscribed'] = self.object.subscribed_users.filter(username=self.request.user.username).count()
         return context_data
 
 def subscribe(request) -> http.JsonResponse:
@@ -291,7 +291,7 @@ class ForumProfile(profile_views.ProfileUpdate):
         context['avatar'] = forum_models.ForumProfile.objects.get(
             profile_user=self.request.user).avatar
         queryset = forum_models.ForumPost.objects.filter(
-            author=self.request.user.profile.display_name)
+            author=self.request.user)
         paginator = pagination.Paginator(queryset, 6)
         page_number = self.request.GET.get('page')
         page_obj = paginator.get_page(page_number)

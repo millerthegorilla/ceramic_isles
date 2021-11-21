@@ -93,15 +93,14 @@ class ForumProfile(profile_models.Profile):
     disconnect dummy profile
 """
 signals.post_save.disconnect(profile_models.create_user_profile, sender=auth_models.User)
-signals.post_save.disconnect(profile_models.save_user_profile, sender=auth_models.User)
+#signals.post_save.disconnect(profile_models.save_user_profile, sender=auth_models.User)
 """
     Custom signals to create and update user profile
 """
 
 
 @dispatch.receiver(signals.post_save, sender=auth_models.User)
-def create_user_forum_profile(sender: auth_models.User, instance: auth_models.User, created: bool, **kwargs) -> None:
-    breakpoint()
+def create_user_forum_profile(sender: auth_models.User, instance: auth_models.User, created: bool = False, **kwargs) -> None:
     if created:
         ForumProfile.objects.create(
             profile_user=instance,
@@ -115,15 +114,15 @@ def create_user_forum_profile(sender: auth_models.User, instance: auth_models.Us
     except (exceptions.ObjectDoesNotExist, exceptions.FieldError) as e:
         logger.error("Error saving forum profile : {0}".format(e))
 
-@dispatch.receiver(signals.post_save, sender=auth_models.User)
-def save_user_forum_profile(sender: auth_models.User, instance: auth_models.User, **kwargs) -> None:
-    try:
-        instance.profile.save()
-    except (exceptions.ObjectDoesNotExist, exceptions.FieldError) as e:
-        logger.error("Error saving forum profile : {0}".format(e))
+# @dispatch.receiver(signals.post_save, sender=auth_models.User)
+# def save_user_forum_profile(sender: auth_models.User, instance: auth_models.User, **kwargs) -> None:
+#     try:
+#         instance.profile.save()
+#     except (exceptions.ObjectDoesNotExist, exceptions.FieldError) as e:
+#         logger.error("Error saving forum profile : {0}".format(e))
 
 signals.post_save.connect(create_user_forum_profile, sender=auth_models.User)
-signals.post_save.connect(save_user_forum_profile, sender=auth_models.User)
+#signals.post_save.connect(save_user_forum_profile, sender=auth_models.User)
 
 
 @dispatch.receiver(signals.pre_delete, sender=ForumProfile)

@@ -117,7 +117,6 @@ class ArtisanForumPostCreate(forum_views.ForumPostCreate):
     form_class = artisan_forms.ArtisanForumPost
 
     def form_valid(self, form: forms.ModelForm) -> http.HttpResponseRedirect:
-        breakpoint()
         post = form.save(commit=False)
         return super().form_valid(form, post)
 
@@ -178,7 +177,7 @@ class ArtisanForumProfile(forum_views.ForumProfile):
         #              'outlets':self.request.user.profile.forumprofile.artisanforumprofile.outlets,
         #              'listed_member':self.request.user.profile.forumprofile.artisanforumprofile.listed_member})
         context['avatar'] = artisan_models.ArtisanForumProfile.objects.get(profile_user=self.request.user).avatar
-        queryset = forum_models.ForumPost.objects.filter(author=self.request.user.profile.display_name)
+        queryset = artisan_models.ArtisanForumPost.objects.filter(author=self.request.user)
         paginator = pagination.Paginator(queryset, 6)
         page_number = self.request.GET.get('page')
         page_obj = paginator.get_page(page_number)
@@ -268,12 +267,12 @@ class PersonalPage(generic.detail.DetailView):
         return context
 
     def get(self, request: http.HttpRequest, *args, **kwargs) -> typing.Union[http.HttpResponse, http.HttpResponseRedirect]:
-        self.object = self.get_object()
-        if self.object.display_personal_page or self.request.user.is_authenticated:
+        self.object = self.get_object() ## self.object is userprofile of requested person
+        if self.object.display_personal_page or self.object.profile_user == self.request.user:
             context = self.get_context_data(object=self.object)
             return self.render_to_response(context)
         else:
-            return redirect('django_artisan:landing_page')
+            return redirect(self.request.META.get('HTTP_REFERER'))
 
 
 
