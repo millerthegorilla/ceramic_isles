@@ -5,6 +5,7 @@ from django.urls import path, include
 from django_forum import views as forum_views
 
 from . import views as artisan_views
+from . import views_forum_post as forum_post_views
 from . import models as artisan_models
 
 admin.site.site_header = settings.SITE_NAME + ' admin'
@@ -14,6 +15,13 @@ admin.site.index_title = settings.SITE_NAME + ' administration'
 #admin.empty_value_display = '**Empty**'
 
 app_name = "django_artisan"
+
+post_patterns = [
+    path('update_post/', forum_views.ForumPostUpdate.as_view(),
+               name='post_update'),
+    path('delete_post/<int:pk>/', forum_post_views.DeletePost.as_view(), name="post_delete"),
+]
+
 urlpatterns = [
     path('', artisan_views.LandingPage.as_view(), name='landing_page'),
     path('about/', artisan_views.AboutPage.as_view(), name='about_view'),
@@ -29,4 +37,4 @@ urlpatterns = [
     path('forum/posts/', artisan_views.ArtisanForumPostList.as_view(model=artisan_models.ArtisanForumPost,
         template_name='django_artisan/posts_and_comments/forum_post_list.html'), name='post_list_view'),
     path('forum/<int:pk>/<slug:slug>/', artisan_views.ArtisanForumPostView.as_view(), name='post_view'),
-]
+] + post_patterns

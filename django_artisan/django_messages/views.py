@@ -12,10 +12,7 @@ from django.contrib.auth import mixins
 from . import models as messages_models
 from . import forms as messages_forms
 
-
 logger = logging.getLogger('django_artisan')
-
-
 
 def sanitize_post_text(text: str) -> utils.safestring.SafeString:
     return utils.safestring.mark_safe(bleach.clean(html.unescape(text),
@@ -26,7 +23,7 @@ def sanitize_post_text(text: str) -> utils.safestring.SafeString:
 
 
 @utils.decorators.method_decorator(cache.never_cache, name='dispatch')
-class MessageList(mixins.LoginRequiredMixin, generic.list.ListView):
+class MessageList(generic.list.ListView):
     model = messages_models.Message
     template_name = 'django_messages/message_list.html'
     paginate_by = 6
@@ -42,7 +39,7 @@ class MessageList(mixins.LoginRequiredMixin, generic.list.ListView):
 
 @utils.decorators.method_decorator(cache.never_cache, name='dispatch')
 @utils.decorators.method_decorator(cache.never_cache, name='get')
-class MessageView(mixins.LoginRequiredMixin, generic.DetailView):
+class MessageView(generic.DetailView):
     """
         TODO: replace the single view/many form processing with separate urls for
               each form action, pointing to individual views, each with its own form class,
@@ -61,17 +58,17 @@ class MessageView(mixins.LoginRequiredMixin, generic.DetailView):
                       { 'message': message })
 
 
-class MessageUpdate(mixins.LoginRequiredMixin, generic.detail.DetailView):
+class MessageUpdate(generic.detail.DetailView):
     model = messages_models.Message
     template_name = 'django_messages/message_detail.html'
 
 
-class MessageDelete(mixins.LoginRequiredMixin, generic.edit.DeleteView):
+class MessageDelete(generic.edit.DeleteView):
     model = messages_models.Message
     template_name = 'django_messages/message_detail.html'
 
 
-class MessageCreate(mixins.LoginRequiredMixin, generic.edit.CreateView):
+class MessageCreate(generic.edit.CreateView):
     model = messages_models.Message
     template_name_suffix = '_create_form'
     #template_name = 'django_messages/message_create_form.html'
@@ -80,17 +77,21 @@ class MessageCreate(mixins.LoginRequiredMixin, generic.edit.CreateView):
     def form_valid(self, form, message: messages_models.Message = None, **kwargs) -> http.HttpResponseRedirect:
         if message is None:
             message = form.save(commit=False)
-        breakpoint()
-        message.text = sanitize_post_text(message.text)
+        else:
+            passed_message=True
+        message.text = sanitize_post_text(message.text)       
         message.author = self.request.user
         message.slug = defaultfilters.slugify(
             message.text[:10] + '-' + str(utils.dateformat.format(utils.timezone.now(), 'Y-m-d H:i:s')))
         #super().form_valid(form)
         try:
             message.save()
-            return shortcuts.redirect(self.get_success_url(message))
         except db.IntegrityError as e:
             logger.error("Unable to create message : " + str(e))
+        if passed_message:
+            return message
+        else:
+            return shortcuts.redirect(self.get_success_url(message))
 
     def get_success_url(self, message, *args, **kwargs) -> str:
         return urls.reverse_lazy(

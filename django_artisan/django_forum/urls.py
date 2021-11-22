@@ -1,13 +1,14 @@
 from django import urls
 
-from . import views as forum_views 
+from . import views as forum_views
+from . import views_forum_post as forum_post_views 
 
 app_name = "django_forum"
 
 post_patterns = [
     urls.path('update_post/', forum_views.ForumPostUpdate.as_view(),
                name='post_update'),
-    
+    urls.path('delete_post/<int:pk>/', forum_post_views.DeletePost.as_view(), name="post_delete"),
 ]
 
 urlpatterns = [
@@ -29,7 +30,7 @@ urlpatterns = [
     urls.path('subscribe/', forum_views.subscribe, name='subscribe')
     # path('autocomplete/', autocomplete, name='autocomplete')  # experimental
     # autocomplete
-]
+] + post_patterns
 
 
 

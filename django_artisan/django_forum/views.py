@@ -5,6 +5,7 @@ from django_q import tasks
 from django import urls, forms, shortcuts, http, utils, conf
 from django.core import exceptions, mail, paginator as pagination
 from django.contrib import auth
+from django.contrib.auth import mixins
 from django.contrib.sites import models as site_models
 from django.db import models as db_models
 from django.template import defaultfilters
@@ -25,13 +26,13 @@ logger = logging.getLogger('django_artisan')
 
 
 # START POSTS AND COMMENTS
-class ForumPostUpdate(messages_views.MessageUpdate):
+class ForumPostUpdate(mixins.LoginRequiredMixin, messages_views.MessageUpdate):
     model = forum_models.ForumPost
     template_name = "django_forum/posts_and_comments/forum_post_detail.html"
     form_class = forum_forms.ForumPost
 
 
-class ForumPostCreate(messages_views.MessageCreate):
+class ForumPostCreate(mixins.LoginRequiredMixin, messages_views.MessageCreate):
     model = forum_models.ForumPost
     template_name = "django_forum/posts_and_comments/forum_post_create_form.html"
     form_class = forum_forms.ForumPost
@@ -39,9 +40,9 @@ class ForumPostCreate(messages_views.MessageCreate):
     def form_valid(self, form: forum_forms.ForumPost, post: forum_models.ForumPost) -> http.HttpResponseRedirect:
         if post is None:
             post = form.save(commit=False)
+        post = super().form_valid(form, post)
         if 'subscribe' in self.request.POST:
             post.subscribed_users.add(self.request.user)
-        super().form_valid(form, post)
         return shortcuts.redirect(self.get_success_url(post))
 
     def get_success_url(self, post: forum_models.ForumPost, *args, **kwargs) -> str:
@@ -185,7 +186,7 @@ def subscribe(request) -> http.JsonResponse:
 
 
 @utils.decorators.method_decorator(cache.never_cache, name='dispatch')
-class ForumPostList(messages_views.MessageList):
+class ForumPostList(mixins.LoginRequiredMixin, messages_views.MessageList):
     model = forum_models.ForumPost
     template_name = 'django_forum/posts_and_comments/forum_post_list.html'
     paginate_by = 5

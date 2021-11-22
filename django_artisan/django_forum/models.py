@@ -169,14 +169,12 @@ class ForumPost(messages_models.Message):
         return urls.reverse_lazy(
             'django_forum:post_view', args=(
                 self.id, self.slug,)) # type: ignore
-    
+
     def get_author_name(self) -> str:
-        #return self.author
         return self.author.profile.display_name
 
     def __str__(self) -> str:
         return f"{self.author.profile.display_name}"
-
 
 # @dispatch.receiver(signals.post_save, sender=ForumPost)
 # def save_author_on_post_creation(sender: ForumPost, instance: ForumPost, created, **kwargs) -> None:

@@ -11,3 +11,10 @@ class Message(soft_deletion.Model):
 	text: models.TextField = models.TextField(max_length=500)
 	created_at: models.DateTimeField = models.DateTimeField(auto_now_add=True)
 	slug: models.SlugField = models.SlugField(unique=True, db_index=True, max_length=80)
+
+	def get_author_name(self) -> str:
+	    return self.author.username
+
+	def __str__(self) -> str:
+	    breakpoint()
+	    return f"{self.author.username}"
