@@ -74,8 +74,8 @@ class ArtisanForumPostList(forum_views.ForumPostList):
         p_c = None
         is_a_search = False
         form = artisan_forms.ArtisanForumPostListSearch(request.GET)
-        if form.is_valid():
-            is_a_search = True
+        if form.is_valid(): ## could make a search object factory class to hide implementation of search,
+            is_a_search = True   ##  to allow search method (elasticsearch, postgres full text etc) to be changed
             terms = form.cleaned_data['q'].split(' ')
             if len(terms) > 1:
                 t = 'terms'

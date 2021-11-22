@@ -142,7 +142,9 @@ class ForumComment(messages_forms.Message):
 class ForumPostListSearch(forms.Form):
     date_end_of_last_month = datetime(utils.timezone.now().year, utils.timezone.now().month, 1) - timedelta(1)
     DATE_ANY = 0
-    DATE_TODAY = (utils.timezone.now(), utils.timezone.now() - timedelta(1))
+    DATE_TODAY = (utils.timezone.now(), datetime(utils.timezone.now().year, 
+                                                 utils.timezone.now().month, 
+                                                 utils.timezone.now().day, 0, 0, 0))
     DATE_WEEK = (utils.timezone.now(), utils.timezone.now() - timedelta(7))
     DATE_WEEK_LAST = (utils.timezone.now() - timedelta(7), utils.timezone.now() - timedelta(14))
     DATE_MONTH_LAST = (datetime(utils.timezone.now().year, utils.timezone.now().month - 1, 

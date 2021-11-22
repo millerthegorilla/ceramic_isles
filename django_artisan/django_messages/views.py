@@ -54,49 +54,6 @@ class MessageView(mixins.LoginRequiredMixin, generic.DetailView):
     template_name = 'django_messages/message.html'
     form_class = messages_forms.Message
 
-    # def post(self, *args, **kwargs) -> typing.Union[http.HttpResponse, http.HttpResponseRedirect]:
-    #     post = posts_and_comments_models.Post.objects.get(pk=kwargs['pk'])
-    #     if self.request.POST['type'] == 'post' and \
-    #        self.request.user.profile.display_name == post.post_author():
-    #         post.delete()
-    #         return shortcuts.redirect(
-    #             urls.reverse_lazy('django_posts_and_comments:post_list_view'))
-    #     elif self.request.POST['type'] == 'comment':
-    #         comment_form = self.form_class(data=self.request.POST)
-    #         if comment_form.is_valid():
-    #             new_comment = comment_form.save(commit=False)
-    #             new_comment.text = bleach.clean(
-    #                 html.unescape(new_comment.text), strip=True)
-    #             new_comment.post = post
-    #             new_comment.user_profile = self.request.user.profile
-    #             new_comment.save()
-    #             return shortcuts.redirect(post)
-    #         else:
-    #             comments = posts_and_comments_models.Comment.objects.filter(post=post).all()
-    #             return shortcuts.render(
-    #                 self.request, self.template_name, {
-    #                     'post': post, 'comments': comments, 'comment_form': comment_form})
-    #     elif self.request.POST['type'] == 'update':
-    #         post.text = self.request.POST['update-post']
-    #         post.save(update_fields=['text'])
-    #         return shortcuts.redirect(post)
-    #     elif self.request.POST['type'] == 'rem-comment':
-    #         posts_and_comments_models.Comment.objects.get(pk=self.request.POST['comment']).delete()
-    #         return shortcuts.redirect(post)
-    #     elif self.request.POST['type'] == 'comment-update':
-    #         try:
-    #             comment = posts_and_comments_models.Comment.objects.get(id=self.request.POST['id'])
-    #             comment.text = bleach.clean(html.unescape(
-    #                 self.request.POST['comment-update']), strip=True)
-    #             comment.save(update_fields=['text'])
-    #             return shortcuts.redirect(post)
-    #         except exceptions.ObjectDoesNotExist as e:
-    #             logger.error("Error accessing comment : {0}".format(e))
-    #             return shortcuts.redirect(post)
-    #     else:
-    #         logger.warn("request has no processable type")
-    #         return shortcuts.redirect('django_posts_and_comments:post_list_view')
-
     def get(self, *args, **kwargs) -> http.HttpResponse:
         message = messages_models.Message.objects.get(pk=kwargs['pk'])
         return shortcuts.render(self.request,
