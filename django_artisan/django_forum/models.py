@@ -194,12 +194,9 @@ class ForumComment(messages_models.Message):
         permissions = [('approve_comment', 'Approve Comment')]
 
     def save(self, force_insert=False, force_update=False, using=DEFAULT_DB_ALIAS, update_fields=None) -> None:
-        self.post_fk = self.forum_post
-        self.author = self.user_profile.profile_user
-        self.created_at = utils.timezone.now()
-        self.slug = defaultfilters.slugify(
-             self.text[:10] + str(utils.dateformat.format(self.created_at, 'Y-m-d H:i:s')))
+        breakpoint()
         super().save()
+        
 
     def get_absolute_url(self) -> str:
         return self.forum_post.get_absolute_url() + '#' + self.title

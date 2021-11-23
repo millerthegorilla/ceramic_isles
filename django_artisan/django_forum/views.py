@@ -79,7 +79,7 @@ class ForumPostView(messages_views.MessageView):
                 new_comment.text = bleach.clean(
                     html.unescape(new_comment.text), strip=True)
                 new_comment.forum_post = post
-                new_comment.user_profile = self.request.user.profile.forumprofile
+                #new_comment.user_profile = self.request.user.profile.forumprofile
                 new_comment.save()
                 sname: str = "subscribe_timeout" + str(uuid.uuid4())
                 tasks.schedule('django_forum.tasks.send_susbcribed_email',
@@ -162,6 +162,7 @@ class ForumPostView(messages_views.MessageView):
         context_data['site_url'] = (self.request.scheme or 'https') + '://' + site.domain
         context_data['comment_form'] = self.comment_form_class() # type: ignore
         context_data['subscribed'] = self.object.subscribed_users.filter(username=self.request.user.username).count()
+        context_data['comments'] = self.object.forum_comments.all()
         return context_data
 
 def subscribe(request) -> http.JsonResponse:

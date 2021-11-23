@@ -1,6 +1,9 @@
 import bleach, html, uuid
 
-from django import http, shortcuts, urls, views
+from django_q import tasks
+
+from django import http, shortcuts, urls, views, utils, conf
+
 from django.contrib.auth import mixins
 
 from . import models as forum_models
@@ -36,11 +39,13 @@ class SaveComment(mixins.LoginRequiredMixin, views.View):
         comment_form = self.form_class(data=self.request.POST)
         if comment_form.is_valid():
             new_comment = comment_form.save(commit=False)
+            new_comment.author = post.author
             new_comment.text = bleach.clean(
                 html.unescape(new_comment.text), strip=True)
             new_comment.forum_post = post
-            new_comment.user_profile = self.request.user.profile.forumprofile
+            #new_comment.user_profile = self.request.user.profile.forumprofile
             new_comment.save()
+            breakpoint()
             sname: str = "subscribe_timeout" + str(uuid.uuid4())
             tasks.schedule('django_forum.tasks.send_susbcribed_email',
                          name=sname,
