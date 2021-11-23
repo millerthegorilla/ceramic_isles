@@ -149,7 +149,7 @@ class ForumPostView(messages_views.MessageView):
             fail_silently=False,
         )
 
-    def get(self, request: http.HttpRequest, pk:int = None, slug:str = None) -> http.HttpResponse:
+    def get(self, request: http.HttpRequest, pk:int, slug:str) -> http.HttpResponse:
         self.object = self.get_object()
         context = self.get_context_data()
         return shortcuts.render(self.request,

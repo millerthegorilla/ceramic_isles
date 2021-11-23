@@ -70,7 +70,7 @@
             {% endfor %}
             <div class="row">
 	            <div class="card-body mx-auto">
-	                <form method="post" class="comment-form">
+	                <form method="post" action="{% url 'django_artisan:comment_save' artisanforumpost.id artisanforumpost.slug %}" class="comment-form">
 	                <input type="hidden" name="type" value="comment">
 	                  {% crispy comment_form %}
 	                  {% csrf_token %}

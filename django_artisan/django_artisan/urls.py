@@ -3,9 +3,9 @@ from django.contrib import admin
 from django.urls import path, include
 
 from django_forum import views as forum_views
+from django_forum import views_forum_post as forum_post_views
 
 from . import views as artisan_views
-from . import views_forum_post as forum_post_views
 from . import models as artisan_models
 
 admin.site.site_header = settings.SITE_NAME + ' admin'
@@ -19,7 +19,15 @@ app_name = "django_artisan"
 post_patterns = [
     path('update_post/', forum_views.ForumPostUpdate.as_view(),
                name='post_update'),
-    path('delete_post/<int:pk>/', forum_post_views.DeletePost.as_view(), name="post_delete"),
+    path('delete_post/<int:pk>/<slug:slug>/', forum_post_views.DeletePost.as_view(
+                                      model=artisan_models.ArtisanForumPost,
+                                      a_name='django_artisan'
+                                  ), name="post_delete"),
+    path('save_comment/<int:pk>/<slug:slug>/', forum_post_views.SaveComment.as_view(
+                              post_model=artisan_models.ArtisanForumPost,
+                              template_name='django_artisan/posts_and_comments/forum_post_detail.html',
+                              a_name=app_name), name="comment_save"),
+
 ]
 
 urlpatterns = [
@@ -36,5 +44,5 @@ urlpatterns = [
     path('forum/create_post/', artisan_views.ArtisanForumPostCreate.as_view(), name='post_create_view'),
     path('forum/posts/', artisan_views.ArtisanForumPostList.as_view(model=artisan_models.ArtisanForumPost,
         template_name='django_artisan/posts_and_comments/forum_post_list.html'), name='post_list_view'),
-    path('forum/<int:pk>/<slug:slug>/', artisan_views.ArtisanForumPostView.as_view(), name='post_view'),
+    path('forum/<int:pk>/<slug:slug>', artisan_views.ArtisanForumPostView.as_view(), name='post_view'),
 ] + post_patterns

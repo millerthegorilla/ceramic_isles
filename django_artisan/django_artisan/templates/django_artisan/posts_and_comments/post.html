@@ -94,7 +94,7 @@
 		          </div>
 		          <div class="modal-footer">
 		            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-		            <form action="{% url 'django_artisan:post_delete' artisanforumpost.id %}" method="post">
+		            <form action="{% url 'django_artisan:post_delete' artisanforumpost.id artisanforumpost.slug %}" method="post">
 		            {% csrf_token %}
 		            <input type="hidden" name="type" value="post">
 		            <button type="submit" class="btn btn-primary">Delete Post</button>
