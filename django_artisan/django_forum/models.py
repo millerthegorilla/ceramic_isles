@@ -195,13 +195,14 @@ class ForumComment(messages_models.Message):
         ordering = ['created_at']
         permissions = [('approve_comment', 'Approve Comment')]
 
-    def save(self, force_insert=False, force_update=False, using=DEFAULT_DB_ALIAS, update_fields=None) -> None:
+    def save(self, force_insert: bool = False, force_update: bool = False, 
+                   using: str = DEFAULT_DB_ALIAS, update_fields:list =None) -> None:
         self.post_fk = self.forum_post
-        self.author = self.user_profile.display_name
+        self.author = self.user_profile.profile_user
         self.created_at = utils.timezone.now()
         self.slug = defaultfilters.slugify(
              self.text[:10] + str(utils.dateformat.format(self.created_at, 'Y-m-d H:i:s')))
-        super().save()
+        super().save(force_insert, force_update, using, update_fields)
 
     def get_absolute_url(self) -> str:
         return self.forum_post.get_absolute_url() + '#' + self.title
@@ -210,7 +211,7 @@ class ForumComment(messages_models.Message):
         return 'Comment'
 
     def get_author_name(self) -> str:
-        return self.author.user_profile.display_name
+        return self.author.profile.display_name
 
 # @dispatch.receiver(post_save, sender=ForumComment)
 # def save_author_on_comment_creation(sender: ForumComment, instance: ForumComment, created, **kwargs) -> None:

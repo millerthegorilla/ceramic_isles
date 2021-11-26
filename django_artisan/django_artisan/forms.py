@@ -30,6 +30,13 @@ class ArtisanForumPost(forum_forms.ForumPost):
 
     def __init__(self, user_name: str = None, post: artisan_models.ArtisanForumPost = None, *args, **kwargs) -> None:
         super().__init__(user_name=user_name, post=post, *args, **kwargs)
+        checked_string = ''
+        if post and user_name and post.subscribed_users.filter(
+                username=user_name).count():
+            checked_string = 'checked'
+        checkbox_string = '<input type="checkbox" id="subscribe_cb" name="subscribe" value="Subscribe" ' + \
+            checked_string + '> \
+                              <label for="subscribe_cb" class="tinfo">Subscribe to this post...</label><br>'
         self.helper.layout = layout.Layout(
             layout.Fieldset(
                 'Create your post...',

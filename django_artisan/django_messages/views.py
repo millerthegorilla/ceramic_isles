@@ -80,12 +80,10 @@ class MessageCreate(mixins.LoginRequiredMixin, generic.edit.CreateView):
     def form_valid(self, form, message: messages_models.Message = None, **kwargs) -> http.HttpResponseRedirect:
         if message is None:
             message = form.save(commit=False)
-        breakpoint()
         message.text = sanitize_post_text(message.text)
         message.author = self.request.user
         message.slug = defaultfilters.slugify(
             message.text[:10] + '-' + str(utils.dateformat.format(utils.timezone.now(), 'Y-m-d H:i:s')))
-        #super().form_valid(form)
         try:
             message.save()
             return shortcuts.redirect(self.get_success_url(message))

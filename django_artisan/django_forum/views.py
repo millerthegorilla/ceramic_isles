@@ -39,9 +39,9 @@ class ForumPostCreate(messages_views.MessageCreate):
     def form_valid(self, form: forum_forms.ForumPost, post: forum_models.ForumPost) -> http.HttpResponseRedirect:
         if post is None:
             post = form.save(commit=False)
+        super().form_valid(form, post)
         if 'subscribe' in self.request.POST:
             post.subscribed_users.add(self.request.user)
-        super().form_valid(form, post)
         return shortcuts.redirect(self.get_success_url(post))
 
     def get_success_url(self, post: forum_models.ForumPost, *args, **kwargs) -> str:
