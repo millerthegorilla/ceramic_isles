@@ -13,9 +13,7 @@ class Message(soft_deletion.Model):
     slug: models.SlugField = models.SlugField(unique=True, db_index=True, max_length=80)
 
     def get_author_name(self) -> str:
-        breakpoint()
         return self.author.username
 
     def __str__(self) -> str:
-        breakpoint()
         return f"{self.author.username}"

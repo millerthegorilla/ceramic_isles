@@ -1,15 +1,34 @@
-import bleach, html, uuid
+import bleach, html, logging, uuid
 
 from django_q import tasks
 
 from django import http, shortcuts, urls, views, utils, conf
-
 from django.contrib.auth import mixins
+
+from django_messages import views as messages_views
 
 from . import models as forum_models
 from . import forms as forum_forms
 
+logger = logging.getLogger('django_artisan')
 
+
+class ForumPostUpdate(mixins.LoginRequiredMixin, messages_views.MessageUpdate):
+    model = forum_models.ForumPost
+    a_name = 'django_forum'
+
+    def post(self, request: http.HttpRequest, 
+                   pk: int, slug:str, post:forum_models.ForumPost = None,
+                   updatefields:list = []) -> http.HttpResponseRedirect:
+        try:
+            if post is None:
+                post = self.model.objects.get(id=pk)
+            post.text = messages_views.sanitize_post_text(self.request.POST['update-post'])
+            post.save(update_fields=['text'] + updatefields)
+            return shortcuts.redirect(urls.reverse_lazy(self.a_name + ':post_view', args=[pk, slug]))
+        except self.model.DoesNotExist:
+            logger.error('post does not exist when updating post.')
+        
 class DeletePost(mixins.LoginRequiredMixin, views.View):
     http_method_names = ['post']
     model = forum_models.ForumPost
@@ -69,3 +88,6 @@ class SaveComment(mixins.LoginRequiredMixin, views.View):
                           'site_url': (self.request.scheme or 'https') + '://' + site.domain})
         pass
         return shortcuts.redirect(urls.reverse_lazy(self.a_name + ':post_view'))
+
+
+# class UpdateComment

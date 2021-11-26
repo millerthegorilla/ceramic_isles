@@ -7,6 +7,7 @@ from django_forum import views_forum_post as forum_post_views
 
 from . import views as artisan_views
 from . import models as artisan_models
+from . import views_forum_post as artisan_forum_post_views
 
 admin.site.site_header = settings.SITE_NAME + ' admin'
 admin.site.site_title = settings.SITE_NAME + ' admin'
@@ -17,17 +18,17 @@ admin.site.index_title = settings.SITE_NAME + ' administration'
 app_name = "django_artisan"
 
 post_patterns = [
-    path('update_post/', forum_views.ForumPostUpdate.as_view(),
-               name='post_update'),
+    path('update_post/<int:pk>/<slug:slug>/', artisan_forum_post_views.ArtisanForumPostUpdate.as_view(), 
+                                              name='post_update'),
     path('delete_post/<int:pk>/<slug:slug>/', forum_post_views.DeletePost.as_view(
                                       model=artisan_models.ArtisanForumPost,
-                                      a_name='django_artisan'
-                                  ), name="post_delete"),
+                                      a_name='django_artisan'),
+                                      name="post_delete"),
     path('save_comment/<int:pk>/<slug:slug>/', forum_post_views.SaveComment.as_view(
-                              post_model=artisan_models.ArtisanForumPost,
-                              template_name='django_artisan/posts_and_comments/forum_post_detail.html',
-                              a_name=app_name), name="comment_save"),
-
+                                      post_model=artisan_models.ArtisanForumPost,
+                         template_name='django_artisan/posts_and_comments/forum_post_detail.html',
+                                      a_name=app_name),
+                                      name="comment_save"),
 ]
 
 urlpatterns = [

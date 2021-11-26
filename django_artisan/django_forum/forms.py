@@ -119,7 +119,6 @@ class ForumComment(messages_forms.Message):
         fields = messages_forms.Message.Meta.fields
 
     def __init__(self, *args, **kwargs) -> None:
-        breakpoint()
         super().__init__(*args, **kwargs)
         self.helper.layout = layout.Layout(
             layout.Fieldset(

@@ -15,7 +15,6 @@ class Message(forms.ModelForm):
         # }
 
     def __init__(self, *args, **kwargs) -> None:
-        breakpoint()
         super().__init__(*args, **kwargs)
         self.helper = helper.FormHelper()
         self.helper.layout = layout.Layout(

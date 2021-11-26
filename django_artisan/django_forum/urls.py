@@ -6,10 +6,10 @@ from . import views_forum_post as forum_post_views
 app_name = "django_forum"
 
 post_patterns = [
-    urls.path('update_post/', forum_views.ForumPostUpdate.as_view(),
+    urls.path('update_post/<int:pk>/<slug:slug>/', forum_post_views.ForumPostUpdate.as_view(),
                name='post_update'),
     urls.path('delete_post/<int:pk>/', forum_post_views.DeletePost.as_view(), name="post_delete"),
-    urls.path('save_comment/', forum_post_views.SaveComment.as_view(), name="comment_save"),
+    urls.path('save_comment/<int:pk>/<slug:slug>/', forum_post_views.SaveComment.as_view(), name="comment_save"),
 ]
 
 urlpatterns = [

@@ -39,7 +39,7 @@
 				    {% endif %}
 				    {% if artisanforumpost.author.profile.display_name == user.profile.display_name %}
 					    <div class="ms-auto">
-			    		    <form method="post">
+			    		    <form method="post" action="{% url 'django_artisan:post_update' artisanforumpost.pk artisanforumpost.slug %}">
 			    		    	{% csrf_token %}
 			    		    	<div id="post-edit-div">
 			    		    		<input type="textarea" name="update-post" class="update-form-text"></input>

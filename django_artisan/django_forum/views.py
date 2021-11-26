@@ -26,11 +26,6 @@ logger = logging.getLogger('django_artisan')
 
 
 # START POSTS AND COMMENTS
-class ForumPostUpdate(mixins.LoginRequiredMixin, messages_views.MessageUpdate):
-    model = forum_models.ForumPost
-    template_name = "django_forum/posts_and_comments/forum_post_detail.html"
-    form_class = forum_forms.ForumPost
-
 
 class ForumPostCreate(mixins.LoginRequiredMixin, messages_views.MessageCreate):
     model = forum_models.ForumPost
