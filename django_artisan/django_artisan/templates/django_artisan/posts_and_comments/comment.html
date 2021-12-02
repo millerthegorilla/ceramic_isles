@@ -92,6 +92,8 @@
 					  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
 					  <form method="post" action="{% url 'django_artisan:comment_delete' %}">
 						{% csrf_token %}
+						<input id="post-id" type="hidden" name="post-id" value="{{ artisanforumpost.id }}">
+						<input id="post-slug" type="hidden" name="post-slug" value="{{ artisanforumpost.slug }}">
 						<input id="rem-comment-slug" type="hidden" name="comment-slug" value="">
 						<input id="rem-comment-id" type="hidden" name="comment-id" value="">
 						<button type="submit" class="btn btn-primary">Delete Comment</button>

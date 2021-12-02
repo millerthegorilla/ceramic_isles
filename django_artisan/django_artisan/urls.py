@@ -29,15 +29,15 @@ post_patterns = [
                                    name="post_delete"),
      path('create_comment/<int:pk>/<slug:slug>/', forum_post_views.CreateComment.as_view(
                                         post_model=artisan_models.ArtisanForumPost,
-                                        comment_model=artisan_models.ArtisanForumComment,
-                                        form_class=artisan_forms.ArtisanForumComment,
+                                        comment_model=forum_models.ForumComment,
                          template_name='django_artisan/posts_and_comments/forum_post_detail.html',
                                         a_name=app_name),
                                    name="comment_create"),
      path('delete_comment/', 
                          forum_post_views.DeleteComment.as_view( 
                                         a_name='django_artisan',
-                                        model=artisan_models.ArtisanForumComment),
+                                        post_model=artisan_models.ArtisanForumPost,
+                                        comment_model=forum_models.ForumComment),
                                    name='comment_delete'),
 ]
 

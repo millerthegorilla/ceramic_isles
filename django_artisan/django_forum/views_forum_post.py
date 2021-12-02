@@ -91,22 +91,26 @@ class CreateComment(mixins.LoginRequiredMixin, views.View):
                           'comments': comments,
                           'comment_form': comment_form,
                           'site_url': (self.request.scheme or 'https') + '://' + site.domain})
-        pass
-        return shortcuts.redirect(urls.reverse_lazy(self.a_name + ':post_view'))
+        return shortcuts.redirect(urls.reverse_lazy(self.a_name + ':post_view', 
+                                                    args=[post.id, post.slug]))
 
 
 class DeleteComment(mixins.LoginRequiredMixin, views.View):
     http_method_names = ['post']
-    model = forum_models.ForumComment
+    post_model = forum_models.ForumPost
+    comment_model = forum_models.ForumComment
     a_name = 'django_forum'
 
     def post(self, request: http.HttpRequest) -> http.HttpResponseRedirect:
-        comment = self.model.objects.get(id=request.POST['comment-id'],
-                                         slug=request.POST['comment-slug'])
+        comment = self.comment_model.objects.get(id=request.POST['comment-id'],
+                                                 slug=request.POST['comment-slug'])
+        post = self.post_model.objects.get(id=request.POST['post-id'], 
+                                           slug=request.POST['post-slug'])
         if comment.author == request.user:
             try:
                 comment.delete()
             except self.model.DoesNotExist:
                 logger.warn('the model you tried to delete does not exist')
 
-        return shortcuts.redirect(comment)
+        return shortcuts.redirect(urls.reverse_lazy(self.a_name + ':post_view',
+                                                    args=[post.id, post.slug]))
