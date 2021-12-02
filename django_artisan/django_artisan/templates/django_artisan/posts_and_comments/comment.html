@@ -20,7 +20,7 @@
                             {% else %}
                                 <div>This comment has been reported and is awaiting moderation</div>
                             {% endif%}
-                            {% if comment.author == user_display_name %}
+                            {% if comment.author == request.user %}
                             <div id="comment-form-buttons-{{ forloop.counter }}" class="comment-form-buttons">
                             	<form method="post" id="comment-update-form">
                             	{% csrf_token %}
@@ -58,46 +58,46 @@
 		                            {{ comment.created_at }}
                                 </span>
                             </div>
-			                {% if comment.author == user_display_name %}
+			                {% if comment.author == request.user %}
 		                    <div id="comment-modify-btns-{{ forloop.counter }}" class="d-flex justify-content-end">
-			                	<a href="#" class="tinfo col-auto me-3" data-bs-toggle="modal" data-bs-target="#commentModal" data-bs-whatever="{{comment.id}}">Delete Comment</a>
+			                	<a href="#" class="tinfo col-auto me-3" data-bs-toggle="modal" data-bs-target="#commentModal" data-bs-comment-id="{{comment.id}}" data-bs-comment-slug="{{comment.slug}}">Delete Comment</a>
 			                	<a id="{{ forloop.counter }}" class="comment-edit tinfo col-auto" href="#">Edit Comment</a>
 				             </div>
 				            {% endif %}
 				        </div>
 			        </div>
-        	    </div>
+        	  </div>
             {% endfor %}
             <div class="row">
 	            <div class="card-body mx-auto">
-	                <form method="post" action="{% url 'django_artisan:comment_save' artisanforumpost.id artisanforumpost.slug %}" class="comment-form">
+	                <form method="post" action="{% url 'django_artisan:comment_create' artisanforumpost.id artisanforumpost.slug %}" class="comment-form">
 	                <input type="hidden" name="type" value="comment">
 	                  {% crispy comment_form %}
 	                  {% csrf_token %}
 	                </form>
 	            </div>
             </div>
-            <!-- Confirm Delete Comment Modal -->
+			<!-- Confirm Delete Comment Modal -->
             <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
-              <div class="modal-dialog">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title" id="commentModalLabel">Confirm Comment Deletion</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                  </div>
-                  <div class="modal-body">
-                    <h4>Warning!</h4><p>You are about to delete this Comment.  This action cannot be undone!  Proceed carefully...</p>
-                  </div>
-                  <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <form method="post">
-                    {% csrf_token %}
-                    <input type="hidden" name="type" value="rem-comment">
-                    <input id="rem-comment" type="hidden" name="comment" value="">
-                    <button type="submit" class="btn btn-primary">Delete Comment</button>
-                    </form>
-                  </div>
-                </div>
-              </div>
-            </div>
+				<div class="modal-dialog">
+				  <div class="modal-content">
+					<div class="modal-header">
+					  <h5 class="modal-title" id="commentModalLabel">Confirm Comment Deletion</h5>
+					  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+					  <h4>Warning!</h4><p>You are about to delete this Comment.  This action cannot be undone!  Proceed carefully...</p>
+					</div>
+					<div class="modal-footer">
+					  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+					  <form method="post" action="{% url 'django_artisan:comment_delete' %}">
+						{% csrf_token %}
+						<input id="rem-comment-slug" type="hidden" name="comment-slug" value="">
+						<input id="rem-comment-id" type="hidden" name="comment-id" value="">
+						<button type="submit" class="btn btn-primary">Delete Comment</button>
+					  </form>
+					</div>
+				  </div>
+				</div>
+			  </div>
         </div>

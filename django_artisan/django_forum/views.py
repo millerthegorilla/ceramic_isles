@@ -60,7 +60,6 @@ class ForumPostView(messages_views.MessageView):
     template_name: str = 'django_forum/posts_and_comments/forum_post_detail.html'
     form_class: forum_forms.ForumPost = forum_forms.ForumPost
     comment_form_class: forum_forms.ForumComment = forum_forms.ForumComment
-    #extra_context = { 'site_url':Site.objects.get_current().domain }
 
     def post(self, *args, **kwargs) -> typing.Union[http.HttpResponse, http.HttpResponseRedirect]:
         post = self.model.objects.get(pk=kwargs['pk'])

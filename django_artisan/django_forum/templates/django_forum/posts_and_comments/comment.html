@@ -15,7 +15,7 @@
                             {% else %}
                                 <div>This comment has been reported and is awaiting moderation</div>
                             {% endif%}
-                            {% if comment.author == user_display_name %}
+                            {% if comment.author == request.user %}
                             <div id="comment-form-buttons-{{ forloop.counter }}" class="comment-form-buttons">
                             	<form method="post" id="comment-update-form">
                             	{% csrf_token %}
@@ -56,9 +56,9 @@
 		                            {{ comment.created_at }}
 		                        </span>
 		                    </div>
-			                {% if comment.author == user_display_name %}
+			                {% if comment.author == request.user %}
 		                    <div id="comment-modify-btns-{{ forloop.counter }}" class="col-auto">
-			                	<a href="#" class="tinfo" data-bs-toggle="modal" data-bs-target="#commentModal" data-bs-whatever="{{comment.id}}">Delete Comment</a>
+			                	<a href="#" class="tinfo" data-bs-toggle="modal" data-bs-target="commentModal" data-bs-comment-id="{{comment.id}}" data-bs-comment-slug="{{comment.slug}}">Delete Comment</a>
 			                	<a id="{{ forloop.counter }}" class="comment-edit tinfo" href="#">Edit Comment</a>
 				             </div>
 				            {% endif %}
@@ -68,7 +68,7 @@
             {% endfor %}
             <div class="row">
 	            <div class="card-body mx-auto">
-	                <form method="post" action="{% url 'django_forum:comment_save' forumpost.id forumpost.slug %}" class="mt-3">
+	                <form method="post" action="{% url 'django_forum:comment_create' forumpost.id forumpost.slug %}" class="mt-3">
 	                <input type="hidden" name="type" value="comment">
 	                  {% crispy comment_form %}
 	                  {% csrf_token %}
@@ -88,11 +88,11 @@
                   </div>
                   <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <form method="post">
-                    {% csrf_token %}
-                    <input type="hidden" name="type" value="rem-comment">
-                    <input id="rem-comment" type="hidden" name="comment" value="">
-                    <button type="submit" class="btn btn-primary">Delete Comment</button>
+                    <form id="delete_form" method="post" action="{% url 'django_forum:comment_delete' %}">
+						{% csrf_token %}
+						<input id="rem-comment-slug" type="hidden" name="comment-slug" value="">
+						<input id="rem-comment-id" type="hidden" name="comment-id" value="">
+						<button type="submit" class="btn btn-primary">Delete Comment</button>
                     </form>
                   </div>
                 </div>

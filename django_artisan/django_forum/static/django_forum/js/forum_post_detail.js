@@ -1,50 +1,43 @@
-
-$(document).ready(function () {
-
-$("#id_text").keyup(function(){
-  $("#count").text("...characters left: " + (500 - $(this).val().length));
-});
-
 function showEditor() {
-	$('.update-form-text').val($('#textarea').html())
-	$('#post-edit-div').show();
-	tinymce.editors[0].show();
-	$('#textarea').hide()
-	$('#modify-post-btns').hide();
-	
-	$('#editor-cancel-btn').click(function(){
-		tinymce.editors[0].hide();
-		$('.update-form-text').hide()
-		$('#post-edit-div').hide()
-		$('#textarea').html($('.update-form-text').val())
-		$('#textarea').show()
-	    $('#modify-post-btns').show();
-	});
+  $('.update-form-text').val($('#textarea').html())
+  $('#post-edit-div').show();
+  tinymce.editors[0].show();
+  $('#textarea').hide()
+  $('#modify-post-btns').hide();
+  
+  $('#editor-cancel-btn').click(function(){
+    tinymce.editors[0].hide();
+    $('.update-form-text').hide()
+    $('#post-edit-div').hide()
+    $('#textarea').html($('.update-form-text').val())
+    $('#textarea').show()
+      $('#modify-post-btns').show();
+  });
 }
 
 function getCookie(name) {
-var cookieValue = null;
-if (document.cookie && document.cookie != '') {
-    var cookies = document.cookie.split(';');
-    for (var i = 0; i < cookies.length; i++) {
-        var cookie = jQuery.trim(cookies[i]);
-        // Does this cookie string begin with the name we want?
-        if (cookie.substring(0, name.length + 1) == (name + '=')) {
-            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-            break;
-        }
-    }
-}
-    return cookieValue;
+  var cookieValue = null;
+  if (document.cookie && document.cookie != '') {
+      var cookies = document.cookie.split(';');
+      for (var i = 0; i < cookies.length; i++) {
+          var cookie = jQuery.trim(cookies[i]);
+          // Does this cookie string begin with the name we want?
+          if (cookie.substring(0, name.length + 1) == (name + '=')) {
+              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+              break;
+          }
+      }
+  }
+  return cookieValue;
 }
 
 function showUpdateComment(id) {
-	//$("textarea[id='#comment-textarea-" + id + "']").val($('#comment-text-' + id).html().trim())
-	$("#comment-textarea-" + id).val($('#comment-text-' + id).text().trim())
-	$('#comment-textarea-' + id).show()
-	$('#comment-text-' + id).hide()
-	$('#comment-form-buttons-' + id).show()
-    $('#comment-modify-btns-' + id).hide()
+  //$("textarea[id='#comment-textarea-" + id + "']").val($('#comment-text-' + id).html().trim())
+  $("#comment-textarea-" + id).val($('#comment-text-' + id).text().trim())
+  $('#comment-textarea-' + id).show()
+  $('#comment-text-' + id).hide()
+  $('#comment-form-buttons-' + id).show()
+  $('#comment-modify-btns-' + id).hide()
 }
 
 function hideUpdateComment(id) {
@@ -61,8 +54,14 @@ function onInstanceInit(editor) {
     $('#textarea').show()
 }
 
-	$('.update-form-text').hide();
+$(document).ready(function () {
+
+  $("#id_text").keyup(function(){
+    $("#count").text("...characters left: " + String(500 - $(this).val().length));
+  });
+
 	$('#post-edit-div').hide();
+	$('.update-form-text').hide();
 	$('#comment-textarea').hide();
 	$('.comment-form-buttons').hide();
 	$('#editor-btn').click(function(){
@@ -101,11 +100,18 @@ function onInstanceInit(editor) {
 	});
 	//tinymce.editors[0].hide()
   var commentModal = document.getElementById('commentModal')
-  commentModal.addEventListener('show.bs.modal', function (event) {
-    var button = event.relatedTarget
-    var value_val = button.getAttribute('data-bs-whatever')
-    $('#rem-comment').attr('value', value_val)
-  })
+  if (commentModal != null)
+  {
+    console.assert(commentModal)
+    commentModal.addEventListener('show.bs.modal', function (event) {
+      var button = event.relatedTarget
+      console.log(button)
+      var comment_slug_value = button.getAttribute('data-bs-comment-slug')
+      var comment_id_value = button.getAttribute('data-bs-comment-id')
+      $('#rem-comment-slug').attr('value', comment_slug_value)
+      $('#rem-comment-id').attr('value', comment_id_value)
+    })
+  }
   $('#subscribed_cb').change(function() {
     parts = $(location).attr('href').split('/');
     var lastSegment = parts.pop() || parts.pop();
@@ -130,4 +136,5 @@ function onInstanceInit(editor) {
     text='Subscribe to this thread';
   }
   $("label[for='subscribed_cb']").text(text);
+
 });

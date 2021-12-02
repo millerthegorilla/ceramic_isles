@@ -4,6 +4,8 @@ from django_q import tasks
 
 from django import http, shortcuts, urls, views, utils, conf
 from django.contrib.auth import mixins
+from django.template import defaultfilters
+from django.db.models import F
 
 from django_messages import views as messages_views
 
@@ -45,7 +47,7 @@ class DeletePost(mixins.LoginRequiredMixin, views.View):
         return shortcuts.redirect(urls.reverse_lazy(self.a_name + ':post_list_view'))
 
 
-class SaveComment(mixins.LoginRequiredMixin, views.View):
+class CreateComment(mixins.LoginRequiredMixin, views.View):
     http_method_names: list = ['post']
     post_model: forum_models.ForumPost = forum_models.ForumPost
     comment_model: forum_models.ForumComment = forum_models.ForumComment
@@ -61,10 +63,13 @@ class SaveComment(mixins.LoginRequiredMixin, views.View):
             new_comment.author = post.author
             new_comment.text = bleach.clean(
                 html.unescape(new_comment.text), strip=True)
+            new_comment.slug = defaultfilters.slugify(uuid.uuid4())
             new_comment.forum_post = post
             #new_comment.user_profile = self.request.user.profile.forumprofile
             new_comment.save()
-            breakpoint()
+            new_comment.slug = defaultfilters.slugify(post.slug + '_comment_' 
+                               + str(new_comment.created_at or utils.timezone.now()))
+            new_comment.save(update_fields=['slug'])
             sname: str = "subscribe_timeout" + str(uuid.uuid4())
             tasks.schedule('django_forum.tasks.send_susbcribed_email',
                          name=sname,
@@ -75,7 +80,7 @@ class SaveComment(mixins.LoginRequiredMixin, views.View):
                          comment_id=new_comment.id,
                          s_name=sname,
                          path_info=self.request.path_info)
-            return shortcuts.redirect(post)
+            return shortcuts.redirect(new_comment)
         else:
             site = site_models.Site.objects.get_current()
             comments = self.model.objects.filter(post_fk=post).all()
@@ -90,4 +95,18 @@ class SaveComment(mixins.LoginRequiredMixin, views.View):
         return shortcuts.redirect(urls.reverse_lazy(self.a_name + ':post_view'))
 
 
-# class UpdateComment
+class DeleteComment(mixins.LoginRequiredMixin, views.View):
+    http_method_names = ['post']
+    model = forum_models.ForumComment
+    a_name = 'django_forum'
+
+    def post(self, request: http.HttpRequest) -> http.HttpResponseRedirect:
+        comment = self.model.objects.get(id=request.POST['comment-id'],
+                                         slug=request.POST['comment-slug'])
+        if comment.author == request.user:
+            try:
+                comment.delete()
+            except self.model.DoesNotExist:
+                logger.warn('the model you tried to delete does not exist')
+
+        return shortcuts.redirect(comment)

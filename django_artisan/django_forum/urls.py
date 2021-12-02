@@ -7,9 +7,12 @@ app_name = "django_forum"
 
 post_patterns = [
     urls.path('update_post/<int:pk>/<slug:slug>/', forum_post_views.ForumPostUpdate.as_view(),
-               name='post_update'),
+                name='post_update'),
     urls.path('delete_post/<int:pk>/', forum_post_views.DeletePost.as_view(), name="post_delete"),
-    urls.path('save_comment/<int:pk>/<slug:slug>/', forum_post_views.SaveComment.as_view(), name="comment_save"),
+    urls.path('create_comment/<int:pk>/<slug:slug>/', forum_post_views.CreateComment.as_view(), 
+                name="comment_create"),
+    urls.path('delete_comment/', forum_post_views.DeleteComment.as_view(),
+                name='comment_delete'),
 ]
 
 urlpatterns = [

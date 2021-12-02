@@ -165,10 +165,10 @@ class ForumPost(messages_models.Message):
         permissions = [('approve_post', 'Approve Post')]
         messages_models.Message._meta.get_field('text').max_length = 3000
 
-    def get_absolute_url(self) -> str:
+    def get_absolute_url(self, a_name:str = 'django_forum') -> str:
         return urls.reverse_lazy(
-            'django_forum:post_view', args=(
-                self.id)) # type: ignore
+            a_name + ':post_view', 
+            args=[self.id, self.slug]) # type: ignore
 
     def get_author_name(self) -> str:
         return self.author.profile.display_name
@@ -193,13 +193,12 @@ class ForumComment(messages_models.Message):
         ordering = ['created_at']
         permissions = [('approve_comment', 'Approve Comment')]
 
-    def save(self, force_insert=False, force_update=False, using=DEFAULT_DB_ALIAS, update_fields=None) -> None:
-        breakpoint()
-        super().save()
-        
+    # def save(self, force_insert=False, force_update=False, using=DEFAULT_DB_ALIAS, update_fields=None) -> None:
+    #     breakpoint()
+    #     super().save()
 
     def get_absolute_url(self) -> str:
-        return self.forum_post.get_absolute_url() + '#' + self.title
+        return self.forum_post.get_absolute_url() + '#' + self.slug
 
     def get_category_display(self) -> str:
         return 'Comment'
