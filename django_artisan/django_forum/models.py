@@ -155,10 +155,10 @@ def auto_delete_avatar_on_delete(sender: ForumProfile, instance: ForumProfile, *
 
 class ForumPost(messages_models.Message):
     title: db_models.CharField = db_models.CharField(max_length=100, default='')
-    moderation_date: db_models.DateField = db_models.DateField(null=True, default=None, blank=True)
     pinned: db_models.SmallIntegerField = db_models.SmallIntegerField(default=0)
     subscribed_users: db_models.ManyToManyField = db_models.ManyToManyField(
         auth_models.User, blank=True, related_name="subscribed_posts")
+    commenting_locked: db_models.BooleanField = db_models.BooleanField(default=False)
 
     class Meta(messages_models.Message.Meta):
         ordering = ['-created_at']
@@ -187,7 +187,6 @@ class ForumComment(messages_models.Message):
     # author: models.CharField = models.CharField(default='', max_length=40)
     forum_post: db_models.ForeignKey = db_models.ForeignKey(
         ForumPost, on_delete=db_models.CASCADE, related_name="forum_comments")
-    moderation_date: db_models.DateField = db_models.DateField(null=True, default=None, blank=True)
 
     class Meta:
         ordering = ['created_at']

@@ -63,15 +63,16 @@ class ForumComment(soft_deletion.Admin):
 
 @admin.register(forum_models.ForumPost)
 class ForumPost(soft_deletion.Admin):
-    list_display = ('pinned', 'moderation_date', 'active', 'author',
+    list_display = ('commenting_locked', 'pinned', 'moderation_date', 'active', 'author',
                     'title', 'text', 'created_at', 'deleted_at')
-    list_filter = ('pinned', 'moderation_date', 'active',
+    list_filter = ('commenting_locked', 'pinned', 'moderation_date', 'active',
                    'created_at', 'author', 'deleted_at')
     search_fields = ('author', 'text', 'title')
 
-    actions = ['approve_post']
+    actions = ['approve_post', 'lock_commenting', 'unlock_commenting', 'unpin_post']
 
-    def approve_post(self, request: http.HttpRequest, queryset: db_models.QuerySet):
+    def approve_post(self, request: http.HttpRequest,
+                           queryset: db_models.QuerySet) -> None:
         idx = 0
         for q in queryset:
             q.moderation_date = None
@@ -89,12 +90,62 @@ class ForumPost(soft_deletion.Admin):
                           ) % idx, 
                           messages.SUCCESS)
 
-    # def pin_post(self, request: HttpRequest queryset):
-    #     self.message_user(request: HttpRequest ngettext(
-    #                 '%d post was approved.',
-    #                 '%d posts were approved.',
-    #                 updated,
-    #             ) % updated, messages.SUCCESS)
+    def lock_commenting(self, request: http.HttpRequest, 
+                            queryset: db_models.QuerySet) -> None:
+        idx = 0
+        for q in queryset:
+            q.commenting_locked = True
+            try:
+                q.save(update_fields=['commenting_locked'])
+                idx += 1
+            except Exception as e:
+                logger.error("Error locking comments : {0}".format(e))
+        
+        self.message_user(request,
+                          utils.translation.ngettext(
+                                'commenting on %d post was locked.',
+                                'commenting on %d posts was locked.',
+                                idx,
+                          ) % idx, 
+                          messages.SUCCESS)
+
+    def unlock_commenting(self, request: http.HttpRequest, 
+                              queryset: db_models.QuerySet) -> None:
+        idx = 0
+        for q in queryset:
+            q.commenting_locked = False
+            try:
+                q.save(update_fields=['commenting_locked'])
+                idx += 1
+            except Exception as e:
+                logger.error("Error unlocking comments : {0}".format(e))
+        
+        self.message_user(request,
+                          utils.translation.ngettext(
+                                'commenting on %d post was unlocked.',
+                                'commenting on %d posts was unlocked.',
+                                idx,
+                          ) % idx, 
+                          messages.SUCCESS)
+
+    def unpin_post(self, request: http.HttpRequest, 
+                         queryset: db_models.QuerySet) -> None:
+        idx = 0
+        for q in queryset:
+            q.pinned = 0
+            try:
+                q.save(update_fields=['pinned'])
+                idx += 1
+            except Exception as e:
+                logger.error("Error unpinning posts: {0}".format(e))
+        
+        self.message_user(request,
+                          utils.translation.ngettext(
+                                '%d post was unpinned.',
+                                '%d posts were unpinned.',
+                                idx,
+                          ) % idx, 
+                          messages.SUCCESS)
 
 
 # admin.site.unregister(Profile)

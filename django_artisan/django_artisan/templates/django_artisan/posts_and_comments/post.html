@@ -35,7 +35,7 @@
 					{% if not artisanforumpost.moderation_date %}
 				    <div id="textarea" class="col-auto">{{ artisanforumpost.text|safe }}</div>
 				    {% else %}
-				    <div>This post has been reported and is awaiting moderation.</div>
+				    <div>This post has been reported and is awaiting moderation.  Comments are locked until the post has been validated.</div>
 				    {% endif %}
 				    {% if artisanforumpost.author.profile.display_name == user.profile.display_name %}
 					    <div class="ms-auto">

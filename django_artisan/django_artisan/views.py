@@ -29,40 +29,6 @@ logger = logging.getLogger('django_artisan')
 
 
 @decorators.method_decorator(cache.never_cache, name='dispatch')
-@decorators.method_decorator(cache.never_cache, name='get')
-class ArtisanForumPostView(forum_views.ForumPostView):
-    model: artisan_models.ArtisanForumPost = artisan_models.ArtisanForumPost
-    slug_url_kwarg: str = 'slug'
-    slug_field: str = 'slug'
-    template_name: str = 'django_artisan/posts_and_comments/forum_post_detail.html'
-    form_class: artisan_forms.ArtisanForumPost = artisan_forms.ArtisanForumPost
-
-    def get_context_data(self, **kwargs):
-        context_data = super(ArtisanForumPostView, self).get_context_data(**kwargs)
-        category = self.object.get_category_display()
-        cat_text = ''
-        for i in [(cat.value, cat.label) for cat in conf.settings.CATEGORY]:
-            if i[1] == category:
-                cat_text = cat_text + '<option value="' + \
-                    str(i[0]) + '" selected>' + str(i[1]) + '</option>'
-            else:
-                cat_text = cat_text + '<option value="' + \
-                    str(i[0]) + '">' + str(i[1]) + '</option>'
-        location = self.object.get_location_display()
-        loc_text = ''
-        for i in [(loc.value, loc.label) for loc in conf.settings.LOCATION]:
-            if i[1] == location:
-                loc_text = loc_text + '<option value="' + \
-                    str(i[0]) + '" selected>' + str(i[1]) + '</option>'
-            else:
-                loc_text = loc_text + '<option value="' + \
-                    str(i[0]) + '">' + str(i[1]) + '</option>'
-        context_data['category_opts'] = cat_text
-        context_data['location_opts'] = loc_text
-        return context_data
-
-
-@decorators.method_decorator(cache.never_cache, name='dispatch')
 class ArtisanForumPostList(forum_views.ForumPostList):
     model = artisan_models.ArtisanForumPost
     template_name = 'django_forum/posts_and_comments/forum_post_list.html'
