@@ -1,7 +1,10 @@
 import logging
 
+import debug_toolbar
+
 from django.contrib import admin
 from django.urls import include, path
+
 from django_email_verification import urls as mail_urls
 from django_users import urls as users_app_urls
 from django_forum import urls as forum_urls
@@ -22,6 +25,7 @@ sitemaps = {'main': StaticView,
             'personalpage': PersonalPage}
 
 urlpatterns = [
+    path('__debug__/', include(debug_toolbar.urls)),
     path('users/accounts/register/', CustomRegister.as_view(), name='register'),
     path('', include(artisan_urls)),
     path('forum/', include(forum_urls)),
@@ -46,9 +50,5 @@ else:
                               document_root=settings.MEDIA_ROOT)
         urlpatterns += static(settings.STATIC_URL,
                               document_root=settings.STATIC_ROOT)
-        import debug_toolbar
-        urlpatterns = [
-            path('__debug__/', include(debug_toolbar.urls)),
-        ] + urlpatterns
     else:
         logger.info("Django is in production mode")

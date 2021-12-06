@@ -136,7 +136,6 @@ class ForumComment(messages_forms.Message):
         self.helper.form_id = 'id-post-create-form'
         self.helper.form_method = 'post'
         self.helper.form_class = 'col-auto'
-        self.helper.form_action = 'django_forum:post_view'
 
 ## TODO add choices field to search page
 class ForumPostListSearch(forms.Form):

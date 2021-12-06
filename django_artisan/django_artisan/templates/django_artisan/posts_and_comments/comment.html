@@ -9,7 +9,7 @@
 		                <div class="flex-column mx-auto">
 		                	{% if not comment.moderation_date %}
                                 <div class="d-flex">
-                                    <a href="/people/{{comment.author}}/">{% thumbnail comment.user_profile.forumprofile.avatar.image_file "40x40" crop="center" as im %}
+                                    <a href="/people/{{comment.author}}/">{% thumbnail comment.author.profile.forumprofile.avatar.image_file "40x40" crop="center" as im %}
                                         <img src="{{ im.url }}" height="{{ im.height }}" width="{{ im.width }}" class="rounded-circle me-1" value="image-{{ forloop.counter }}" title="{{comment.author}}"></img></a>
                                     {% endthumbnail %}
     		                	    <a class="col-1" href="{{request.path}}#{{comment.slug}}" id="{{ comment.slug }}"><h2 class="text-warning me-1">#</h2></a>
@@ -20,15 +20,17 @@
                             {% else %}
                                 <div>This comment has been reported and is awaiting moderation</div>
                             {% endif%}
-                            {% if comment.author == user_display_name %}
+                            {% if comment.author == request.user %}
                             <div id="comment-form-buttons-{{ forloop.counter }}" class="comment-form-buttons">
-                            	<form method="post" id="comment-update-form">
+                            	<form method="post" action="{% url 'django_artisan:comment_update' %}" id="comment-update-form">
                             	{% csrf_token %}
-                            	<input type="hidden" name="type" value="comment-update">
-                            	<input type="hidden" name="id" value="{{ comment.id }}">
+                            		<input id="post-id" type="hidden" name="post-id" value="{{ artisanforumpost.id }}">
+        							<input id="post-slug" type="hidden" name="post-slug" value="{{ artisanforumpost.slug }}">
+        							<input id="comment-slug" type="hidden" name="comment-slug" value="{{ comment.slug }}">
+        							<input id="comment-id" type="hidden" name="comment-id" value="{{ comment.id }}">
                             		<div class="row">
                             			<div class="col-auto">
-                                    		<textarea id="comment-textarea-{{ forloop.counter }}" wrap="hard" rows="6" cols="60" class="comment-textarea" name="comment-update"></textarea>
+                                    		<textarea id="comment-textarea-{{ forloop.counter }}" wrap="hard" rows="6" cols="60" class="comment-textarea" name="comment-text"></textarea>
                                     	</div>
                                     </div>
                                     <div class="row">
@@ -41,11 +43,13 @@
                             </div>
                             {% elif not comment.moderation_date %}
                             <div class="ms-auto">
-			                    <form method="post" id="form-report-comment">
+			                    <form method="post" action="{% url 'django_artisan:comment_report' %}" id="form-report-comment">
 			                    	{% csrf_token %}
 			                    	<div class="tinfo">
-			                            <input type="hidden" name="type" value="comment-report">
-			                            <input type="hidden" name="id" value="{{ comment.id }}">
+			                        <input id="post-id" type="hidden" name="post-id" value="{{ artisanforumpost.id }}">
+        							<input id="post-slug" type="hidden" name="post-slug" value="{{ artisanforumpost.slug }}">
+        							<input id="comment-slug" type="hidden" name="comment-slug" value="{{ comment.slug }}">
+        							<input id="comment-id" type="hidden" name="comment-id" value="{{ comment.id }}">
 			                            <a class="report-comment text-warning" href="#">Report Comment for Moderation</a>
 			                    	</div>
 			                    </form>
@@ -53,51 +57,64 @@
                             {% endif %}
                         </div>
                         <div class="row justify-content-end mb-3">
-                            <div class="col-auto">
-                                <span class="tinfo fs-6 font-weight-normal">
-		                            {{ comment.created_at }}
-                                </span>
-                            </div>
-			                {% if comment.author == user_display_name %}
-		                    <div id="comment-modify-btns-{{ forloop.counter }}" class="d-flex justify-content-end">
-			                	<a href="#" class="tinfo col-auto me-3" data-bs-toggle="modal" data-bs-target="#commentModal" data-bs-whatever="{{comment.id}}">Delete Comment</a>
+			                {% if comment.author == request.user %}
+		                    <div id="comment-modify-btns-{{ forloop.counter }}" class="col-auto">
+			                	<a href="#" class="tinfo col-auto me-3" data-bs-toggle="modal" data-bs-target="#commentModal" data-bs-comment-id="{{comment.id}}" data-bs-comment-slug="{{comment.slug}}">Delete Comment</a>
 			                	<a id="{{ forloop.counter }}" class="comment-edit tinfo col-auto" href="#">Edit Comment</a>
-				             </div>
+				            </div>
 				            {% endif %}
 				        </div>
+	                    <div class="row justify-content-end">
+	                        <span class="col-auto tinfo fs-6 font-weight-normal">
+	                                {{ comment.created_at }}
+	                        </span>
+	                    </div>
 			        </div>
-        	    </div>
+        	  </div>
             {% endfor %}
+            {% if artisanforumpost.commenting_locked == False and  artisanforumpost.moderation_date is None %}
             <div class="row">
 	            <div class="card-body mx-auto">
-	                <form method="post" class="comment-form">
+	                <form method="post" action="{% url 'django_artisan:comment_create' artisanforumpost.id artisanforumpost.slug %}" class="comment-form">
 	                <input type="hidden" name="type" value="comment">
 	                  {% crispy comment_form %}
 	                  {% csrf_token %}
 	                </form>
 	            </div>
             </div>
-            <!-- Confirm Delete Comment Modal -->
-            <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
-              <div class="modal-dialog">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title" id="commentModalLabel">Confirm Comment Deletion</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                  </div>
-                  <div class="modal-body">
-                    <h4>Warning!</h4><p>You are about to delete this Comment.  This action cannot be undone!  Proceed carefully...</p>
-                  </div>
-                  <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <form method="post">
-                    {% csrf_token %}
-                    <input type="hidden" name="type" value="rem-comment">
-                    <input id="rem-comment" type="hidden" name="comment" value="">
-                    <button type="submit" class="btn btn-primary">Delete Comment</button>
-                    </form>
-                  </div>
-                </div>
-              </div>
+            {% else %}
+            <div class="row tinfo mb-4">
+            	<div class="col-auto">
+	            	<div class="comment-headline">
+	            		Commenting has been locked for this post.
+	            	</div>
+            		Contact an admin if you disagree...
+            	</div>
             </div>
+            {% endif %}
+			<!-- Confirm Delete Comment Modal -->
+            <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
+				<div class="modal-dialog">
+				  <div class="modal-content">
+					<div class="modal-header">
+					  <h5 class="modal-title" id="commentModalLabel">Confirm Comment Deletion</h5>
+					  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+					  <h4>Warning!</h4><p>You are about to delete this Comment.  This action cannot be undone!  Proceed carefully...</p>
+					</div>
+					<div class="modal-footer">
+					  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+					  <form method="post" action="{% url 'django_artisan:comment_delete' %}">
+						{% csrf_token %}
+						<input id="post-id" type="hidden" name="post-id" value="{{ artisanforumpost.id }}">
+						<input id="post-slug" type="hidden" name="post-slug" value="{{ artisanforumpost.slug }}">
+						<input id="rem-comment-slug" type="hidden" name="comment-slug" value="">
+						<input id="rem-comment-id" type="hidden" name="comment-id" value="">
+						<button type="submit" class="btn btn-primary">Delete Comment</button>
+					  </form>
+					</div>
+				  </div>
+				</div>
+			  </div>
         </div>

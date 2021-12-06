@@ -52,6 +52,12 @@ class ArtisanForumPost(forum_forms.ForumPost):
         self.helper.form_action = 'django_artisan:post_create_view'
 
 
+# class ArtisanForumComment(forum_forms.ForumComment):
+#     class Meta(forum_forms.ForumComment.Meta):
+#         model = artisan_models.ArtisanForumComment
+#         fields = forum_forms.ForumComment.Meta.fields
+
+
 class ArtisanForumProfile(forum_forms.ForumProfile):
     image_file = safe_image_forms.SafeImageField(allowed_extensions=('jpg', 'png'),
                                                  check_content_type=True,

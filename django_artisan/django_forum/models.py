@@ -155,28 +155,26 @@ def auto_delete_avatar_on_delete(sender: ForumProfile, instance: ForumProfile, *
 
 class ForumPost(messages_models.Message):
     title: db_models.CharField = db_models.CharField(max_length=100, default='')
-    moderation_date: db_models.DateField = db_models.DateField(null=True, default=None, blank=True)
     pinned: db_models.SmallIntegerField = db_models.SmallIntegerField(default=0)
     subscribed_users: db_models.ManyToManyField = db_models.ManyToManyField(
         auth_models.User, blank=True, related_name="subscribed_posts")
+    commenting_locked: db_models.BooleanField = db_models.BooleanField(default=False)
 
     class Meta(messages_models.Message.Meta):
         ordering = ['-created_at']
         permissions = [('approve_post', 'Approve Post')]
         messages_models.Message._meta.get_field('text').max_length = 3000
 
-    def get_absolute_url(self) -> str:
+    def get_absolute_url(self, a_name:str = 'django_forum') -> str:
         return urls.reverse_lazy(
-            'django_forum:post_view', args=(
-                self.id, self.slug,)) # type: ignore
-    
+            a_name + ':post_view', 
+            args=[self.id, self.slug]) # type: ignore
+
     def get_author_name(self) -> str:
-        #return self.author
         return self.author.profile.display_name
 
     def __str__(self) -> str:
         return f"{self.author.profile.display_name}"
-
 
 # @dispatch.receiver(signals.post_save, sender=ForumPost)
 # def save_author_on_post_creation(sender: ForumPost, instance: ForumPost, created, **kwargs) -> None:
@@ -189,23 +187,17 @@ class ForumComment(messages_models.Message):
     # author: models.CharField = models.CharField(default='', max_length=40)
     forum_post: db_models.ForeignKey = db_models.ForeignKey(
         ForumPost, on_delete=db_models.CASCADE, related_name="forum_comments")
-    moderation_date: db_models.DateField = db_models.DateField(null=True, default=None, blank=True)
 
     class Meta:
         ordering = ['created_at']
         permissions = [('approve_comment', 'Approve Comment')]
 
-    def save(self, force_insert: bool = False, force_update: bool = False, 
-                   using: str = DEFAULT_DB_ALIAS, update_fields:list =None) -> None:
-        self.post_fk = self.forum_post
-        self.author = self.user_profile.profile_user
-        self.created_at = utils.timezone.now()
-        self.slug = defaultfilters.slugify(
-             self.text[:10] + str(utils.dateformat.format(self.created_at, 'Y-m-d H:i:s')))
-        super().save(force_insert, force_update, using, update_fields)
+    # def save(self, force_insert=False, force_update=False, using=DEFAULT_DB_ALIAS, update_fields=None) -> None:
+    #     breakpoint()
+    #     super().save()
 
     def get_absolute_url(self) -> str:
-        return self.forum_post.get_absolute_url() + '#' + self.title
+        return self.forum_post.get_absolute_url() + '#' + self.slug
 
     def get_category_display(self) -> str:
         return 'Comment'
