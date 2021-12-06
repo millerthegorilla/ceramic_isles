@@ -39,6 +39,13 @@ post_patterns = [
                                         post_model=artisan_models.ArtisanForumPost,
                                         comment_model=forum_models.ForumComment),
                                    name='comment_delete'),
+     path('update_comment/', 
+                         forum_post_views.UpdateComment.as_view( 
+                                        a_name='django_artisan',
+                                        post_model=artisan_models.ArtisanForumPost,
+                                        comment_model=forum_models.ForumComment),
+                                   name='comment_update'),
+     
 ]
 
 urlpatterns = [

@@ -13,6 +13,8 @@ post_patterns = [
                 name="comment_create"),
     urls.path('delete_comment/', forum_post_views.DeleteComment.as_view(),
                 name='comment_delete'),
+    urls.path('update_comment/', forum_post_views.UpdateComment.as_view(),
+                name='comment_update'),
 ]
 
 urlpatterns = [

@@ -32,6 +32,7 @@ function getCookie(name) {
 }
 
 function showUpdateComment(id) {
+  console.log(id)
   //$("textarea[id='#comment-textarea-" + id + "']").val($('#comment-text-' + id).html().trim())
   $("#comment-textarea-" + id).val($('#comment-text-' + id).text().trim())
   $('#comment-textarea-' + id).show()

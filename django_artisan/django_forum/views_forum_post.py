@@ -114,3 +114,21 @@ class DeleteComment(mixins.LoginRequiredMixin, views.View):
 
         return shortcuts.redirect(urls.reverse_lazy(self.a_name + ':post_view',
                                                     args=[post.id, post.slug]))
+
+
+class UpdateComment(mixins.LoginRequiredMixin, views.View):
+    http_method_names = ['post']
+    comment_model = forum_models.ForumComment
+    post_model = forum_models.ForumPost
+    a_name = 'django_forum'
+    
+    def post(self, request:http.HttpRequest) -> http.HttpResponseRedirect:
+        comment = self.comment_model.objects.get(id=request.POST['comment-id'],
+                                                 slug=request.POST['comment-slug'])
+        post = self.post_model.objects.get(id=request.POST['post-id'], 
+                                           slug=request.POST['post-slug'])
+        comment.text = request.POST['comment-text']
+        comment.save(update_fields=['text'])
+        return shortcuts.redirect(urls.reverse_lazy(self.a_name + ':post_view',
+                                                    args=[post.id, post.slug])
+                                                    + '#' + comment.slug)
