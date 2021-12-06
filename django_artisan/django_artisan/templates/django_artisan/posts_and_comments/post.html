@@ -59,10 +59,11 @@
 	                {% else %}
 		                {% if not artisanforumpost.moderation_date and artisanforumpost.author.profile.display_name != user.profile.display_name %}
 		                <div class="ms-auto">
-		                    <form method="post" id="form-report-post">
+		                    <form method="post" action="{% url 'django_artisan:post_report' %}" id="form-report-post">
 		                    	{% csrf_token %}
+		                        <input id="post-id" type="hidden" name="post-id" value="{{ artisanforumpost.id }}">
+    							<input id="post-slug" type="hidden" name="post-slug" value="{{ artisanforumpost.slug }}">
 		                    	<div class="tinfo">
-		                            <input type="hidden" name="type" value="post-report">
 		                            <a class="report-post text-warning" href="#">Report Post for Moderation</a>
 		                    	</div>
 		                    </form>

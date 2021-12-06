@@ -43,11 +43,13 @@
                             </div>
                             {% elif not comment.moderation_date %}
                             <div class="ms-auto">
-			                    <form method="post" id="form-report-comment">
+			                    <form method="post" action="{% url 'django_artisan:comment_report' %}" id="form-report-comment">
 			                    	{% csrf_token %}
 			                    	<div class="tinfo">
-			                            <input type="hidden" name="type" value="comment-report">
-			                            <input type="hidden" name="id" value="{{ comment.id }}">
+			                        <input id="post-id" type="hidden" name="post-id" value="{{ artisanforumpost.id }}">
+        							<input id="post-slug" type="hidden" name="post-slug" value="{{ artisanforumpost.slug }}">
+        							<input id="comment-slug" type="hidden" name="comment-slug" value="{{ comment.slug }}">
+        							<input id="comment-id" type="hidden" name="comment-id" value="{{ comment.id }}">
 			                            <a class="report-comment text-warning" href="#">Report Comment for Moderation</a>
 			                    	</div>
 			                    </form>

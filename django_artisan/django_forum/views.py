@@ -127,22 +127,6 @@ class ForumPostView(messages_views.MessageView):
         else:
             return shortcuts.redirect('django_forum:post_list_view')
 
-    @staticmethod
-    def send_mod_mail(type: str) -> None:
-        mail.send_mail(
-            'Moderation for {0}'.format(type),
-            'A {0} has been created and requires moderation.  Please visit the {1} AdminPanel, and inspect the {0}'.format(
-                type,
-                conf.settings.SITE_NAME),
-            conf.settings.EMAIL_HOST_USER,
-            list(
-                auth.get_user_model().objects.filter(
-                    is_staff=True).values_list(
-                    'email',
-                    flat=True)),
-            fail_silently=False,
-        )
-
     def get(self, request: http.HttpRequest, pk:int, slug:str) -> http.HttpResponse:
         self.object = self.get_object()
         context = self.get_context_data()

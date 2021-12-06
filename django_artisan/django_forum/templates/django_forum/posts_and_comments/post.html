@@ -36,10 +36,9 @@
                 {% else %}
 	                {% if not forumpost.moderation_date and forumpost.author.profile.display_name != user.profile.display_name %}
 	                <div class="ms-auto">
-	                    <form method="post" id="form-report-post">
+	                    <form method="post" action="{% url 'django_forum:post_report' %}" id="form-report-post">
 	                    	{% csrf_token %}
 	                    	<div class="tinfo">
-	                            <input type="hidden" name="type" value="post-report">
 	                            <a class="report-post text-warning" href="#">Report Post for Moderation</a>
 	                    	</div>
 	                    </form>

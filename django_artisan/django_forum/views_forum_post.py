@@ -3,7 +3,8 @@ import bleach, html, logging, uuid
 from django_q import tasks
 
 from django import http, shortcuts, urls, views, utils, conf
-from django.contrib.auth import mixins
+from django.core import mail
+from django.contrib import auth
 from django.template import defaultfilters
 from django.db.models import F
 
@@ -15,7 +16,23 @@ from . import forms as forum_forms
 logger = logging.getLogger('django_artisan')
 
 
-class ForumPostUpdate(mixins.LoginRequiredMixin, messages_views.MessageUpdate):
+def send_mod_mail(type: str) -> None:
+    mail.send_mail(
+        'Moderation for {0}'.format(type),
+        'A {0} has been created and requires moderation.  Please visit the {1} AdminPanel, and inspect the {0}'.format(
+            type,
+            conf.settings.SITE_NAME),
+        conf.settings.EMAIL_HOST_USER,
+        list(
+            auth.get_user_model().objects.filter(
+                is_staff=True).values_list(
+                'email',
+                flat=True)),
+        fail_silently=False,
+    )
+
+
+class ForumPostUpdate(auth.mixins.LoginRequiredMixin, messages_views.MessageUpdate):
     model = forum_models.ForumPost
     a_name = 'django_forum'
 
@@ -31,7 +48,7 @@ class ForumPostUpdate(mixins.LoginRequiredMixin, messages_views.MessageUpdate):
         except self.model.DoesNotExist:
             logger.error('post does not exist when updating post.')
         
-class DeletePost(mixins.LoginRequiredMixin, views.View):
+class DeletePost(auth.mixins.LoginRequiredMixin, views.View):
     http_method_names = ['post']
     model = forum_models.ForumPost
     a_name = 'django_forum'
@@ -47,7 +64,7 @@ class DeletePost(mixins.LoginRequiredMixin, views.View):
         return shortcuts.redirect(urls.reverse_lazy(self.a_name + ':post_list_view'))
 
 
-class CreateComment(mixins.LoginRequiredMixin, views.View):
+class CreateComment(auth.mixins.LoginRequiredMixin, views.View):
     http_method_names: list = ['post']
     post_model: forum_models.ForumPost = forum_models.ForumPost
     comment_model: forum_models.ForumComment = forum_models.ForumComment
@@ -95,7 +112,7 @@ class CreateComment(mixins.LoginRequiredMixin, views.View):
                                                     args=[post.id, post.slug]))
 
 
-class DeleteComment(mixins.LoginRequiredMixin, views.View):
+class DeleteComment(auth.mixins.LoginRequiredMixin, views.View):
     http_method_names = ['post']
     post_model = forum_models.ForumPost
     comment_model = forum_models.ForumComment
@@ -116,7 +133,7 @@ class DeleteComment(mixins.LoginRequiredMixin, views.View):
                                                     args=[post.id, post.slug]))
 
 
-class UpdateComment(mixins.LoginRequiredMixin, views.View):
+class UpdateComment(auth.mixins.LoginRequiredMixin, views.View):
     http_method_names = ['post']
     comment_model = forum_models.ForumComment
     post_model = forum_models.ForumPost
@@ -127,8 +144,47 @@ class UpdateComment(mixins.LoginRequiredMixin, views.View):
                                                  slug=request.POST['comment-slug'])
         post = self.post_model.objects.get(id=request.POST['post-id'], 
                                            slug=request.POST['post-slug'])
-        comment.text = request.POST['comment-text']
-        comment.save(update_fields=['text'])
+        if comment.author == request.user:
+            comment.text = request.POST['comment-text']
+            comment.save(update_fields=['text'])
         return shortcuts.redirect(urls.reverse_lazy(self.a_name + ':post_view',
                                                     args=[post.id, post.slug])
                                                     + '#' + comment.slug)
+
+
+class ReportComment(auth.mixins.LoginRequiredMixin, views.View):
+    http_method_names = ['post']
+    comment_model = forum_models.ForumComment
+    post_model = forum_models.ForumPost
+    a_name = 'django_forum'
+    
+    def post(self, request:http.HttpRequest) -> http.HttpResponseRedirect:
+        comment = self.comment_model.objects.get(id=request.POST['comment-id'],
+                                                 slug=request.POST['comment-slug'])
+        post = self.post_model.objects.get(id=request.POST['post-id'], 
+                                           slug=request.POST['post-slug'])
+        breakpoint()
+        if comment.author != request.user:
+            comment.moderation_date = utils.timezone.now()
+            comment.save(update_fields=['moderation_date'])
+            send_mod_mail('Comment')
+        return shortcuts.redirect(urls.reverse_lazy(self.a_name + ':post_view',
+                                                    args=[post.id, post.slug])
+                                                    + '#' + comment.slug)
+
+
+class ReportPost(auth.mixins.LoginRequiredMixin, views.View):
+    http_method_names = ['post']
+    post_model = forum_models.ForumPost
+    a_name = 'django_forum'
+    
+    def post(self, request:http.HttpRequest) -> http.HttpResponseRedirect:
+        post = self.post_model.objects.get(id=request.POST['post-id'], 
+                                           slug=request.POST['post-slug'])
+        breakpoint()
+        if post.author != request.user:
+            post.moderation_date = utils.timezone.now()
+            post.save(update_fields=['moderation_date'])
+            send_mod_mail('Post')
+        return shortcuts.redirect(urls.reverse_lazy(self.a_name + ':post_view',
+                                                    args=[post.id, post.slug]))

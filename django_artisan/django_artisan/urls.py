@@ -45,7 +45,17 @@ post_patterns = [
                                         post_model=artisan_models.ArtisanForumPost,
                                         comment_model=forum_models.ForumComment),
                                    name='comment_update'),
-     
+     path('report_comment/', 
+                         forum_post_views.ReportComment.as_view( 
+                                        a_name='django_artisan',
+                                        post_model=artisan_models.ArtisanForumPost,
+                                        comment_model=forum_models.ForumComment),
+                                   name='comment_report'),
+     path('report_post/', 
+                         forum_post_views.ReportPost.as_view( 
+                                        a_name='django_artisan',
+                                        post_model=artisan_models.ArtisanForumPost),
+                                   name='post_report'),
 ]
 
 urlpatterns = [

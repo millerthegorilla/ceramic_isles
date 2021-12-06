@@ -15,6 +15,10 @@ post_patterns = [
                 name='comment_delete'),
     urls.path('update_comment/', forum_post_views.UpdateComment.as_view(),
                 name='comment_update'),
+    urls.path('report_comment/', forum_post_views.ReportComment.as_view(),
+                name='comment_report'),
+    urls.path('report_post/', forum_post_views.ReportPost.as_view(),
+                name='post_report'),
 ]
 
 urlpatterns = [
