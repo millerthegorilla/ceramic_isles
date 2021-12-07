@@ -81,15 +81,15 @@ class ForumProfile(profile_forms.Profile):
 
 # START POST AND COMMENTS
 
-class ForumPost(messages_forms.Message):
+class Post(messages_forms.Message):
     class Meta(messages_forms.Message.Meta):
-        model = forum_models.ForumPost
+        model = forum_models.Post
         fields = messages_forms.Message.Meta.fields + ['title']
         widgets = {'text': TinyMCE()}
         labels = {'category': 'Choose a category for your post...',
                   'location': 'Which island...?'}
 
-    def __init__(self, user_name: str = None, post: forum_models.ForumPost = None, *args, **kwargs) -> None:
+    def __init__(self, user_name: str = None, post: forum_models.Post = None, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         checked_string = ''
         if post and user_name and post.subscribed_users.filter(
@@ -113,9 +113,9 @@ class ForumPost(messages_forms.Message):
         self.helper.form_action = 'django_forum:post_create_view'
 
 
-class ForumComment(messages_forms.Message):
+class Comment(messages_forms.Message):
     class Meta:
-        model = forum_models.ForumComment
+        model = forum_models.Comment
         fields = messages_forms.Message.Meta.fields
 
     def __init__(self, *args, **kwargs) -> None:

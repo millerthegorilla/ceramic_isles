@@ -38,18 +38,18 @@ def send_mod_mail(type: str) -> None:
 
 @utils.decorators.method_decorator(cache.never_cache, name='dispatch')
 @utils.decorators.method_decorator(cache.never_cache, name='get')
-class ForumPostView(messages_views.MessageView):
+class PostView(messages_views.MessageView):
     """
         TODO: Replace superclass form processing if conditions with separate urls/views
               and overload them individually here, where necessary, instead of redefining
               the whole if clause.
     """
-    # model: forum_models.ForumPost = forum_models.ForumPost
+    # model: forum_models.Post = forum_models.Post
     # slug_url_kwarg: str = 'slug'
     # slug_field: str = 'slug'
     template_name: str = 'django_forum/posts_and_comments/forum_post_detail.html'
-    # form_class: forum_forms.ForumPost = forum_forms.ForumPost
-    comment_form_class: forum_forms.ForumComment = forum_forms.ForumComment
+    # form_class: forum_forms.Post = forum_forms.Post
+    comment_form_class: forum_forms.Comment = forum_forms.Comment
 
     # def post(self, *args, **kwargs) -> typing.Union[http.HttpResponse, http.HttpResponseRedirect]:
     #     post = self.model.objects.get(pk=kwargs['pk'])
@@ -78,7 +78,7 @@ class ForumPostView(messages_views.MessageView):
     #             return shortcuts.redirect(post)
     #         else:
     #             site = site_models.Site.objects.get_current()
-    #             comments = forum_models.ForumComment.objects.filter(post_fk=post).all()
+    #             comments = forum_models.Comment.objects.filter(post_fk=post).all()
     #             return shortcuts.render(self.request,
     #                          self.template_name,
     #                          {'comment_edit': True,
@@ -91,11 +91,11 @@ class ForumPostView(messages_views.MessageView):
     #         post.save(update_fields=['text', 'location', 'category'])
     #         return shortcuts.redirect(post)
     #     elif self.request.POST['type'] == 'rem-comment':
-    #         forum_models.ForumComment.objects.get(pk=self.request.POST['comment']).delete()
+    #         forum_models.Comment.objects.get(pk=self.request.POST['comment']).delete()
     #         return shortcuts.redirect(post)
     #     elif self.request.POST['type'] == 'comment-update':
     #         try:
-    #             comment = forum_models.ForumComment.objects.get(id=self.request.POST['id'])
+    #             comment = forum_models.Comment.objects.get(id=self.request.POST['id'])
     #             comment.text = bleach.clean(html.unescape(
     #                 self.request.POST['comment-update']), strip=True)
     #             comment.save(update_fields=['text'])
@@ -106,13 +106,13 @@ class ForumPostView(messages_views.MessageView):
     #     elif self.request.POST['type'] == 'post-report':
     #         post.moderation_date = utils.timezone.now()
     #         post.save(update_fields=['moderation_date'])
-    #         ForumPostView.send_mod_mail('Post')
+    #         PostView.send_mod_mail('Post')
     #         return shortcuts.redirect(post)
     #     elif self.request.POST['type'] == 'comment-report':
-    #         comment = forum_models.ForumComment.objects.get(id=self.request.POST['id'])
+    #         comment = forum_models.Comment.objects.get(id=self.request.POST['id'])
     #         comment.moderation_date = utils.timezone.now()
     #         comment.save(update_fields=['moderation_date'])
-    #         ForumPostView.send_mod_mail('Comment')
+    #         PostView.send_mod_mail('Comment')
     #         return shortcuts.redirect(post)
     #     else:
     #         return shortcuts.redirect('django_forum:post_list_view')
@@ -139,13 +139,13 @@ def subscribe(request) -> http.JsonResponse:
     # request should be ajax and method should be POST.
     if request.is_ajax and request.method == "POST":
         try:
-            fp = forum_models.ForumPost.objects.get(slug=request.POST['slug'])
+            fp = forum_models.Post.objects.get(slug=request.POST['slug'])
             if request.POST['data'] == 'true':
                 fp.subscribed_users.add(request.user)
             else:
                 fp.subscribed_users.remove(request.user)
             return http.JsonResponse({}, status=200)
-        except forum_models.ForumPost.DoesNotExist as e:
+        except forum_models.Post.DoesNotExist as e:
             logger.error('There is no post with that slug : {0}'.format(e))
             return http.JsonResponse(
                 {"error": "no post with that slug"}, 
@@ -155,12 +155,12 @@ def subscribe(request) -> http.JsonResponse:
             {"error": ""}, 
             status=500)
 
-class ForumPostUpdate(auth.mixins.LoginRequiredMixin, messages_views.MessageUpdate):
-    model = forum_models.ForumPost
+class PostUpdate(auth.mixins.LoginRequiredMixin, messages_views.MessageUpdate):
+    model = forum_models.Post
     a_name = 'django_forum'
 
     def post(self, request: http.HttpRequest, 
-                   pk: int, slug:str, post:forum_models.ForumPost = None,
+                   pk: int, slug:str, post:forum_models.Post = None,
                    updatefields:list = []) -> http.HttpResponseRedirect:
         try:
             if post is None:
@@ -174,7 +174,7 @@ class ForumPostUpdate(auth.mixins.LoginRequiredMixin, messages_views.MessageUpda
 
 class DeletePost(auth.mixins.LoginRequiredMixin, views.View):
     http_method_names = ['post']
-    model = forum_models.ForumPost
+    model = forum_models.Post
     a_name = 'django_forum'
 
     def post(self, request: http.HttpRequest, pk: int, slug:str) -> http.HttpResponseRedirect:
@@ -190,9 +190,9 @@ class DeletePost(auth.mixins.LoginRequiredMixin, views.View):
 
 class CreateComment(auth.mixins.LoginRequiredMixin, views.View):
     http_method_names: list = ['post']
-    post_model: forum_models.ForumPost = forum_models.ForumPost
-    comment_model: forum_models.ForumComment = forum_models.ForumComment
-    form_class: forum_forms.ForumComment = forum_forms.ForumComment
+    post_model: forum_models.Post = forum_models.Post
+    comment_model: forum_models.Comment = forum_models.Comment
+    form_class: forum_forms.Comment = forum_forms.Comment
     template_name: str = 'django_forum/posts_and_comments/forum_post_detail.html'
     a_name: str = 'django_forum'
 
@@ -239,8 +239,8 @@ class CreateComment(auth.mixins.LoginRequiredMixin, views.View):
 
 class DeleteComment(auth.mixins.LoginRequiredMixin, views.View):
     http_method_names = ['post']
-    post_model = forum_models.ForumPost
-    comment_model = forum_models.ForumComment
+    post_model = forum_models.Post
+    comment_model = forum_models.Comment
     a_name = 'django_forum'
 
     def post(self, request: http.HttpRequest) -> http.HttpResponseRedirect:
@@ -260,8 +260,8 @@ class DeleteComment(auth.mixins.LoginRequiredMixin, views.View):
 
 class UpdateComment(auth.mixins.LoginRequiredMixin, views.View):
     http_method_names = ['post']
-    comment_model = forum_models.ForumComment
-    post_model = forum_models.ForumPost
+    comment_model = forum_models.Comment
+    post_model = forum_models.Post
     a_name = 'django_forum'
     
     def post(self, request:http.HttpRequest) -> http.HttpResponseRedirect:
@@ -279,8 +279,8 @@ class UpdateComment(auth.mixins.LoginRequiredMixin, views.View):
 
 class ReportComment(auth.mixins.LoginRequiredMixin, views.View):
     http_method_names = ['post']
-    comment_model = forum_models.ForumComment
-    post_model = forum_models.ForumPost
+    comment_model = forum_models.Comment
+    post_model = forum_models.Post
     a_name = 'django_forum'
     
     def post(self, request:http.HttpRequest) -> http.HttpResponseRedirect:
@@ -299,7 +299,7 @@ class ReportComment(auth.mixins.LoginRequiredMixin, views.View):
 
 class ReportPost(auth.mixins.LoginRequiredMixin, views.View):
     http_method_names = ['post']
-    post_model = forum_models.ForumPost
+    post_model = forum_models.Post
     a_name = 'django_forum'
     
     def post(self, request:http.HttpRequest) -> http.HttpResponseRedirect:

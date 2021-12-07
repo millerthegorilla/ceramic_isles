@@ -22,7 +22,7 @@ html_strip = elasticsearch_dsl.analyzer(
 
 
 @registry.register_document
-class ForumComment(django_elasticsearch_dsl.Document):
+class Comment(django_elasticsearch_dsl.Document):
 
     author_name = django_elasticsearch_dsl.fields.TextField(attr="get_author_name")
 
@@ -43,13 +43,13 @@ class ForumComment(django_elasticsearch_dsl.Document):
            I no longer have an autocomplete defined, as the amount of requests is crazy.
         """
 
-        model = forum_models.ForumComment
+        model = forum_models.Comment
 
         """
           the commented code below allows searched comments to return a post as the 'found'
           record.
         """
-        # related_models = [ForumPost]
+        # related_models = [Post]
 
         # def get_queryset(self):
         #     return super().get_queryset().select_related(
@@ -58,7 +58,7 @@ class ForumComment(django_elasticsearch_dsl.Document):
 
 
 @registry.register_document
-class ForumPost(django_elasticsearch_dsl.Document):
+class Post(django_elasticsearch_dsl.Document):
 
     author_name = django_elasticsearch_dsl.fields.TextField(attr="get_author_name")
 
@@ -87,7 +87,7 @@ class ForumPost(django_elasticsearch_dsl.Document):
             I no longer have an autocomplete defined as the amount of requests goes
             through the roof.
         """
-        model = forum_models.ForumPost
+        model = forum_models.Post
         fields = [
             'title',
         ]

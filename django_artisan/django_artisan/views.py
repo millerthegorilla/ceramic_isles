@@ -29,8 +29,8 @@ logger = logging.getLogger('django_artisan')
 
 
 @decorators.method_decorator(cache.never_cache, name='dispatch')
-class ArtisanForumPostList(forum_views.ForumPostList):
-    model = artisan_models.ArtisanForumPost
+class PostList(forum_views.PostList):
+    model = artisan_models.Post
     template_name = 'django_forum/posts_and_comments/forum_post_list.html'
     paginate_by = 5
 
@@ -48,7 +48,7 @@ class ArtisanForumPostList(forum_views.ForumPostList):
             else:
                 t = 'match'
                 terms = terms[0]
-            queryset = artisan_documents.ArtisanForumPost.search().query(
+            queryset = artisan_documents.Post.search().query(
                 elasticsearch_dsl.Q(t, text=terms) |
                 elasticsearch_dsl.Q(t, author=terms) |
                 elasticsearch_dsl.Q(t, title=terms) |
@@ -60,10 +60,10 @@ class ArtisanForumPostList(forum_views.ForumPostList):
                 queryset = queryset.filter(created_at__lt=time_range[0], created_at__gt=time_range[1])
                 search = len(queryset)
             if not search:
-                queryset = artisan_models.ArtisanForumPost.objects.order_by('-pinned')
+                queryset = artisan_models.Post.objects.order_by('-pinned')
         else:
             form.errors.clear()
-            queryset = artisan_models.ArtisanForumPost.objects.order_by('-pinned')
+            queryset = artisan_models.Post.objects.order_by('-pinned')
          
         paginator = pagination.Paginator(queryset, self.paginate_by)
          
@@ -78,15 +78,15 @@ class ArtisanForumPostList(forum_views.ForumPostList):
         return shortcuts.render(request, self.template_name, context)
 
 
-class ArtisanForumPostCreate(forum_views.ForumPostCreate):
-    model = artisan_models.ArtisanForumPost
-    form_class = artisan_forms.ArtisanForumPost
+class PostCreate(forum_views.PostCreate):
+    model = artisan_models.Post
+    form_class = artisan_forms.Post
 
     def form_valid(self, form: forms.ModelForm) -> http.HttpResponseRedirect:
         post = form.save(commit=False)
         return super().form_valid(form, post)
 
-    def get_success_url(self, post: artisan_models.ArtisanForumPost, *args, **kwargs) -> str:
+    def get_success_url(self, post: artisan_models.Post, *args, **kwargs) -> str:
         return urls.reverse_lazy(
             'django_artisan:post_view', args=(
                 post.id, post.slug,))
@@ -143,7 +143,7 @@ class ArtisanForumProfile(forum_views.ForumProfile):
         #              'outlets':self.request.user.profile.forumprofile.artisanforumprofile.outlets,
         #              'listed_member':self.request.user.profile.forumprofile.artisanforumprofile.listed_member})
         context['avatar'] = artisan_models.ArtisanForumProfile.objects.get(profile_user=self.request.user).avatar
-        queryset = artisan_models.ArtisanForumPost.objects.filter(author=self.request.user)
+        queryset = artisan_models.Post.objects.filter(author=self.request.user)
         paginator = pagination.Paginator(queryset, 6)
         page_number = self.request.GET.get('page')
         page_obj = paginator.get_page(page_number)

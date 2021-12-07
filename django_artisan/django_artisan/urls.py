@@ -20,43 +20,43 @@ admin.site.index_title = settings.SITE_NAME + ' administration'
 app_name = "django_artisan"
 
 postview_patterns = [
-     path('forum/<int:pk>/<slug:slug>', artisan_forum_post_views.ArtisanForumPostView.as_view(), 
+     path('forum/<int:pk>/<slug:slug>', artisan_forum_post_views.PostView.as_view(), 
                                    name='post_view'),
      path('update_post/<int:pk>/<slug:slug>/', 
-                         artisan_forum_post_views.ArtisanForumPostUpdate.as_view(), 
+                         artisan_forum_post_views.PostUpdate.as_view(), 
                                    name='post_update'),
      path('delete_post/<int:pk>/<slug:slug>/', forum_post_views.DeletePost.as_view(
-                                        model=artisan_models.ArtisanForumPost,
+                                        model=artisan_models.Post,
                                         a_name='django_artisan'),
                                    name="post_delete"),
      path('report_post/', 
                          forum_post_views.ReportPost.as_view( 
                                         a_name='django_artisan',
-                                        post_model=artisan_models.ArtisanForumPost),
+                                        post_model=artisan_models.Post),
                                    name='post_report'),
      path('create_comment/<int:pk>/<slug:slug>/', forum_post_views.CreateComment.as_view(
-                                        post_model=artisan_models.ArtisanForumPost,
-                                        comment_model=forum_models.ForumComment,
+                                        post_model=artisan_models.Post,
+                                        comment_model=forum_models.Comment,
                          template_name='django_artisan/posts_and_comments/forum_post_detail.html',
                                         a_name=app_name),
                                    name="comment_create"),
      path('delete_comment/', 
                          forum_post_views.DeleteComment.as_view( 
                                         a_name='django_artisan',
-                                        post_model=artisan_models.ArtisanForumPost,
-                                        comment_model=forum_models.ForumComment),
+                                        post_model=artisan_models.Post,
+                                        comment_model=forum_models.Comment),
                                    name='comment_delete'),
      path('update_comment/', 
                          forum_post_views.UpdateComment.as_view( 
                                         a_name='django_artisan',
-                                        post_model=artisan_models.ArtisanForumPost,
-                                        comment_model=forum_models.ForumComment),
+                                        post_model=artisan_models.Post,
+                                        comment_model=forum_models.Comment),
                                    name='comment_update'),
      path('report_comment/', 
                          forum_post_views.ReportComment.as_view( 
                                         a_name='django_artisan',
-                                        post_model=artisan_models.ArtisanForumPost,
-                                        comment_model=forum_models.ForumComment),
+                                        post_model=artisan_models.Post,
+                                        comment_model=forum_models.Comment),
                                    name='comment_report'),
 ]
 
@@ -71,10 +71,10 @@ urlpatterns = [
          artisan_views.UserProductImageUpload.as_view(), name='image_update'),
     path('users/accounts/profile/images/update/<slug:unique_id>/',
          artisan_views.UserProductImageDelete.as_view(), name='remove_images'),
-    path('forum/create_post/', artisan_views.ArtisanForumPostCreate.as_view(), 
+    path('forum/create_post/', artisan_views.PostCreate.as_view(), 
                                name='post_create_view'),
-    path('forum/posts/', artisan_views.ArtisanForumPostList.as_view(
-                               model=artisan_models.ArtisanForumPost,
+    path('forum/posts/', artisan_views.PostList.as_view(
+                               model=artisan_models.Post,
         template_name='django_artisan/posts_and_comments/forum_post_list.html'), 
                                name='post_list_view'),
 ] + postview_patterns

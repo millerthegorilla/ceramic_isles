@@ -6,40 +6,40 @@
 			</div>
 			<div class="row align-items-end tinfo post-headline mb-2">
 				<div class="col-auto">
-				    <h1><span id="post_title">{{ artisanforumpost.title|safe }}</span></h1> 
+				    <h1><span id="post_title">{{ post.title|safe }}</span></h1> 
 			    </div>
 			    <div class="col-auto">
 			    	<h1><span class="text-dark ps-2">by</span></h1>
 			    </div>
 			    <div class="col-auto">
-			    	<h3>{{ artisanforumpost.author.profile.display_name }}</h3>
+			    	<h3>{{ post.author.profile.display_name }}</h3>
 			    </div>
 			    <div class="col-auto">
 			    	<h3><span class="text-dark ps-3">on</span></h3>
 			    </div>
 			    <div class="col-auto">
-			    	<h4>{{ artisanforumpost.created_at }}</h4>
+			    	<h4>{{ post.created_at }}</h4>
 			    </div>
 			</div>
 			<div class='ps-4'>
 				<div class="tinfo row justify-content-start mb-2">
 					 <div class="col-auto">
-				    	<h6>Category : {{ artisanforumpost.get_category_display }}</h6>
+				    	<h6>Category : {{ post.get_category_display }}</h6>
 				    </div>
 				    <div class="col-auto flex-grow-1">
-				    	<h6>Location : {{ artisanforumpost.get_location_display }}</h6>
+				    	<h6>Location : {{ post.get_location_display }}</h6>
 				    </div>
 				    <div class="col-auto"><input type='checkbox' id='subscribed_cb' {% if subscribed %}checked{% endif %}><label for="subscribed_cb" class="ps-2">{% if subscribed %}Subscribed{% else %}Subscribe{% endif %} to this thread</label></div>
 				</div>
 				<div class="row ms-auto mb-2">
-					{% if not artisanforumpost.moderation_date %}
-				    <div id="textarea" class="col-auto">{{ artisanforumpost.text|safe }}</div>
+					{% if not post.moderation_date %}
+				    <div id="textarea" class="col-auto">{{ post.text|safe }}</div>
 				    {% else %}
 				    <div>This post has been reported and is awaiting moderation.  Comments are locked until the post has been validated.</div>
 				    {% endif %}
-				    {% if artisanforumpost.author.profile.display_name == user.profile.display_name %}
+				    {% if post.author.profile.display_name == user.profile.display_name %}
 					    <div class="ms-auto">
-			    		    <form method="post" action="{% url 'django_artisan:post_update' artisanforumpost.pk artisanforumpost.slug %}">
+			    		    <form method="post" action="{% url 'django_artisan:post_update' post.pk post.slug %}">
 			    		    	{% csrf_token %}
 			    		    	<div id="post-edit-div">
 			    		    		<input type="textarea" name="update-post" class="update-form-text"></input>
@@ -57,12 +57,12 @@
 			                </form>
 			            </div>
 	                {% else %}
-		                {% if not artisanforumpost.moderation_date and artisanforumpost.author.profile.display_name != user.profile.display_name %}
+		                {% if not post.moderation_date and post.author.profile.display_name != user.profile.display_name %}
 		                <div class="ms-auto">
 		                    <form method="post" action="{% url 'django_artisan:post_report' %}" id="form-report-post">
 		                    	{% csrf_token %}
-		                        <input id="post-id" type="hidden" name="post-id" value="{{ artisanforumpost.id }}">
-    							<input id="post-slug" type="hidden" name="post-slug" value="{{ artisanforumpost.slug }}">
+		                        <input id="post-id" type="hidden" name="post-id" value="{{ post.id }}">
+    							<input id="post-slug" type="hidden" name="post-slug" value="{{ post.slug }}">
 		                    	<div class="tinfo">
 		                            <a class="report-post text-warning" href="#">Report Post for Moderation</a>
 		                    	</div>
@@ -72,7 +72,7 @@
 	                {% endif %}
 			    </div>
 			    <div class="row justify-content-end mb-3">
-		    		{% if artisanforumpost.author.profile.display_name == user.profile.display_name %}
+		    		{% if post.author.profile.display_name == user.profile.display_name %}
 		    		    <div id="modify-post-btns">
 		    		    	<div class="d-flex justify-content-end">
 				    			<button id="delete-btn" type="button" class="btn btn-secondary col-auto me-2" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">Delete Post</button>
@@ -95,7 +95,7 @@
 		          </div>
 		          <div class="modal-footer">
 		            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-		            <form action="{% url 'django_artisan:post_delete' artisanforumpost.id artisanforumpost.slug %}" method="post">
+		            <form action="{% url 'django_artisan:post_delete' post.id post.slug %}" method="post">
 		            {% csrf_token %}
 		            <input type="hidden" name="type" value="post">
 		            <button type="submit" class="btn btn-primary">Delete Post</button>

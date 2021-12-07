@@ -6,9 +6,9 @@ from . import views_forum_post as forum_post_views
 app_name = "django_forum"
 
 postview_patterns = [
-    urls.path('<int:pk>/<slug:slug>/', forum_post_views.ForumPostView.as_view(),
+    urls.path('<int:pk>/<slug:slug>/', forum_post_views.PostView.as_view(),
                 name='post_view'),
-    urls.path('update_post/<int:pk>/<slug:slug>/', forum_post_views.ForumPostUpdate.as_view(),
+    urls.path('update_post/<int:pk>/<slug:slug>/', forum_post_views.PostUpdate.as_view(),
                 name='post_update'),
     urls.path('delete_post/<int:pk>/', forum_post_views.DeletePost.as_view(),
                 name="post_delete"),
@@ -26,9 +26,9 @@ postview_patterns = [
 ]
 
 urlpatterns = [
-    urls.path('create_post/', forum_views.ForumPostCreate.as_view(),
+    urls.path('create_post/', forum_views.PostCreate.as_view(),
                 name='post_create_view'),
-    urls.path('posts/', forum_views.ForumPostList.as_view(),
+    urls.path('posts/', forum_views.PostList.as_view(),
                 name='post_list_view'),
     urls.path('profile/', forum_views.ForumProfile.as_view(),
          name='profile_update_view'),

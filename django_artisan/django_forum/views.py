@@ -26,12 +26,12 @@ logger = logging.getLogger('django_artisan')
 
 
 # START POSTS AND COMMENTS
-class ForumPostCreate(mixins.LoginRequiredMixin, messages_views.MessageCreate):
-    model = forum_models.ForumPost
+class PostCreate(mixins.LoginRequiredMixin, messages_views.MessageCreate):
+    model = forum_models.Post
     template_name = "django_forum/posts_and_comments/forum_post_create_form.html"
-    form_class = forum_forms.ForumPost
+    form_class = forum_forms.Post
 
-    def form_valid(self, form: forum_forms.ForumPost, post: forum_models.ForumPost) -> http.HttpResponseRedirect:
+    def form_valid(self, form: forum_forms.Post, post: forum_models.Post) -> http.HttpResponseRedirect:
         if post is None:
             post = form.save(commit=False)
         post = super().form_valid(form, post)
@@ -39,15 +39,15 @@ class ForumPostCreate(mixins.LoginRequiredMixin, messages_views.MessageCreate):
             post.subscribed_users.add(self.request.user)
         return shortcuts.redirect(self.get_success_url(post))
 
-    def get_success_url(self, post: forum_models.ForumPost, *args, **kwargs) -> str:
+    def get_success_url(self, post: forum_models.Post, *args, **kwargs) -> str:
         return urls.reverse_lazy(
             'django_forum:post_view', args=(
                 post.id, post.slug,))
 
 
 @utils.decorators.method_decorator(cache.never_cache, name='dispatch')
-class ForumPostList(mixins.LoginRequiredMixin, messages_views.MessageList):
-    model = forum_models.ForumPost
+class PostList(mixins.LoginRequiredMixin, messages_views.MessageList):
+    model = forum_models.Post
     template_name = 'django_forum/posts_and_comments/forum_post_list.html'
     paginate_by = 5
     """
@@ -79,7 +79,7 @@ class ForumPostList(mixins.LoginRequiredMixin, messages_views.MessageList):
                 else:
                     t = 'match'
                     terms = terms[0]
-                queryset = forum_documents.ForumPost.search().query(
+                queryset = forum_documents.Post.search().query(
                     elasticsearch_dsl.Q(t, text=terms) |
                     elasticsearch_dsl.Q(t, author=terms) |
                     elasticsearch_dsl.Q(t, title=terms) |
@@ -91,10 +91,10 @@ class ForumPostList(mixins.LoginRequiredMixin, messages_views.MessageList):
                     queryset = queryset.filter(created_at__lt=time_range[0], created_at__gt=time_range[1])
                     search = len(queryset)
                 if not search:
-                    queryset = forum_models.ForumPost.objects.order_by('-pinned')
+                    queryset = forum_models.Post.objects.order_by('-pinned')
             else:
                 form.errors.clear()
-                queryset = forum_models.ForumPost.objects.order_by('-pinned')
+                queryset = forum_models.Post.objects.order_by('-pinned')
              
             paginator = pagination.Paginator(queryset, self.paginate_by)
              
@@ -114,7 +114,7 @@ class ForumPostList(mixins.LoginRequiredMixin, messages_views.MessageList):
 #     q = request.GET.get('q')
 #     results = []
 #     if q:
-#         search = ForumPost.search().suggest('results', q, term={'field':'text'})
+#         search = Post.search().suggest('results', q, term={'field':'text'})
 #         result = search.execute()
 #         for idx,item in enumerate(result.suggest['results'][0]['options']):
 #             results.append(item.text)
@@ -151,7 +151,7 @@ class ForumProfile(profile_views.ProfileUpdate):
         context = super().get_context_data(**args)
         context['avatar'] = forum_models.ForumProfile.objects.get(
             profile_user=self.request.user).avatar
-        queryset = forum_models.ForumPost.objects.filter(
+        queryset = forum_models.Post.objects.filter(
             author=self.request.user)
         paginator = pagination.Paginator(queryset, 6)
         page_number = self.request.GET.get('page')

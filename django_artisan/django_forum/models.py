@@ -25,7 +25,7 @@ logger = logging.getLogger('django_artisan')
 # helper functions
 
 ## TODO see if Union below is necessary...
-def user_directory_path_avatar(instance: Union['ForumPost','ForumComment'], filename: str) -> str:
+def user_directory_path_avatar(instance: Union['Post','Comment'], filename: str) -> str:
     return 'uploads/users/{0}/avatar/{1}'.format(
         instance.user_profile.display_name, filename)
 
@@ -153,7 +153,7 @@ def auto_delete_avatar_on_delete(sender: ForumProfile, instance: ForumProfile, *
 
 ## TODO Post and Comment should probably have common superclass somewhere.
 
-class ForumPost(messages_models.Message):
+class Post(messages_models.Message):
     title: db_models.CharField = db_models.CharField(max_length=100, default='')
     pinned: db_models.SmallIntegerField = db_models.SmallIntegerField(default=0)
     subscribed_users: db_models.ManyToManyField = db_models.ManyToManyField(
@@ -176,17 +176,17 @@ class ForumPost(messages_models.Message):
     def __str__(self) -> str:
         return f"{self.author.profile.display_name}"
 
-# @dispatch.receiver(signals.post_save, sender=ForumPost)
-# def save_author_on_post_creation(sender: ForumPost, instance: ForumPost, created, **kwargs) -> None:
+# @dispatch.receiver(signals.post_save, sender=Post)
+# def save_author_on_post_creation(sender: Post, instance: Post, created, **kwargs) -> None:
 #     if created:
 #         instance.author = instance.post_author()
 #         instance.save()
 
 
-class ForumComment(messages_models.Message):
+class Comment(messages_models.Message):
     # author: models.CharField = models.CharField(default='', max_length=40)
     forum_post: db_models.ForeignKey = db_models.ForeignKey(
-        ForumPost, on_delete=db_models.CASCADE, related_name="forum_comments")
+        Post, on_delete=db_models.CASCADE, related_name="forum_comments")
 
     class Meta:
         ordering = ['created_at']
@@ -205,8 +205,8 @@ class ForumComment(messages_models.Message):
     def get_author_name(self) -> str:
         return self.author.profile.display_name
 
-# @dispatch.receiver(post_save, sender=ForumComment)
-# def save_author_on_comment_creation(sender: ForumComment, instance: ForumComment, created, **kwargs) -> None:
+# @dispatch.receiver(post_save, sender=Comment)
+# def save_author_on_comment_creation(sender: Comment, instance: Comment, created, **kwargs) -> None:
 #     if created:
 #         instance.author = instance.comment_author()
 #         instance.title = slugify(

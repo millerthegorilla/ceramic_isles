@@ -13,8 +13,8 @@ from . import models as forum_models
 logger = logging.getLogger('django_artisan')
 
 
-@admin.register(forum_models.ForumComment)
-class ForumComment(soft_deletion.Admin):
+@admin.register(forum_models.Comment)
+class Comment(soft_deletion.Admin):
     #fields = ('moderation', 'active', 'author', 'title', 'text', 'created_at', 'deleted_at', 'user_profile')
     # fieldsets = [
     #     ('Moderation', {'fields': ['moderation']}),
@@ -29,13 +29,13 @@ class ForumComment(soft_deletion.Admin):
                    'forum_post', 'author', 'deleted_at')
     search_fields = ('author', 'text')
 
-    def post_str(self, obj: forum_models.ForumComment) -> str:
+    def post_str(self, obj: forum_models.Comment) -> str:
         link = urls.reverse("admin:django_forum_forumpost_change",
                        args=[obj.forum_post.id])
         return utils.safestring.mark_safe(
             f'<a href="{link}">{utils.html.escape(obj.forum_post.__str__())}</a>')
 
-    post_str.short_description = 'ForumPost' # type: ignore
+    post_str.short_description = 'Post' # type: ignore
     # make row sortable
     post_str.admin_order_field = 'forumpost'  # type: ignore
 
@@ -61,8 +61,8 @@ class ForumComment(soft_deletion.Admin):
                           messages.SUCCESS)
 
 
-@admin.register(forum_models.ForumPost)
-class ForumPost(soft_deletion.Admin):
+@admin.register(forum_models.Post)
+class Post(soft_deletion.Admin):
     list_display = ('commenting_locked', 'pinned', 'moderation_date', 'active', 'author',
                     'title', 'text', 'created_at', 'deleted_at')
     list_filter = ('commenting_locked', 'pinned', 'moderation_date', 'active',

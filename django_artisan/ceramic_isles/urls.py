@@ -29,7 +29,7 @@ urlpatterns = [
     path('users/accounts/register/', CustomRegister.as_view(), name='register'),
     path('', include(artisan_urls)),
     path('forum/', include(forum_urls)),
-    # path('forum/create_post/', artisan_views.ArtisanForumPostCreate.as_view(), name='post_create_view'),
+    # path('forum/create_post/', artisan_views.PostCreate.as_view(), name='post_create_view'),
     path('messages/', include(messages_urls)),
     path('users/', include(users_app_urls)),
     path('email/', include(mail_urls)),

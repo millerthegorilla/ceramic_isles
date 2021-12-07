@@ -18,7 +18,7 @@ from safe_imagefield import models as safe_image_models
 logger = logging.getLogger('django_artisan')
 
 
-class ArtisanForumPost(forum_models.ForumPost):
+class Post(forum_models.Post):
     category: models.CharField = models.CharField(
         max_length=2,
         choices=conf.settings.CATEGORY.choices,
@@ -55,7 +55,7 @@ def user_directory_path(instance : typing.Union['ArtisanForumProfile', 'UserProd
             instance.user_profile.display_name, filename)
 
 
-# class ArtisanForumComment(forum_models.ForumComment):
+# class Comment(forum_models.Comment):
 #     def get_absolute_url(self) -> str:
 #         return self.forum_post.get_absolute_url(a_name='django_artisan') + '#' + self.slug
 
@@ -228,7 +228,7 @@ def send_email_when_image_uploaded(sender: UserProductImage, instance: UserProdu
     """
        Send email to moderators
     """
-    tasks.async_task(forum_views.ForumPostView.send_mod_mail('Image'))
+    tasks.async_task(forum_views.PostView.send_mod_mail('Image'))
 
 
 class Event(models.Model):

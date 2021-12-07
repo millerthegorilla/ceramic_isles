@@ -24,8 +24,8 @@
                             <div id="comment-form-buttons-{{ forloop.counter }}" class="comment-form-buttons">
                             	<form method="post" action="{% url 'django_artisan:comment_update' %}" id="comment-update-form">
                             	{% csrf_token %}
-                            		<input id="post-id" type="hidden" name="post-id" value="{{ artisanforumpost.id }}">
-        							<input id="post-slug" type="hidden" name="post-slug" value="{{ artisanforumpost.slug }}">
+                            		<input id="post-id" type="hidden" name="post-id" value="{{ post.id }}">
+        							<input id="post-slug" type="hidden" name="post-slug" value="{{ post.slug }}">
         							<input id="comment-slug" type="hidden" name="comment-slug" value="{{ comment.slug }}">
         							<input id="comment-id" type="hidden" name="comment-id" value="{{ comment.id }}">
                             		<div class="row">
@@ -46,8 +46,8 @@
 			                    <form method="post" action="{% url 'django_artisan:comment_report' %}" id="form-report-comment">
 			                    	{% csrf_token %}
 			                    	<div class="tinfo">
-			                        <input id="post-id" type="hidden" name="post-id" value="{{ artisanforumpost.id }}">
-        							<input id="post-slug" type="hidden" name="post-slug" value="{{ artisanforumpost.slug }}">
+			                        <input id="post-id" type="hidden" name="post-id" value="{{ post.id }}">
+        							<input id="post-slug" type="hidden" name="post-slug" value="{{ post.slug }}">
         							<input id="comment-slug" type="hidden" name="comment-slug" value="{{ comment.slug }}">
         							<input id="comment-id" type="hidden" name="comment-id" value="{{ comment.id }}">
 			                            <a class="report-comment text-warning" href="#">Report Comment for Moderation</a>
@@ -72,10 +72,10 @@
 			        </div>
         	  </div>
             {% endfor %}
-            {% if artisanforumpost.commenting_locked == False and  artisanforumpost.moderation_date is None %}
+            {% if post.commenting_locked == False and  post.moderation_date is None %}
             <div class="row">
 	            <div class="card-body mx-auto">
-	                <form method="post" action="{% url 'django_artisan:comment_create' artisanforumpost.id artisanforumpost.slug %}" class="comment-form">
+	                <form method="post" action="{% url 'django_artisan:comment_create' post.id post.slug %}" class="comment-form">
 	                <input type="hidden" name="type" value="comment">
 	                  {% crispy comment_form %}
 	                  {% csrf_token %}
@@ -107,8 +107,8 @@
 					  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
 					  <form method="post" action="{% url 'django_artisan:comment_delete' %}">
 						{% csrf_token %}
-						<input id="post-id" type="hidden" name="post-id" value="{{ artisanforumpost.id }}">
-						<input id="post-slug" type="hidden" name="post-slug" value="{{ artisanforumpost.slug }}">
+						<input id="post-id" type="hidden" name="post-id" value="{{ post.id }}">
+						<input id="post-slug" type="hidden" name="post-slug" value="{{ post.slug }}">
 						<input id="rem-comment-slug" type="hidden" name="comment-slug" value="">
 						<input id="rem-comment-id" type="hidden" name="comment-id" value="">
 						<button type="submit" class="btn btn-primary">Delete Comment</button>

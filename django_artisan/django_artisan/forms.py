@@ -20,15 +20,15 @@ from . import models as artisan_models
 from . import fields as artisan_fields
 
 
-class ArtisanForumPost(forum_forms.ForumPost):
-    class Meta(forum_forms.ForumPost.Meta):
-        model = artisan_models.ArtisanForumPost
-        fields = forum_forms.ForumPost.Meta.fields + ['category', 'location']
-        widgets = forum_forms.ForumPost.Meta.widgets
+class Post(forum_forms.Post):
+    class Meta(forum_forms.Post.Meta):
+        model = artisan_models.Post
+        fields = forum_forms.Post.Meta.fields + ['category', 'location']
+        widgets = forum_forms.Post.Meta.widgets
         labels = {'category': 'Choose a category for your post...',
                   'location': 'Which island...?'}
 
-    def __init__(self, user_name: str = None, post: artisan_models.ArtisanForumPost = None, *args, **kwargs) -> None:
+    def __init__(self, user_name: str = None, post: artisan_models.Post = None, *args, **kwargs) -> None:
         super().__init__(user_name=user_name, post=post, *args, **kwargs)
         checked_string = ''
         if post and user_name and post.subscribed_users.filter(
@@ -52,10 +52,10 @@ class ArtisanForumPost(forum_forms.ForumPost):
         self.helper.form_action = 'django_artisan:post_create_view'
 
 
-# class ArtisanForumComment(forum_forms.ForumComment):
-#     class Meta(forum_forms.ForumComment.Meta):
-#         model = artisan_models.ArtisanForumComment
-#         fields = forum_forms.ForumComment.Meta.fields
+# class Comment(forum_forms.Comment):
+#     class Meta(forum_forms.Comment.Meta):
+#         model = artisan_models.Comment
+#         fields = forum_forms.Comment.Meta.fields
 
 
 class ArtisanForumProfile(forum_forms.ForumProfile):

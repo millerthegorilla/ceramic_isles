@@ -15,15 +15,15 @@ logger = logging.getLogger('django_artisan')
 
 @decorators.method_decorator(cache.never_cache, name='dispatch')
 @decorators.method_decorator(cache.never_cache, name='get')
-class ArtisanForumPostView(forum_post_views.ForumPostView):
-    model: artisan_models.ArtisanForumPost = artisan_models.ArtisanForumPost
+class PostView(forum_post_views.PostView):
+    model: artisan_models.Post = artisan_models.Post
     slug_url_kwarg: str = 'slug'
     slug_field: str = 'slug'
     template_name: str = 'django_artisan/posts_and_comments/forum_post_detail.html'
-    form_class: artisan_forms.ArtisanForumPost = artisan_forms.ArtisanForumPost
+    form_class: artisan_forms.Post = artisan_forms.Post
 
     def get_context_data(self, **kwargs):
-        context_data = super(ArtisanForumPostView, self).get_context_data(**kwargs)
+        context_data = super(PostView, self).get_context_data(**kwargs)
         category = self.object.get_category_display()
         cat_text = ''
         for i in [(cat.value, cat.label) for cat in conf.settings.CATEGORY]:
@@ -47,8 +47,8 @@ class ArtisanForumPostView(forum_post_views.ForumPostView):
         return context_data
 
 
-class ArtisanForumPostUpdate(forum_post_views.ForumPostUpdate):
-    model = artisan_models.ArtisanForumPost
+class PostUpdate(forum_post_views.PostUpdate):
+    model = artisan_models.Post
     a_name = 'django_artisan'
 
     def post(self, request: http.HttpRequest, pk: int, slug:str) -> http.HttpResponseRedirect:

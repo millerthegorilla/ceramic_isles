@@ -15,11 +15,11 @@ def send_susbcribed_email(post_id: int = None,
                           path_info: str = None,
                           s_name: str = None) -> str:
     post = comment = None
-    posts = forum_models.ForumPost.objects.filter(id=post_id)
+    posts = forum_models.Post.objects.filter(id=post_id)
     if posts.count():
         post = posts.first()
 
-    comments = forum_models.ForumComment.objects.filter(id=comment_id)
+    comments = forum_models.Comment.objects.filter(id=comment_id)
     if comments.count():
         comment = comments.first()
 
