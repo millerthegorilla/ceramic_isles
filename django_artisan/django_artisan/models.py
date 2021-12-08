@@ -13,6 +13,8 @@ from django.core import exceptions
 
 from django_forum import models as forum_models
 from django_forum import views as forum_views
+from django_forum import views_forum_post as forum_post_views
+
 from safe_imagefield import models as safe_image_models
 
 logger = logging.getLogger('django_artisan')
@@ -54,10 +56,6 @@ def user_directory_path(instance : typing.Union['ArtisanForumProfile', 'UserProd
         return 'uploads/users/{0}/{1}'.format(
             instance.user_profile.display_name, filename)
 
-
-# class Comment(forum_models.Comment):
-#     def get_absolute_url(self) -> str:
-#         return self.post.get_absolute_url(a_name='django_artisan') + '#' + self.slug
 
 class ArtisanForumProfile(forum_models.ForumProfile):
     bio: models.TextField = models.TextField('biographical information, max 500 chars',
@@ -228,7 +226,7 @@ def send_email_when_image_uploaded(sender: UserProductImage, instance: UserProdu
     """
        Send email to moderators
     """
-    tasks.async_task(forum_views.PostView.send_mod_mail('Image'))
+    tasks.async_task(forum_post_views.send_mod_mail, 'Image')
 
 
 class Event(models.Model):

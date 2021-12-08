@@ -46,6 +46,8 @@
         </div>
     {% endblock content %}
     {% block body_imports %}
-    <script src="{% static 'django_artisan/js/profileUpdate.js' %}" type="application/javascript" referrerpolicy="origin"></script>
     {% endblock body_imports %}
+    {% block body_js %}
+        <script src="{% static 'django_artisan/js/profileUpdate.js' %}" type="application/javascript" referrerpolicy="origin" defer=""></script>
+    {% endblock body_js %}
 {% endif %}

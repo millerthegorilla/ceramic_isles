@@ -190,20 +190,6 @@ class LandingPage(generic.base.TemplateView):
         context['username'] = self.request.user.username # type: ignore
         return context
 
-# class PeopleDirectoryView(TemplateView):
-#     template_name = 'django_forum/people.html'
-
-#     def get_context_data(self):
-#         """ couldn't get the values() to pass back an appropriate queryset, and since
-#              this view does not require loginrequiredmixin, perhaps a list of names is 
-#              safer? """
-#         uname_list = []
-#         data = {}
-#         qs = ForumProfile.objects.all().exclude(profile_user__is_superuser=True) \
-#                                        .values_list('display_name', flat=True)
-#         data['dnames'] = qs
-#         data['colours'] = ['text-white', 'text-purple', 'text-warning', 'text-lightgreen', 'text-danger', 'headline-text', 'sub-headline-text']
-#         return data
 
 class PersonalPage(generic.detail.DetailView):
     model = artisan_models.ArtisanForumProfile
@@ -239,7 +225,6 @@ class PersonalPage(generic.detail.DetailView):
             return self.render_to_response(context)
         else:
             return redirect(self.request.META.get('HTTP_REFERER'))
-
 
 
 class UserProductImageUpload(mixins.LoginRequiredMixin, generic.edit.FormView):
@@ -308,5 +293,3 @@ class UserProductImageDelete(mixins.LoginRequiredMixin, generic.edit.UpdateView)
             return redirect(self.success_url)
         else:
             return image
-
-
