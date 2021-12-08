@@ -186,7 +186,7 @@ class Post(messages_models.Message):
 class Comment(messages_models.Message):
     # author: models.CharField = models.CharField(default='', max_length=40)
     forum_post: db_models.ForeignKey = db_models.ForeignKey(
-        Post, on_delete=db_models.CASCADE, related_name="forum_comments")
+        Post, on_delete=db_models.CASCADE, related_name="comments")
 
     class Meta:
         ordering = ['created_at']

@@ -42,7 +42,7 @@
                                         {{ post.get_location_display|safe }}
                                     </td>
                                     <td data-label="#comments" class="num-comments">
-                                        {{ post.forum_comments.count }}
+                                        {{ post.comments.count }}
                                     </td>
                                     <td data-label="Date">
                                         {{ post.created_at|date }}

@@ -64,7 +64,7 @@ class PostView(messages_views.MessageView):
         context_data['site_url'] = (self.request.scheme or 'https') + '://' + site.domain
         context_data['comment_form'] = self.comment_form_class() # type: ignore
         context_data['subscribed'] = self.object.subscribed_users.filter(username=self.request.user.username).count()
-        context_data['comments'] = self.object.forum_comments.all()
+        context_data['comments'] = self.object.comments.all()
         return context_data
 
 
