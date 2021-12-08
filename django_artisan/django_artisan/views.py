@@ -243,7 +243,7 @@ class UserProductImageUpload(mixins.LoginRequiredMixin, generic.edit.FormView):
 
     def form_valid(self, form: forms.ModelForm) -> http.HttpResponseRedirect:
         obj = form.save(commit=False)
-        obj.user_profile = self.request.user.profile.forumprofile.artisanforumprofile
+        obj.user_profile: artisan_forms.ArtisanForumProfile = self.request.user.profile.forumprofile.artisanforumprofile
         obj.save()
         img = Image.open(obj.image_file.path)
         img = ImageOps.expand(img, border=10, fill='white')
