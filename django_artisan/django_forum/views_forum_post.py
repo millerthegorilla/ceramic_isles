@@ -139,13 +139,10 @@ class CreateComment(auth.mixins.LoginRequiredMixin, views.View):
                 new_comment.author = request.user
                 new_comment.text = bleach.clean(
                     html.unescape(new_comment.text), strip=True)
-                new_comment.slug = defaultfilters.slugify(uuid.uuid4())
-                new_comment.forum_post = post
-                #new_comment.user_profile = self.request.user.profile.forumprofile
-                new_comment.save()
-                new_comment.slug = defaultfilters.slugify(post.slug + '_comment_' 
+                new_comment.slug = defaultfilters.slugify(new_comment.text[:4] + '_comment_' 
                                    + str(new_comment.created_at or utils.timezone.now()))
-                new_comment.save(update_fields=['slug'])
+                new_comment.forum_post = post
+                new_comment.save()
                 sname: str = "subscribe_timeout" + str(uuid.uuid4())
                 tasks.schedule('django_forum.tasks.send_susbcribed_email',
                              name=sname,
