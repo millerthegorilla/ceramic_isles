@@ -3,16 +3,16 @@
 		<div class="ps-md-5 ps-lg-5 ps-sm-3 ps-2 col-12 col-lg-8 mx-auto">
 		    <h3 class="tinfo mt-3 comment-headline">Comments...</h3>
 		    {% load thumbnail %}
-		    {% for comment in comments %}
 		        <div class="row mx-auto">
 			        <div class="comments ps-4">
+		    		{% for comment in comments %}
 		                <div class="flex-column mx-auto">
-		                	{% if not comment.moderation_date %}
                                 <div class="d-flex">
                                     <a href="/people/{{comment.author}}/">{% thumbnail comment.author.profile.forumprofile.avatar.image_file "40x40" crop="center" as im %}
                                         <img src="{{ im.url }}" height="{{ im.height }}" width="{{ im.width }}" class="rounded-circle me-1" value="image-{{ forloop.counter }}" title="{{comment.author}}"></img></a>
                                     {% endthumbnail %}
     		                	    <a class="col-1" href="{{request.path}}#{{comment.slug}}" id="{{ comment.slug }}"><h2 class="text-warning me-1">#</h2></a>
+		                	{% if not comment.moderation_date %}
     			                	<div id="comment-text-{{ forloop.counter }}" class="comment-text">
     			                        {{ comment.text|linebreaks|urlize|safe }}
     	                            </div>
@@ -69,9 +69,9 @@
 	                                {{ comment.created_at }}
 	                        </span>
 	                    </div>
+            		{% endfor %}
 			        </div>
-        	  </div>
-            {% endfor %}
+        	    </div>
             {% if post.commenting_locked == False and  post.moderation_date is None %}
             <div class="row">
 	            <div class="card-body mx-auto">

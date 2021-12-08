@@ -9,7 +9,7 @@ from safe_imagefield import models as safe_image_models
 from django import urls, conf, dispatch, utils
 from django.core import exceptions
 from django.db import models as db_models, DEFAULT_DB_ALIAS
-from django.db.models import signals
+from django.db.models import signals, deletion
 from django.contrib.auth import models as auth_models
 from django.template import defaultfilters
 
@@ -185,7 +185,7 @@ class Post(messages_models.Message):
 
 class Comment(messages_models.Message):
     # author: models.CharField = models.CharField(default='', max_length=40)
-    forum_post: db_models.ForeignKey = db_models.ForeignKey(
+    post_fk: db_models.ForeignKey = db_models.ForeignKey(
         Post, on_delete=db_models.CASCADE, related_name="comments")
 
     class Meta:
@@ -197,7 +197,7 @@ class Comment(messages_models.Message):
     #     super().save()
 
     def get_absolute_url(self) -> str:
-        return self.forum_post.get_absolute_url() + '#' + self.slug
+        return self.post_fk.get_absolute_url() + '#' + self.slug
 
     def get_category_display(self) -> str:
         return 'Comment'

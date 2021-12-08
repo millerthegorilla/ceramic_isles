@@ -26,18 +26,18 @@ class Comment(soft_deletion.Admin):
                     'author', 'text', 'created_at', 'deleted_at')
     list_editable = ('text', )
     list_filter = ('moderation_date', 'active', 'created_at',
-                   'forum_post', 'author', 'deleted_at')
+                   'post_fk', 'author', 'deleted_at')
     search_fields = ('author', 'text')
 
     def post_str(self, obj: forum_models.Comment) -> str:
         link = urls.reverse("admin:django_forum_forumpost_change",
-                       args=[obj.forum_post.id])
+                       args=[obj.post.id])
         return utils.safestring.mark_safe(
-            f'<a href="{link}">{utils.html.escape(obj.forum_post.__str__())}</a>')
+            f'<a href="{link}">{utils.html.escape(obj.post.__str__())}</a>')
 
     post_str.short_description = 'Post' # type: ignore
     # make row sortable
-    post_str.admin_order_field = 'forumpost'  # type: ignore
+    post_str.admin_order_field = 'post'  # type: ignore
 
     actions = ['approve_comment']
 

@@ -57,7 +57,7 @@ def user_directory_path(instance : typing.Union['ArtisanForumProfile', 'UserProd
 
 # class Comment(forum_models.Comment):
 #     def get_absolute_url(self) -> str:
-#         return self.forum_post.get_absolute_url(a_name='django_artisan') + '#' + self.slug
+#         return self.post.get_absolute_url(a_name='django_artisan') + '#' + self.slug
 
 class ArtisanForumProfile(forum_models.ForumProfile):
     bio: models.TextField = models.TextField('biographical information, max 500 chars',
