@@ -152,14 +152,14 @@ class UserProductImage(forms.ModelForm):
                     'User already has {} images'.format(MAX_NUMBER_OF_IMAGES))
 
 
-class ArtisanForumPostListSearch(forum_forms.ForumPostListSearch):
+class PostListSearch(forum_forms.PostListSearch):
     # category = forms.ChoiceField(
     #     choices=settings.CATEGORY.choices, required=False, initial=settings.CATEGORY.GENERAL)
     # location = forms.ChoiceField(
     #     choices=settings.LOCATION.choices, required=False, initial=settings.LOCATION.ANY_ISLE)
 
-    class Meta(forum_forms.ForumPostListSearch.Meta):
-        fields = forum_forms.ForumPostListSearch.Meta.fields + ['search']
+    class Meta(forum_forms.PostListSearch.Meta):
+        fields = forum_forms.PostListSearch.Meta.fields + ['search']
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)

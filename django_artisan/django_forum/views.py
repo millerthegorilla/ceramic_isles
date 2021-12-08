@@ -70,7 +70,7 @@ class PostList(mixins.LoginRequiredMixin, messages_views.MessageList):
             search = 0
             p_c = None
             is_a_search = False
-            form = artisan_forms.ArtisanForumPostListSearch(request.GET)
+            form = artisan_forms.PostListSearch(request.GET)
             if form.is_valid():
                 is_a_search = True
                 terms = form.cleaned_data['q'].split(' ')

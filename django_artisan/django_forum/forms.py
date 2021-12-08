@@ -138,7 +138,7 @@ class Comment(messages_forms.Message):
         self.helper.form_class = 'col-auto'
 
 ## TODO add choices field to search page
-class ForumPostListSearch(forms.Form):
+class PostListSearch(forms.Form):
     date_end_of_last_month = datetime(utils.timezone.now().year, utils.timezone.now().month, 1) - timedelta(1)
     DATE_ANY = 0
     DATE_TODAY = (utils.timezone.now(), datetime(utils.timezone.now().year, 
