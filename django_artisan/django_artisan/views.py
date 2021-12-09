@@ -1,21 +1,18 @@
 import random, logging, elasticsearch_dsl, typing
 from PIL import Image, ImageOps
 from sorl.thumbnail import delete
-from django_q.tasks import async_task
+from django_q import tasks
 
-from django import http, forms, shortcuts, urls
+from django import conf, http, forms, shortcuts, urls, utils
 from django.core import paginator as pagination
-from django import conf
 from django.contrib.auth import mixins
-from django.contrib.sitemaps import ping_google
+from django.contrib import sitemaps
 from django.contrib.sites import models as site_models
 from django.db import models as db_models
+from django.utils import decorators
 from django.shortcuts import render, redirect
-from django.urls import reverse_lazy
-from django.utils import timezone, decorators
 from django.views import generic
 from django.views.decorators import cache
-
 
 from django_forum import forms as forum_forms
 from django_forum import views as forum_views
@@ -97,7 +94,7 @@ class PostCreate(forum_views.PostCreate):
 """
 def ping_google_func() -> None:
     try:
-        ping_google()
+        sitemaps.ping_google()
         logger.info("Pinged Google!")
     except Exception as e:
         logger.error("unable to ping_google : {0}".format(e))
@@ -111,25 +108,27 @@ class ArtisanForumProfile(forum_views.ForumProfile):
     post_model = artisan_models.Post 
     form_class = artisan_forms.ArtisanForumProfile
     user_form_class = artisan_forms.ArtisanForumProfileUser
-    success_url = reverse_lazy('django_artisan:profile_update_view')
+    success_url = urls.reverse_lazy('django_artisan:profile_update_view')
     template_name = 'django_artisan/profile/forum_profile_update_form.html'
 
     ## TODO type form to correct type of Form - probably artisan_forms.ArtisanForumProfile
     ##  and do the same in superclasses
     def form_valid(self, form: forms.ModelForm, **kwargs) -> typing.Union[http.HttpResponse, http.HttpResponseRedirect]: # type: ignore
-    # - mypy grumbles about missing return statement coz it can't handle inheritance
         if self.request.POST['type'] == 'update-profile':
             if form.has_changed():
-                if 'display_personal_page' in form.changed_data or \
-                   'listed_member' in form.changed_data:
-                   async_task(ping_google_func)
+                if ('display_personal_page' in form.changed_data or
+                   'listed_member' in form.changed_data):
+                    try:
+                        if not conf.settings.DEBUG:
+                            tasks.async_task(ping_google_func)
+                    except:
+                        tasks.async_task(ping_google_func)
                 obj = form.save()
                 if obj.image_file:
                     img = Image.open(obj.image_file.path)
                     img = ImageOps.expand(img, border=10, fill='white')
                     img.save(obj.image_file.path)
             return super().form_valid(form)
-            #return redirect(self.success_url)
         elif self.request.POST['type'] == 'update-avatar':
             super().form_valid(form)
             return redirect(self.success_url)
@@ -175,7 +174,7 @@ class AboutPage(generic.list.ListView):
     def get_queryset(self) -> db_models.QuerySet:
             """Return all published posts."""
              # filter objects created today
-            qs_bydate = self.model.objects.filter(time__gt=timezone.now().replace(hour=0, minute=0, second=0, microsecond=0))
+            qs_bydate = self.model.objects.filter(time__gt=utils.timezone.now().replace(hour=0, minute=0, second=0, microsecond=0))
             qs_repeating = self.model.objects.filter(repeating=True)
             return qs_bydate | qs_repeating
 
@@ -232,7 +231,7 @@ class UserProductImageUpload(mixins.LoginRequiredMixin, generic.edit.FormView):
     model = artisan_models.UserProductImage
     form_class = artisan_forms.UserProductImage
     template_name = 'django_artisan/profile/images/image_update.html'
-    success_url = reverse_lazy('django_artisan:image_update')
+    success_url = urls.reverse_lazy('django_artisan:image_update')
     
     @cache.never_cache
     def get(self, request: http.HttpRequest, *args, **kwargs) -> http.HttpResponse:
@@ -275,7 +274,7 @@ class UserProductImageDelete(mixins.LoginRequiredMixin, generic.edit.UpdateView)
     model = artisan_models.UserProductImage
     slug_url_kwarg = 'unique_id'
     slug_field = 'slug'
-    success_url = reverse_lazy('django_artisan:image_update')  
+    success_url = urls.reverse_lazy('django_artisan:image_update')  
     template_name = 'django_artisan/profile/images/image_list.html'                  
 
     def post(self, request: http.HttpRequest, *args, **kwargs) -> http.HttpResponseRedirect:

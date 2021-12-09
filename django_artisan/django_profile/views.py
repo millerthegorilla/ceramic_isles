@@ -14,7 +14,7 @@ from . import forms as profile_forms
 
 class ProfileUpdate(mixins.LoginRequiredMixin, generic.edit.UpdateView):
     form_class = profile_forms.Profile
-    user_form_class = profile_forms.ProfileUser
+    user_form_class = profile_forms.UserProfile
     model = profile_models.Profile
     success_url = urls.reverse_lazy('django_profile:profile_update_view')
     template_name = 'django_profile/profile_update_form.html'

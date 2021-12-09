@@ -21,12 +21,12 @@ from . import models as forum_models
 #     def __init__(*args, **kwargs):
 
 # this class is here to provide the user's forum profile 
-class ForumProfileUser(profile_forms.ProfileUser):
+class ForumProfileUser(profile_forms.UserProfile):
     model = forum_models.ForumProfile
 
-    class Meta(profile_forms.ProfileUser.Meta):
-        fields = profile_forms.ProfileUser.Meta.fields
-        #model = profile_forms.ProfileUser.Meta.model
+    class Meta(profile_forms.UserProfile.Meta):
+        fields = profile_forms.UserProfile.Meta.fields
+        #model = profile_forms.UserProfile.Meta.model
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)

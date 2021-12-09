@@ -12,7 +12,7 @@ from . import models as profile_models
 
 logger = logging.getLogger('django_artisan')
 
-class ProfileUser(forms.ModelForm):
+class UserProfile(forms.ModelForm):
     # def clean_username(self, *args, **kwargs):
     #     username = self.cleaned_data['username']
     #     if User.objects.filter(username=username):
