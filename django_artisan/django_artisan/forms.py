@@ -14,6 +14,7 @@ from django.contrib.auth.models import User
 
 from django_forum import models as forum_models
 from django_forum import forms as forum_forms
+from django_forum import forms_custom_registration as forum_custom_reg_forms
 from django_messages import forms as messages_forms
 
 from . import models as artisan_models
@@ -50,12 +51,6 @@ class Post(forum_forms.Post):
             )
         )
         self.helper.form_action = 'django_artisan:post_create_view'
-
-
-# class Comment(forum_forms.Comment):
-#     class Meta(forum_forms.Comment.Meta):
-#         model = artisan_models.Comment
-#         fields = forum_forms.Comment.Meta.fields
 
 
 class ArtisanForumProfile(forum_forms.ForumProfile):
@@ -110,6 +105,13 @@ class ArtisanForumProfile(forum_forms.ForumProfile):
         self.helper.form_class = 'col-auto tinfo'
 
 
+class CustomRegistrationForm(forum_custom_reg_forms.CustomUserCreation):
+    model = artisan_models.ArtisanForumProfile
+
+
+class ArtisanForumProfileUser(forum_forms.ForumProfileUser):
+    model = artisan_models.ArtisanForumProfile
+
 MAX_NUMBER_OF_IMAGES = settings.MAX_USER_IMAGES
 
 
@@ -147,7 +149,7 @@ class UserProductImage(forms.ModelForm):
     def restrict_amount(self, count: int) -> None:
         if artisan_models.UserProductImage.objects.count() and self.user is not None:
             if artisan_models.UserProductImage.objects.filter(
-                    user_profile=self.user.profile.forumprofile).count() >= MAX_NUMBER_OF_IMAGES:
+                    user_profile=self.user.profile).count() >= MAX_NUMBER_OF_IMAGES:
                 raise exceptions.ValidationError(
                     'User already has {} images'.format(MAX_NUMBER_OF_IMAGES))
 
@@ -209,7 +211,7 @@ class PostListSearch(forum_forms.PostListSearch):
 #     def restrict_amount(self) -> None:
 #         if self.user is not None:
 #             if UserProductImage.objects.filter(
-#                     user_profile=self.user.profile.forumprofile).count() >= MAX_NUMBER_OF_IMAGES:
+#                     user_profile=self.user.profile).count() >= MAX_NUMBER_OF_IMAGES:
 #                 raise exceptions.ValidationError(_('User already has {0} images'.format(
 #                     MAX_NUMBER_OF_IMAGES)), code='max_image_limit', params={'value': '3'})
 

@@ -15,9 +15,17 @@ from . import models as forum_models
 class CustomUserCreation(auth.forms.UserCreationForm):
     captcha = captcha.fields.ReCaptchaField(label='', widget=captcha.widgets.ReCaptchaV2Checkbox)
     email = forms.EmailField()
-
+    model = forum_models.ForumProfile
+    
     class Meta(auth.forms.UserCreationForm.Meta):
         fields = (*auth.forms.UserCreationForm.Meta.fields, 'email', 'captcha',)
+
+    # def save(self, commit:bool = True, profile_model = forum_models.ForumProfile) -> "CustomUserCreation":
+    #     instance = super().save(commit=False)
+    #     instance.profile_model = profile_model
+    #     if commit:
+    #         instance.save()
+    #     return instance
 
     def clean_username(self) -> str:
         username = self.cleaned_data['username']
@@ -32,8 +40,8 @@ class CustomUserCreation(auth.forms.UserCreationForm):
         displayname = self.cleaned_data['display_name']
         dname = defaultfilters.slugify(displayname)
         try:
-            forum_models.ForumProfile.objects.get(display_name=dname)
-        except forum_models.ForumProfile.DoesNotExist:
+            self.model.objects.get(display_name=dname)
+        except self.model.DoesNotExist:
             return displayname
         self.add_error(
             'display_name', 'Error! That display name already exists!')

@@ -54,10 +54,6 @@ class ProfileUpdate(mixins.LoginRequiredMixin, generic.edit.UpdateView):
         for change in user_form.changed_data:
             setattr(self.request.user, change, user_form[change].value())
         self.request.user.save()
-        if form.has_changed():
-            obj = form.save(commit=False)
-            obj.display_name = defaultfilters.slugify(form['display_name'].value())
-            obj.save()
         return shortcuts.redirect(self.success_url)
         # return render(self.request: HttpRequest self.template_name, {'form': form,
         # 'user_form': user_form})

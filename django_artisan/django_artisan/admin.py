@@ -103,7 +103,12 @@ class Event(admin.ModelAdmin):
 # #admin.site.unregister(UserPasswordHistoryConfig)
 admin.site.unregister(PasswordHistory)
 
-admin.site.unregister(ForumProfile)
+try:
+    abs_forum_profile = conf.settings.ABSTRACTFORUMPROFILE
+except AttributeError:
+    abs_forum_profile = False
+if not abs_forum_profile:
+    admin.site.unregister(ForumProfile)
 
 # Register your models here.
 

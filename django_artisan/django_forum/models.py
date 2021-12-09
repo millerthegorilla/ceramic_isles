@@ -2,6 +2,7 @@ import os
 import logging
 from random import randint
 from typing import Any, Union
+from random_username import generate
 
 from sorl import thumbnail
 from safe_imagefield import models as safe_image_models
@@ -16,27 +17,24 @@ from django.template import defaultfilters
 from django_profile import models as profile_models
 from django_messages import models as messages_models
 
-
-# _: Any
-
 logger = logging.getLogger('django_artisan')
 
 # START PROFILE
 # helper functions
+def default_display_name() -> str:
+    return generate.generate_username()[0]
 
 ## TODO see if Union below is necessary...
 def user_directory_path_avatar(instance: Union['Post','Comment'], filename: str) -> str:
     return 'uploads/users/{0}/avatar/{1}'.format(
         instance.user_profile.display_name, filename)
 
-
 def default_avatar(num: int) -> str:
     return 'default_avatars/default_avatar_{0}.jpg'.format(num)
 # end helper functions
 
 
-# START AVATARS
-
+# START AVATAR
 class Avatar(db_models.Model):
     image_file = safe_image_models.SafeImageField(upload_to=user_directory_path_avatar)
 
@@ -66,8 +64,7 @@ def auto_delete_file_on_change(sender: Avatar, instance: Avatar, **kwargs):
                 except exceptions.ObjectDoesNotExist as e:
                     logger.error(
                         "Error, avatar does not exist : {0}".format(e))
-
-# END AVATARS
+# END AVATAR
 
 
 class ForumProfile(profile_models.Profile):
@@ -81,9 +78,17 @@ class ForumProfile(profile_models.Profile):
     avatar: db_models.OneToOneField = db_models.OneToOneField(
         Avatar, on_delete=db_models.CASCADE, related_name='user_profile')
     rules_agreed: db_models.BooleanField = db_models.BooleanField(default='False')
+    display_name: db_models.CharField = db_models.CharField(
+        max_length=37, blank=True, unique=True, default=default_display_name)
 
     def username(self) -> str:
         return self.profile_user.username
+
+    class Meta:
+        try:
+            abstract = conf.settings.ABSTRACTFORUMPROFILE
+        except AttributeError:
+            abstract = False
 
     # def delete(self, *args, **kwargs):
     #     breakpoint()
@@ -164,6 +169,10 @@ class Post(messages_models.Message):
         ordering = ['-created_at']
         permissions = [('approve_post', 'Approve Post')]
         messages_models.Message._meta.get_field('text').max_length = 3000
+        try:
+            abstract = conf.settings.ABSTRACTPOST
+        except AttributeError:
+            abstract = False
 
     def get_absolute_url(self, a_name:str = 'django_forum') -> str:
         return urls.reverse_lazy(
@@ -182,19 +191,26 @@ class Post(messages_models.Message):
 #         instance.author = instance.post_author()
 #         instance.save()
 
-
+# if django_forum.models.Post is abstract then the below needs to know what Post model
+# is being used.  TODO  make sure that docs indicate that POST_MODEL must be set if
+# ABSTRACTPOST is True.
+import importlib
+try:
+    post_model = eval('conf.settings.POST_MODEL')
+except AttributeError:
+    post_model = Post
 class Comment(messages_models.Message):
     # author: models.CharField = models.CharField(default='', max_length=40)
     post_fk: db_models.ForeignKey = db_models.ForeignKey(
-        Post, on_delete=db_models.CASCADE, related_name="comments")
+        post_model, on_delete=db_models.CASCADE, related_name="comments")
 
     class Meta:
         ordering = ['created_at']
         permissions = [('approve_comment', 'Approve Comment')]
-
-    # def save(self, force_insert=False, force_update=False, using=DEFAULT_DB_ALIAS, update_fields=None) -> None:
-    #     breakpoint()
-    #     super().save()
+        try:
+            abstract = conf.settings.ABSTRACTCOMMENT
+        except AttributeError:
+            abstract = False
 
     def get_absolute_url(self) -> str:
         return self.post_fk.get_absolute_url() + '#' + self.slug

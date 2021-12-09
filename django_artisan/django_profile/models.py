@@ -1,15 +1,7 @@
-from random_username.generate import generate_username
-
-from django import dispatch
+from django import conf, dispatch
 from django.db import models
 from django.db.models import signals
 from django.contrib.auth import models as auth_models
-
-
-def default_display_name() -> str:
-    return generate_username()[0]
-
-# Create your models here.
 
 
 class Profile(models.Model):
@@ -18,11 +10,15 @@ class Profile(models.Model):
     """
     profile_user: models.OneToOneField = models.OneToOneField(
         auth_models.User, on_delete=models.CASCADE, related_name='profile')
-    display_name: models.CharField = models.CharField(
-        max_length=37, blank=True, unique=True, default=default_display_name)
 
     def __str__(self) -> str:
         return str(self._meta.get_fields(include_hidden=True))
+
+    class Meta:
+        try:
+            abstract = conf.settings.ABSTRACTPROFILE
+        except AttributeError:
+            abstract = False
 
 
 """

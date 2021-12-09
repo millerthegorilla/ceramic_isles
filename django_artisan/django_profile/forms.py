@@ -73,7 +73,7 @@ class ProfileUser(forms.ModelForm):
 class Profile(forms.ModelForm):
     class Meta:
         model = profile_models.Profile
-        fields = ['profile_user', 'display_name']
+        fields = ['profile_user',]
         exclude = ['profile_user']
 
     def __init__(self, *args, **kwargs) -> None:
@@ -81,6 +81,3 @@ class Profile(forms.ModelForm):
         self.helper = helper.FormHelper()
         self.helper.css_class = ''
         self.helper.form_tag = False
-        self.helper.layout = layout.Layout(
-            bootstrap5.FloatingField('display_name'),
-        )

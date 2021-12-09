@@ -20,7 +20,7 @@ from django_users import views as users_views
 from . import documents as forum_documents
 from . import models as forum_models
 from . import forms as forum_forms
-from . import custom_registration as custom_reg_form
+from . import forms_custom_registration as custom_reg_form
 
 logger = logging.getLogger('django_artisan')
 
@@ -129,6 +129,7 @@ class PostList(mixins.LoginRequiredMixin, messages_views.MessageList):
 @utils.decorators.method_decorator(cache.never_cache, name='dispatch')
 class ForumProfile(profile_views.ProfileUpdate):
     model = forum_models.ForumProfile
+    post_model = forum_models.Post
     form_class = forum_forms.ForumProfile
     user_form_class = forum_forms.ForumProfileUser
     success_url = urls.reverse_lazy('django_forum:profile_update_view')
@@ -137,7 +138,11 @@ class ForumProfile(profile_views.ProfileUpdate):
     def form_valid(self, form: forms.ModelForm) -> typing.Union[http.HttpResponse, http.HttpResponseRedirect]: # type: ignore
     # mypy can't handle inheritance properly, and grumbles about a missing return statement
         if self.request.POST['type'] == 'update-profile':
+            breakpoint()
             if form.has_changed():
+                obj = form.save(commit=False)
+                obj.display_name = defaultfilters.slugify(form['display_name'].value())
+                obj.save()
                 form.save()
             return super().form_valid(form)  # process other form in django_profile app
         elif self.request.POST['type'] == 'update-avatar':
@@ -149,9 +154,9 @@ class ForumProfile(profile_views.ProfileUpdate):
 
     def get_context_data(self, **args) -> dict:
         context = super().get_context_data(**args)
-        context['avatar'] = forum_models.ForumProfile.objects.get(
+        context['avatar'] = self.model.objects.get(
             profile_user=self.request.user).avatar
-        queryset = forum_models.Post.objects.filter(
+        queryset = self.post_model.objects.filter(
             author=self.request.user)
         paginator = pagination.Paginator(queryset, 6)
         page_number = self.request.GET.get('page')
@@ -171,8 +176,8 @@ class CustomRegister(users_views.Register):
 
     def form_valid(self, form: custom_reg_form.CustomUserCreation) -> http.HttpResponseRedirect:
         user = form.save()
-        user.profile.forumprofile.rules_agreed = form['rules'].value()
-        user.profile.forumprofile.save(update_fields=['rules_agreed'])
+        user.profile.rules_agreed = form['rules'].value()
+        user.profile.save(update_fields=['rules_agreed'])
         user.profile.display_name = defaultfilters.slugify(form['display_name'].value())
         user.profile.save(update_fields=['display_name'])
         user.save() ## TODO do I need this save?

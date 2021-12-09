@@ -17,6 +17,8 @@ from django.contrib.staticfiles import views
 from django.contrib.sitemaps.views import sitemap
 from django_artisan.sitemaps import StaticView, PersonalPage
 from django_artisan import views as artisan_views
+from django_artisan import models as artisan_models
+from django_artisan import forms as artisan_forms
 from django_forum.views import CustomRegister
 
 logger = logging.getLogger('django_artisan')
@@ -26,10 +28,11 @@ sitemaps = {'main': StaticView,
 
 urlpatterns = [
     path('__debug__/', include(debug_toolbar.urls)),
-    path('users/accounts/register/', CustomRegister.as_view(), name='register'),
+    path('users/accounts/register/', 
+           CustomRegister.as_view(form_class=artisan_forms.CustomRegistrationForm), 
+         name='register'),
     path('', include(artisan_urls)),
     path('forum/', include(forum_urls)),
-    # path('forum/create_post/', artisan_views.PostCreate.as_view(), name='post_create_view'),
     path('messages/', include(messages_urls)),
     path('users/', include(users_app_urls)),
     path('email/', include(mail_urls)),

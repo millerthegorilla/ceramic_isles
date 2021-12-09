@@ -8,7 +8,7 @@
 		    		{% for comment in comments %}
 		                <div class="flex-column mx-auto">
                                 <div class="d-flex">
-                                    <a href="/people/{{comment.author}}/">{% thumbnail comment.author.profile.forumprofile.avatar.image_file "40x40" crop="center" as im %}
+                                    <a href="/people/{{comment.author}}/">{% thumbnail comment.author.profile.avatar.image_file "40x40" crop="center" as im %}
                                         <img src="{{ im.url }}" height="{{ im.height }}" width="{{ im.width }}" class="rounded-circle me-1" value="image-{{ forloop.counter }}" title="{{comment.author}}"></img></a>
                                     {% endthumbnail %}
     		                	    <a class="col-1" href="{{request.path}}#{{comment.slug}}" id="{{ comment.slug }}"><h2 class="text-warning me-1">#</h2></a>

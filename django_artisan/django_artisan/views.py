@@ -107,9 +107,10 @@ class ArtisanForumProfile(forum_views.ForumProfile):
     """
         ForumProfile subclasses LoginRequiredMixin
     """
-    model = artisan_models.ArtisanForumProfile 
+    model = artisan_models.ArtisanForumProfile
+    post_model = artisan_models.Post 
     form_class = artisan_forms.ArtisanForumProfile
-    user_form_class = forum_forms.ForumProfileUser
+    user_form_class = artisan_forms.ArtisanForumProfileUser
     success_url = reverse_lazy('django_artisan:profile_update_view')
     template_name = 'django_artisan/profile/forum_profile_update_form.html'
 
@@ -137,11 +138,11 @@ class ArtisanForumProfile(forum_views.ForumProfile):
         context = super().get_context_data(**kwargs)
         site = site_models.Site.objects.get_current()
         # context['form'].initial.update(
-        #             {'bio':self.request.user.profile.forumprofile.artisanforumprofile.bio,
-        #              'image_file':self.request.user.profile.forumprofile.artisanforumprofile.image_file,
-        #              'shop_web_address':self.request.user.profile.forumprofile.artisanforumprofile.shop_web_address,
-        #              'outlets':self.request.user.profile.forumprofile.artisanforumprofile.outlets,
-        #              'listed_member':self.request.user.profile.forumprofile.artisanforumprofile.listed_member})
+        #             {'bio':self.request.user.profile.bio,
+        #              'image_file':self.request.user.profile.image_file,
+        #              'shop_web_address':self.request.user.profile.shop_web_address,
+        #              'outlets':self.request.user.profile.outlets,
+        #              'listed_member':self.request.user.profile.listed_member})
         context['avatar'] = artisan_models.ArtisanForumProfile.objects.get(profile_user=self.request.user).avatar
         queryset = artisan_models.Post.objects.filter(author=self.request.user)
         paginator = pagination.Paginator(queryset, 6)
@@ -237,13 +238,13 @@ class UserProductImageUpload(mixins.LoginRequiredMixin, generic.edit.FormView):
     def get(self, request: http.HttpRequest, *args, **kwargs) -> http.HttpResponse:
         form = self.form_class()
         message = 'Choose a file and add some accompanying text and a shop link if you have one'
-        images = self.model.objects.filter(user_profile=self.request.user.profile.forumprofile)
+        images = self.model.objects.filter(user_profile=self.request.user.profile)
         context = {'images': images, 'form': form, 'message': message}
         return render(self.request, './django_artisan/profile/images/image_update.html', context)
 
     def form_valid(self, form: forms.ModelForm) -> http.HttpResponseRedirect:
         obj = form.save(commit=False)
-        obj.user_profile: artisan_forms.ArtisanForumProfile = self.request.user.profile.forumprofile.artisanforumprofile
+        obj.user_profile: artisan_forms.ArtisanForumProfile = self.request.user.profile
         obj.save()
         img = Image.open(obj.image_file.path)
         img = ImageOps.expand(img, border=10, fill='white')
@@ -256,7 +257,7 @@ class UserProductImageUpload(mixins.LoginRequiredMixin, generic.edit.FormView):
             message = 'The form is not valid. Fix the following errors...'
         else:
             message = 'The form is not valid. Fix the following error...'
-        images = self.model.objects.filter(user_profile=self.request.user.profile.forumprofile)
+        images = self.model.objects.filter(user_profile=self.request.user.profile)
         context = {'images': images, 'form': self.form_class(), 'message': message, 'error_msg': error_msg}
         return render(self.request, './django_artisan/profile/images/image_update.html', context)
 

@@ -16,7 +16,7 @@
                         {% for post in page_obj.object_list %}
                             <tr >
                                     <td scope="row" class="avatar d-flex justify-content-between align-items-center pe-5" data-label="Author">
-                                        {% thumbnail post.author.profile.forumprofile.avatar.image_file "50x50" crop="center" as im %}
+                                        {% thumbnail post.author.profile.avatar.image_file "50x50" crop="center" as im %}
                                             <a href="/people/{{post.author.profile.display_name}}"><img src="{{ im.url }}" height="{{ im.height }}" width="{{ im.width }}" class="rounded-circle" id="image-{{ post.user_profile.display_name }}_avatar-image" title="{{post.author.profile.display_name}}" /></a>
                                         {% endthumbnail %}
                                         {% if post.pinned %}

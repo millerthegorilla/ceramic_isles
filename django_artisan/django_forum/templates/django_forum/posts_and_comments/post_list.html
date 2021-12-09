@@ -13,7 +13,7 @@
                         {% for post in page_obj.object_list %}
                             <tr >
                                     <td>
-                                        {% thumbnail post.author.profile.forumprofile.avatar.image_file "50x50" crop="center" as im %}
+                                        {% thumbnail post.author.profile.avatar.image_file "50x50" crop="center" as im %}
                                             <img src="{{ im.url }}" height="{{ im.height }}" width="{{ im.width }}" class="rounded-circle" id="image-{{ post.user_profile.display_name }}_avatar-image" title="{{post.user_profile.display_name}}" />
                                         {% endthumbnail %}
                                     </td>

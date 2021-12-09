@@ -20,18 +20,21 @@ from . import models as forum_models
 # class AvatarForm(forms.Form):
 #     def __init__(*args, **kwargs):
 
-
+# this class is here to provide the user's forum profile 
 class ForumProfileUser(profile_forms.ProfileUser):
+    model = forum_models.ForumProfile
+
     class Meta(profile_forms.ProfileUser.Meta):
         fields = profile_forms.ProfileUser.Meta.fields
-        model = profile_forms.ProfileUser.Meta.model
+        #model = profile_forms.ProfileUser.Meta.model
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
+        breakpoint()
         if len(args):   # TODO review this...
             initl = args[0].get('display_name')
         else:
-            initl = forum_models.ForumProfile.objects.get(
+            initl = self.model.objects.get(
                 profile_user__username=kwargs['initial']['username']).display_name
         self.fields['display_name'] = forms.CharField(
             help_text='<span class="tinfo">Your display name is used in the forum, and to make \
