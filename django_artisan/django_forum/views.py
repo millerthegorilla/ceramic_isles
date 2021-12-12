@@ -155,8 +155,9 @@ class ForumProfile(profile_views.ProfileUpdate):
         context = super().get_context_data(**args)
         context['avatar'] = self.model.objects.get(
             profile_user=self.request.user).avatar
-        queryset = self.post_model.objects.filter(
-            author=self.request.user)
+        queryset = (self.post_model.objects.select_related('author')
+                               .select_related('author__profile')
+                               .filter(author=self.request.user))
         paginator = pagination.Paginator(queryset, 6)
         page_number = self.request.GET.get('page')
         page_obj = paginator.get_page(page_number)

@@ -17,12 +17,12 @@
                             <tr >
                                     <td scope="row" class="avatar d-flex justify-content-between align-items-center pe-5" data-label="Author">
                                         {% thumbnail post.author.profile.avatar.image_file "50x50" crop="center" as im %}
-                                            <a href="/people/{{post.author.profile.display_name}}"><img src="{{ im.url }}" height="{{ im.height }}" width="{{ im.width }}" class="rounded-circle" id="image-{{ post.user_profile.display_name }}_avatar-image" title="{{post.author.profile.display_name}}" /></a>
+                                            <a href="/people/{{post.author.profile.display_name}}"><img src="{{ im.url }}" height="{{ im.height }}" width="{{ im.width }}" class="rounded-circle" id="image-{{ post.author.profile.display_name }}_avatar-image" title="{{post.author.profile.display_name}}" /></a>
                                         {% endthumbnail %}
                                         {% if post.pinned %}
-                                        {% thumbnail 'http://127.0.0.1:8000/static/django_forum/images/yellow-pin.png' "40x40" format='PNG' as im %}
-                                            <img src="{{ im.url }}" width='30' height='30' title="This post is pinned!">
-                                        {% endthumbnail %}
+                                            {% thumbnail 'http://127.0.0.1:8000/static/django_forum/images/yellow-pin.png' "40x40" format='PNG' as im %}
+                                                <img src="{{ im.url }}" width='30' height='30' title="This post is pinned!">
+                                            {% endthumbnail %}
                                         {% endif %}
                                     </td>
                                     <td data-label="Title">
@@ -56,7 +56,7 @@
                 <div class="col-lg-8">
                     {% with site_url|add:'/static/django_artisan/images/nouveau_line.png' as banner_url %}
                         {% thumbnail banner_url "3000x240" format='PNG' as im %}
-                            <img src="{{ im.url }}" width='100%' height='50' title="This post is pinned!">
+                            <img src="{{ im.url }}" width='100%' height='50'>
                         {% endthumbnail %}
                     {% endwith %}
                 </div>

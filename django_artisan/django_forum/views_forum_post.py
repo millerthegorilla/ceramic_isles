@@ -44,15 +44,17 @@ class PostView(messages_views.MessageView):
               and overload them individually here, where necessary, instead of redefining
               the whole if clause.
     """
-    # model: forum_models.Post = forum_models.Post
-    # slug_url_kwarg: str = 'slug'
-    # slug_field: str = 'slug'
+    model: forum_models.Post = forum_models.Post
+    slug_url_kwarg: str = 'slug'
+    slug_field: str = 'slug'
     template_name: str = 'django_forum/posts_and_comments/forum_post_detail.html'
-    # form_class: forum_forms.Post = forum_forms.Post
+    form_class: forum_forms.Post = forum_forms.Post
     comment_form_class: forum_forms.Comment = forum_forms.Comment
 
     def get(self, request: http.HttpRequest, pk:int, slug:str) -> http.HttpResponse:
-        self.object = self.get_object()
+        self.object = self.get_object(queryset=self.model.objects
+                                     .select_related('author')
+                                     .select_related('author__profile'))
         context = self.get_context_data()
         return shortcuts.render(self.request,
                       self.template_name,

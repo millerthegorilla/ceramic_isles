@@ -57,10 +57,16 @@ class PostList(forum_views.PostList):
                 queryset = queryset.filter(created_at__lt=time_range[0], created_at__gt=time_range[1])
                 search = len(queryset)
             if not search:
-                queryset = artisan_models.Post.objects.order_by('-pinned')
+                queryset = (artisan_models.Post.objects
+                            .select_related('author')
+                            .select_related('author__profile')
+                            .order_by('-pinned'))
         else:
             form.errors.clear()
-            queryset = artisan_models.Post.objects.order_by('-pinned')
+            queryset = (artisan_models.Post.objects
+                            .select_related('author')
+                            .select_related('author__profile')
+                            .order_by('-pinned'))
          
         paginator = pagination.Paginator(queryset, self.paginate_by)
          
@@ -135,6 +141,7 @@ class ArtisanForumProfile(forum_views.ForumProfile):
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
+        #context = {}
         site = site_models.Site.objects.get_current()
         # context['form'].initial.update(
         #             {'bio':self.request.user.profile.bio,
@@ -142,12 +149,16 @@ class ArtisanForumProfile(forum_views.ForumProfile):
         #              'shop_web_address':self.request.user.profile.shop_web_address,
         #              'outlets':self.request.user.profile.outlets,
         #              'listed_member':self.request.user.profile.listed_member})
-        context['avatar'] = artisan_models.ArtisanForumProfile.objects.get(profile_user=self.request.user).avatar
-        queryset = artisan_models.Post.objects.filter(author=self.request.user)
-        paginator = pagination.Paginator(queryset, 6)
-        page_number = self.request.GET.get('page')
-        page_obj = paginator.get_page(page_number)
-        context['page_obj'] = page_obj
+        # context['avatar'] = (artisan_models.ArtisanForumProfile.objects
+        #                        .get(profile_user=self.request.user).avatar)
+        # queryset = (artisan_models.Post.objects
+        #                        .select_related('author')
+        #                        .select_related('author__profile')
+        #                        .filter(author=self.request.user))
+        # paginator = pagination.Paginator(queryset, 6)
+        # page_number = self.request.GET.get('page')
+        # page_obj = paginator.get_page(page_number)
+        # context['page_obj'] = page_obj
         context ['site_url'] = (self.request.scheme or 'https') + '://' + site.domain
         return context
 

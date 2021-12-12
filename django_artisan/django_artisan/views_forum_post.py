@@ -23,7 +23,7 @@ class PostView(forum_post_views.PostView):
     form_class: artisan_forms.Post = artisan_forms.Post
 
     def get_context_data(self, **kwargs):
-        context_data = super(PostView, self).get_context_data(**kwargs)
+        context_data = super().get_context_data(**kwargs)
         category = self.object.get_category_display()
         cat_text = ''
         for i in [(cat.value, cat.label) for cat in conf.settings.CATEGORY]:

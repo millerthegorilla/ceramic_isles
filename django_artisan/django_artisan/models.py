@@ -164,10 +164,6 @@ class UserProductImage(models.Model):
         primary_key=True, default=uuid.uuid4, editable=False)
     id: models.PositiveIntegerField = models.PositiveIntegerField(default=0, editable=False)
 
-    # def __str__(self):
-    # return
-    # f"Profile_image:user={self.user_profile.profile_user.username},active={self.active}"
-
     """
          because I made the primary key a uuid field, I need a way of returning the next sequential
          image, as django doesn't allow auto-incrementing integers.  The below method uses transaction.atomic
