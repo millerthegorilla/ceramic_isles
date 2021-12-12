@@ -30,7 +30,6 @@ class ForumProfileUser(profile_forms.UserProfile):
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        breakpoint()
         if len(args):   # TODO review this...
             initl = args[0].get('display_name')
         else:

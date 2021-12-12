@@ -138,7 +138,6 @@ class ForumProfile(profile_views.ProfileUpdate):
     def form_valid(self, form: forms.ModelForm) -> typing.Union[http.HttpResponse, http.HttpResponseRedirect]: # type: ignore
     # mypy can't handle inheritance properly, and grumbles about a missing return statement
         if self.request.POST['type'] == 'update-profile':
-            breakpoint()
             if form.has_changed():
                 obj = form.save(commit=False)
                 obj.display_name = defaultfilters.slugify(form['display_name'].value())
