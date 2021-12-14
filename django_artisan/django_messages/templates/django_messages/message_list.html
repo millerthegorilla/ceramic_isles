@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}{{ siteName }} - Forum Posts{% endblock title %}
 {% block content %}
-    {% if page_obj.object_list.count == 0 %}
+    {% if not page_obj.object_list.exists %}
         <div class="row">
             <div class="col-auto mx-auto mt-5">
                 <p><h3>There are currently no posts in the forum.  Why not <a href="{% url 'django_messages:message_create_view' %}">add</a> one...?</h3></p>

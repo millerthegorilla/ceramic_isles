@@ -16,15 +16,15 @@ def send_susbcribed_email(post_id: int = None,
                           s_name: str = None) -> str:
     post = comment = None
     posts = forum_models.Post.objects.filter(id=post_id)
-    if posts.count():
+    if posts.exists():
         post = posts.first()
 
     comments = forum_models.Comment.objects.filter(id=comment_id)
-    if comments.count():
+    if comments.exists():
         comment = comments.first()
 
     if post and comment:
-        if post.subscribed_users.count():
+        if post.subscribed_users.exists():
             href = "{0}://{1}{2}#{3}".format('https',
                                              site_models.Site.objects.get_current().domain,
                                              path_info,

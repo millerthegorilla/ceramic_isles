@@ -174,7 +174,7 @@ class AboutPage(generic.list.ListView):
         data['site_url'] = (self.request.scheme or 'https') + '://' + site.domain
         qs = artisan_models.ArtisanForumProfile.objects.all().exclude(profile_user__is_superuser=True).exclude(listed_member=False) \
                                        .values_list('display_name', 'avatar__image_file')
-        if qs.count:
+        if qs.exists():
             data['people'] = {}
             for i, entry in enumerate(qs):
                 data['people'][i] = {'display_name':entry[0], 'avatar':entry[1]}

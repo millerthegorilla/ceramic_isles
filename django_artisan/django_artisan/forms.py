@@ -147,7 +147,7 @@ class UserProductImage(forms.ModelForm):
         self.helper.form_class = 'col-auto col-xs-3'
 
     def restrict_amount(self, count: int) -> None:
-        if artisan_models.UserProductImage.objects.count() and self.user is not None:
+        if artisan_models.UserProductImage.objects.exists() and self.user is not None:
             if artisan_models.UserProductImage.objects.filter(
                     user_profile=self.user.profile).count() >= MAX_NUMBER_OF_IMAGES:
                 raise exceptions.ValidationError(

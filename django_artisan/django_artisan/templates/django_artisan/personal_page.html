@@ -4,7 +4,7 @@
 {% block content %}
 {% load thumbnail %}
 <div class="container-fluid people-page ps-5 pt-3">
-	{% if name is None and bio == "" and profile_image_file is None and images.count == 0 and outlets == '' and shop_link == '' %}
+	{% if name is None and bio == "" and profile_image_file is None and not images.exists and outlets == '' and shop_link == '' %}
 	<div class="col-12 col-sm-10 col-md-8 col-lg-5 mx-auto mt-5 text-white">
 		<h3 class="ms-3 profile-names">Hey {{ display_name }}!...</h3><h4>you have yet to upload any details or images of your work.</br><div class="mt-2">You can go to the profile page to add details and images.</br></div><div class="mt-2">Check the box that states 'display personal page' to make your page visible to others.</div></h4>
 	</div>

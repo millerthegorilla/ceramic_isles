@@ -2,7 +2,7 @@
 {% block title %}{{ siteName }} - Forum Posts{% endblock title %}
 {% block content %}
 {% load crispy_forms_tags %}
-    {% if page_obj.object_list.count == 0 and is_a_search is False %}
+    {% if not page_obj.object_list.exists and is_a_search is False %}
         <div class="row">
             <div class="col-auto mx-auto mt-5">
                 <p><h3>There are currently no posts in the forum.  Why not <a href="{% url 'django_forum:post_create_view' %}" class="tinfo">add</a> one...?</h3></p>
