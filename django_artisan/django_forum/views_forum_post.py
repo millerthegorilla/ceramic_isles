@@ -56,7 +56,7 @@ class PostView(messages_views.MessageView):
                                      .select_related('author')
                                      .select_related('author__profile'))
         context = self.get_context_data()
-        return shortcuts.render(self.request,
+        return shortcuts.render(request,
                       self.template_name,
                       context)
 
@@ -133,7 +133,7 @@ class CreateComment(auth.mixins.LoginRequiredMixin, views.View):
     a_name: str = 'django_forum'
 
     def post(self, request: http.HttpRequest, pk:int, slug:str):
-        post = self.post_model.objects.get(pk=pk)
+        post = self.post_model.objects.get(pk=pk, slug=slug)
         if not post.moderation_date:
             comment_form = self.form_class(data=self.request.POST)
             if comment_form.is_valid():
@@ -147,6 +147,8 @@ class CreateComment(auth.mixins.LoginRequiredMixin, views.View):
                 new_comment.save()
                 sname: str = "subscribe_timeout" + str(uuid.uuid4())
                 tasks.schedule('django_forum.tasks.send_susbcribed_email',
+                             post_model=self.post_model,
+                             comment_model=self.comment_model,
                              name=sname,
                              schedule_type="O",
                              repeats=-1,
@@ -155,7 +157,7 @@ class CreateComment(auth.mixins.LoginRequiredMixin, views.View):
                              comment_id=new_comment.id,
                              s_name=sname,
                              path_info=self.request.path_info)
-                return shortcuts.redirect(new_comment)
+                return shortcuts.redirect(new_comment, permanent=True)
             else:
                 site = site_models.Site.objects.get_current()
                 comments = self.model.objects.filter(post_fk=post).all()
@@ -167,7 +169,7 @@ class CreateComment(auth.mixins.LoginRequiredMixin, views.View):
                               'comment_form': comment_form,
                               'site_url': (self.request.scheme or 'https') + '://' + site.domain})
         return shortcuts.redirect(urls.reverse_lazy(self.a_name + ':post_view', 
-                                                    args=[post.id, post.slug]))
+                                                    args=[post.id, post.slug]), permanent=True)
 
 
 class DeleteComment(auth.mixins.LoginRequiredMixin, views.View):

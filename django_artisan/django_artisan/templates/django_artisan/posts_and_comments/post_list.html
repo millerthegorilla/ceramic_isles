@@ -1,4 +1,5 @@
 {% load thumbnail %}
+{% load cache %} 
 <div class="mb-3 post-list">
                 <table id="table">
                     <thead class="sub-headline-text">
@@ -14,6 +15,7 @@
                     </thead>
                     <tbody id="post-table" class="tinfo post-table">
                         {% for post in page_obj.object_list %}
+                        {% cache 30 "post_teaser_" post.id post.slug %}
                             <tr >
                                     <td scope="row" class="avatar d-flex justify-content-between align-items-center pe-5" data-label="Author">
                                         {% thumbnail post.author.profile.avatar.image_file "50x50" crop="center" as im %}
@@ -48,6 +50,7 @@
                                         {{ post.created_at|date }}
                                     </td>
                             </tr>
+                        {% endcache %}
                         {% endfor %}
                     </tbody>
                 </table>

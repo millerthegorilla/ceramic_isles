@@ -1,4 +1,5 @@
 {% load crispy_forms_tags %}
+{% load cache %}
 		<!-- COMMENTS -->
 		<div class="ps-md-5 ps-lg-5 ps-sm-3 ps-2 col-12 col-lg-8 mx-auto">
 		    <h3 class="tinfo mt-3 comment-headline">Comments...</h3>
@@ -6,6 +7,7 @@
 		        <div class="row mx-auto">
 			        <div class="comments ps-4">
 		    		{% for comment in comments %}
+		    		{% cache 30 "comment_" comment.id comment.slug %}
 		                <div class="flex-column mx-auto">
                                 <div class="d-flex">
                                     <a href="/people/{{comment.author}}/">{% thumbnail comment.author.profile.avatar.image_file "40x40" crop="center" as im %}
@@ -69,6 +71,7 @@
 	                                {{ comment.created_at }}
 	                        </span>
 	                    </div>
+	                {% endcache %}
             		{% endfor %}
 			        </div>
         	    </div>

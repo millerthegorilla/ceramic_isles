@@ -24,7 +24,7 @@ from . import documents as artisan_documents
 
 logger = logging.getLogger('django_artisan')
 
-
+# TODO enable cache and bust it when new post is created.
 @decorators.method_decorator(cache.never_cache, name='dispatch')
 class PostList(forum_views.PostList):
     model = artisan_models.Post

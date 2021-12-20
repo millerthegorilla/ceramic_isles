@@ -1,5 +1,5 @@
 import logging
-
+from typing import Type
 import django_q
 
 from django import conf
@@ -10,16 +10,18 @@ from . import models as forum_models
 
 logger = logging.getLogger('django_artisan')
 
-def send_susbcribed_email(post_id: int = None, 
+def send_susbcribed_email(post_model: Type[forum_models.Post],
+                          comment_model: Type[forum_models.Comment],
+                          post_id: int = None, 
                           comment_id: int = None, 
                           path_info: str = None,
                           s_name: str = None) -> str:
     post = comment = None
-    posts = forum_models.Post.objects.filter(id=post_id)
+    posts = post_model.objects.filter(id=post_id)
     if posts.exists():
         post = posts.first()
 
-    comments = forum_models.Comment.objects.filter(id=comment_id)
+    comments = comment_models.objects.filter(id=comment_id)
     if comments.exists():
         comment = comments.first()
 
