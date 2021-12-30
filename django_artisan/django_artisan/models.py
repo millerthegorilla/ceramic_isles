@@ -1,4 +1,5 @@
 import os, uuid, logging, typing
+from uuid import UUID
 from random import randint
 
 from django_q import tasks
@@ -160,25 +161,7 @@ class UserProductImage(models.Model):
         ArtisanForumProfile,
         on_delete=models.CASCADE,
         related_name="forum_images")
-    image_id: models.UUIDField = models.UUIDField(
-        primary_key=True, default=uuid.uuid4, editable=False)
-    id: models.PositiveIntegerField = models.PositiveIntegerField(default=0, editable=False)
-
-    """
-         because I made the primary key a uuid field, I need a way of returning the next sequential
-         image, as django doesn't allow auto-incrementing integers.  The below method uses transaction.atomic
-         with F strings to return a record in a way that won't go wrong even if the database fails.
-         https://stackoverflow.com/a/54148942
-         TODO (returning to code at later date) - 
-         - what if primary key returned by get_next refers to an existing object
-         https://docs.djangoproject.com/en/3.2/ref/models/instances/ 
-    """
-    @classmethod
-    def get_next(cls) -> int:
-        with transaction.atomic():
-            cls.objects.update(id=models.F('id') + 1)
-            return cls.objects.values_list('id', flat=True)[0]
-
+    image_id: models.UUIDField = models.UUIDField(default=uuid.uuid4, editable=False)
 
 @receiver(signals.post_delete, sender=UserProductImage)
 def auto_delete_file_on_delete(sender: UserProductImage, instance: UserProductImage, **kwargs):

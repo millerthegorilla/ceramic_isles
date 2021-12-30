@@ -61,8 +61,8 @@ class Migration(migrations.Migration):
                 ('image_shop_link', models.CharField(blank=True, default='', max_length=50)),
                 ('image_shop_link_title', models.CharField(blank=True, default='', max_length=30)),
                 ('active', models.BooleanField(default=False)),
-                ('image_id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('id', models.PositiveIntegerField(default=0, editable=False)),
+                ('image_id', models.UUIDField(default=uuid.uuid4, editable=False)),
+                ('id', models.PositiveIntegerField(auto_created=True,  primary_key=True, serialize=False, verbose_name='ID')),
                 ('user_profile', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='forum_images', to='django_artisan.artisanforumprofile')),
             ],
             options={

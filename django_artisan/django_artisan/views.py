@@ -196,7 +196,9 @@ class LandingPage(generic.base.TemplateView):
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
-        context['images'] = artisan_models.UserProductImage.objects.filter(active=True).order_by('?')
+        context['images'] = (artisan_models.UserProductImage.objects
+                                       .select_related('user_profile')
+                                       .filter(active=True).order_by('?'))
         context['image_size'] = "1024x768"
         context['username'] = self.request.user.username # type: ignore
         return context

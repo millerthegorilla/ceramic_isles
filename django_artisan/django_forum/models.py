@@ -185,12 +185,6 @@ class Post(messages_models.Message):
     def __str__(self) -> str:
         return f"{self.author.profile.display_name}"
 
-# @dispatch.receiver(signals.post_save, sender=Post)
-# def save_author_on_post_creation(sender: Post, instance: Post, created, **kwargs) -> None:
-#     if created:
-#         instance.author = instance.post_author()
-#         instance.save()
-
 # if django_forum.models.Post is abstract then the below needs to know what Post model
 # is being used.  TODO  make sure that docs indicate that POST_MODEL must be set if
 # ABSTRACTPOST is True.
