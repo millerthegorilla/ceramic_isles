@@ -141,6 +141,11 @@ class Comment(messages_forms.Message):
 
 ## TODO add choices field to search page
 class PostListSearch(forms.Form):
+    
+    # date constants for search page published at dropdown, where each constant represents
+    # a time range tuple (created_at__lt, created_at__gt)
+    # in django_forum.views.py line 91
+    # queryset = queryset.filter(created_at__lt=time_range[0], created_at__gt=time_range[1])
     date_end_of_last_month = datetime(utils.timezone.now().year, utils.timezone.now().month, 1) - timedelta(1)
     DATE_ANY = 0
     DATE_TODAY = (utils.timezone.now(), datetime(utils.timezone.now().year, 
@@ -148,9 +153,9 @@ class PostListSearch(forms.Form):
                                                  utils.timezone.now().day, 0, 0, 0))
     DATE_WEEK = (utils.timezone.now(), utils.timezone.now() - timedelta(7))
     DATE_WEEK_LAST = (utils.timezone.now() - timedelta(7), utils.timezone.now() - timedelta(14))
-    DATE_MONTH_LAST = (datetime(utils.timezone.now().year, utils.timezone.now().month - 1, 
+    DATE_MONTH_LAST = (datetime(date_end_of_last_month.year, date_end_of_last_month.month,
                                 date_end_of_last_month.day, tzinfo=timezone.utc),
-                       datetime(utils.timezone.now().year, utils.timezone.now().month - 1, 
+                       datetime(date_end_of_last_month.year, date_end_of_last_month.month,
                                 1, tzinfo=timezone.utc))
     DATE_YEAR_NOW = (utils.timezone.now(), datetime(utils.timezone.now().year, 1, 1, tzinfo=timezone.utc))
     DATE_YEAR_LAST = (datetime(utils.timezone.now().year - 1, 12, 31, tzinfo=timezone.utc), 
