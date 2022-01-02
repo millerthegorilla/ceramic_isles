@@ -27,8 +27,17 @@ class Command(base.BaseCommand):
             path = conf.settings.MANAGEMENT_IMAGE_PATH
         except:
             pass
-        imagefiles = ([f for f in os.listdir(path) 
-                      if os.path.isfile(os.path.join(path, f))])
+
+        try:
+            imagefiles = ([f for f in os.listdir(path) 
+                          if os.path.isfile(os.path.join(path, f))])
+        except Exception as e:
+            raise base.CommandError("Error! can't get image names. {}".format(e))
+
+        if not len(imagefiles):
+            raise base.CommandError('Error! There are no images!')
+            sys.exit(1)
+        
         user_ids = []
         for i in range(options['num_of_users']):
             self.stdout.write(self.style.SUCCESS('Creating user number {}'.format(i+1)))
