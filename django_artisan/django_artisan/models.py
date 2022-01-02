@@ -169,7 +169,6 @@ def auto_delete_file_on_delete(sender: UserProductImage, instance: UserProductIm
     Deletes file from filesystem
     when corresponding `MediaFile` object is deleted.
     """
-    breakpoint()
     fp = instance.image_file.path
     fd = os.path.dirname(fp)
     if instance.image_file:
@@ -185,7 +184,6 @@ def auto_delete_file_on_change(sender: UserProductImage, instance:UserProductIma
     when corresponding `MediaFile` object is updated
     with new file.
     """
-    breakpoint()
     if not instance.pk:
         return False
     try:
