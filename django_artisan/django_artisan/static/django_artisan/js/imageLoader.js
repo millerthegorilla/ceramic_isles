@@ -1,7 +1,7 @@
 // https://dev.to/trezy/loading-images-with-web-workers-49ap
 self.addEventListener('message', async event => {
   const request = new Request(
-      event.data.url,
+      event.data.request_url,
       {
           method: 'GET',
           headers: {'X-CSRFToken': event.data.token},
@@ -9,15 +9,16 @@ self.addEventListener('message', async event => {
       }
   );
   fetch(request).then(function(response) {
+     // response.json then has the list of the urls
       return response.json();
   })
-  .then(async responseData => {
-      const response = await fetch(responseData.imgurl)
+  .then(imgUrls => {
+    imgUrls.forEach(async imgurl => {
+      const response = await fetch(imgurl)
       const blob = await response.blob()
       self.postMessage({
-        'elid': event.elementid,
-        'imageURL': responseData.url,
         'blob': blob,
       })
+    })
   })
-})
+});

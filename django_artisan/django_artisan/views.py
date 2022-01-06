@@ -1,4 +1,4 @@
-import random, logging, elasticsearch_dsl, typing
+import random, logging, elasticsearch_dsl, typing, json
 from PIL import Image, ImageOps
 from sorl.thumbnail import delete, get_thumbnail
 
@@ -193,23 +193,17 @@ class AboutPage(generic.list.ListView):
 
 #webworker ajax request to here, returns url
 class ImgURL(generic.base.View):
-    __qs = (artisan_models.UserProductImage.objects
+    def get(self, request: http.HttpRequest) -> http.JsonResponse:
+        # get every thumbnail url except first three which are statically loaded into
+        # the template        
+        images = (artisan_models.UserProductImage.objects
                                        .select_related('user_profile')
                                        .filter(active=True).order_by('?'))
-    index = 0
-
-    def __init__(self):
-        self.iter = iter(self.__qs)
-    
-    @classmethod
-    def qs_count(cls):
-        return cls.__qs.count()
-
-    def get(self, request: http.HttpRequest) -> http.JsonResponse:
-        data = {
-           'imgurl': get_thumbnail(next(self.iter).image_file, '1024x768', format="WEBP", crop='center', quality=80).url
-        }
-        return http.JsonResponse(data)
+        ql = []
+        for image in images:    
+            ql.append(get_thumbnail(image.image_file, '1024x768', 
+                                    format="WEBP", crop='center', quality=80).url)
+        return http.JsonResponse(ql[3:], safe=False)
 
 
 class LandingPage(generic.base.TemplateView):
@@ -218,7 +212,9 @@ class LandingPage(generic.base.TemplateView):
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
-        context['numofimages'] = range(ImgURL.qs_count())
+        context['images'] = (artisan_models.UserProductImage.objects
+                                       .select_related('user_profile')
+                                       .filter(active=True).order_by('?'))
         context['image_size'] = "1024x768"
         #context['username'] = self.request.user.username # type: ignore
         context['csrftoken'] = csrf.get_token(self.request)
