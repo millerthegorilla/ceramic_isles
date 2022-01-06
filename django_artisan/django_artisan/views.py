@@ -1,6 +1,7 @@
 import random, logging, elasticsearch_dsl, typing
 from PIL import Image, ImageOps
-from sorl.thumbnail import delete
+from sorl.thumbnail import delete, get_thumbnail
+
 from django_q import tasks
 
 from django import conf, http, forms, shortcuts, urls, utils
@@ -9,6 +10,7 @@ from django.contrib.auth import mixins
 from django.contrib import sitemaps
 from django.contrib.sites import models as site_models
 from django.db import models as db_models
+from django.middleware import csrf
 from django.utils import decorators
 from django.shortcuts import render, redirect
 from django.views import generic
@@ -189,6 +191,26 @@ class AboutPage(generic.list.ListView):
             qs_repeating = self.model.objects.filter(repeating=True)
             return qs_bydate | qs_repeating
 
+#webworker ajax request to here, returns url
+class ImgURL(generic.base.View):
+    __qs = (artisan_models.UserProductImage.objects
+                                       .select_related('user_profile')
+                                       .filter(active=True).order_by('?'))
+    index = 0
+
+    def __init__(self):
+        self.iter = iter(self.__qs)
+    
+    @classmethod
+    def qs_count(cls):
+        return cls.__qs.count()
+
+    def get(self, request: http.HttpRequest) -> http.JsonResponse:
+        data = {
+           'imgurl': get_thumbnail(next(self.iter).image_file, '1024x768', format="WEBP", crop='center', quality=80).url
+        }
+        return http.JsonResponse(data)
+
 
 class LandingPage(generic.base.TemplateView):
     model = artisan_models.UserProductImage
@@ -196,11 +218,10 @@ class LandingPage(generic.base.TemplateView):
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
-        context['images'] = (artisan_models.UserProductImage.objects
-                                       .select_related('user_profile')
-                                       .filter(active=True).order_by('?'))
+        context['numofimages'] = range(ImgURL.qs_count())
         context['image_size'] = "1024x768"
-        context['username'] = self.request.user.username # type: ignore
+        #context['username'] = self.request.user.username # type: ignore
+        context['csrftoken'] = csrf.get_token(self.request)
         return context
 
 

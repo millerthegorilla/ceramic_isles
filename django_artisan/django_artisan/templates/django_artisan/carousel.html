@@ -1,23 +1,15 @@
 {% load static %}
 {% load thumbnail %}
     <div id="carousel-large-background" class="carousel slide carousel-fade" data-bs-interval="4200" data-bs-ride="carousel" data-bs-pause="false">
+      <input type="hidden" name="csrfmiddlewaretoken" value="{{csrftoken}}">
       <div class="carousel-inner">
-        {% for image in images %}
+        {% for image in numofimages %}
         {% if forloop.counter0 == 0 %}
-          <div id="carousel-item" class="carousel-item active">
+          <div id="image-{{ forloop.counter }}-carousel" class="carousel-item active">
         {% else %}
           <div id="image-{{ forloop.counter }}-carousel" class="carousel-item">
         {% endif %}
-                    <img src="{% thumbnail image.image_file image_size as im %}
-                        {{ im.url }}
-                      {% endthumbnail %}" 
-                          srcset="{% thumbnail image.image_file '350x350' as im %}
-                                      {{ im.url }} {{ im.x }}w
-                                  {% endthumbnail %},
-                                  {% thumbnail image.image_file image_size as im %}
-                                      {{ im.url }} {{ im.x }}w
-                                  {% endthumbnail %}" 
-                          sizes="(max-width: 410px) 350px, 768px" class="carousel-image" id="image-{{forloop.counter}}-image" >
+                    <img src="" size="{{image_size}}" class="carousel-image" id="image-{{forloop.counter}}">
             <div class="carousel-caption p-2 col-sm-6 col-md-4 col-lg-3 d-md-block text-white">
               <h5>{{ image.image_title }}</h5>
               <p>{{ image.image_text }}</p>
