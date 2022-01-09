@@ -1,4 +1,4 @@
-import os, uuid, logging, typing
+import os, uuid, logging, shutil, typing
 from uuid import UUID
 from random import randint
 
@@ -132,13 +132,13 @@ def auto_delete_image_file_on_delete(sender: ArtisanForumProfile, instance: Arti
                 try:
                     thumbnail.delete(instance.image_file)
                     if len(os.listdir(fd)) == 0:
-                        os.rmdir(fd)
-                    fdu1 = core.settings.MEDIA_ROOT + \
-                        'uploads/users/' + \
-                        instance.display_name
-                    if os.path.isdir(fdu1):
-                        if len(os.listdir(fdu1)) == 0:
-                            os.rmdir(fdu1)
+                        shutil.rmtree(conf.settings.MEDIA_ROOT + '/' + instance.user_profile.display_name, ignore_errors=True)
+                    # fdu1 = core.settings.MEDIA_ROOT + \
+                    #     'uploads/users/' + \
+                    #     instance.display_name
+                    # if os.path.isdir(fdu1):
+                    #     if len(os.listdir(fdu1)) == 0:
+                    #         os.rmdir(fdu1)
 
                 except exceptions.ObjectDoesNotExist as e:
                     logger.error("Error deleting image file : {0}".format(e))
@@ -174,7 +174,7 @@ def auto_delete_file_on_delete(sender: UserProductImage, instance: UserProductIm
     if instance.image_file:
         thumbnail.delete(instance.image_file)  # removes from cache - sorl thumbnail
         if len(os.listdir(fd)) == 0:
-            os.rmdir(fd)
+            shutil.rmtree(conf.settings.MEDIA_ROOT + 'uploads/users/' + instance.user_profile.display_name, ignore_errors=True)
 
 # the below function was commented out
 @receiver(signals.pre_save, sender=UserProductImage)

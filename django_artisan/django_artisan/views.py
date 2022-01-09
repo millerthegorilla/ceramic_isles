@@ -1,4 +1,4 @@
-import random, logging, elasticsearch_dsl, typing, json
+import random, logging, elasticsearch_dsl, typing, json, PIL
 from PIL import Image, ImageOps
 from sorl.thumbnail import delete, get_thumbnail
 
@@ -6,6 +6,7 @@ from django_q import tasks
 
 from django import conf, http, forms, shortcuts, urls, utils
 from django.core import paginator as pagination
+from django.core import serializers
 from django.contrib.auth import mixins
 from django.contrib import sitemaps
 from django.contrib.sites import models as site_models
@@ -193,17 +194,32 @@ class AboutPage(generic.list.ListView):
 
 #webworker ajax request to here, returns url
 class ImgURL(generic.base.View):
-    def get(self, request: http.HttpRequest) -> http.JsonResponse:
+    # this is returning images in different order to that on the web page
+    def post(self, request: http.HttpRequest) -> http.JsonResponse:
+        # TODO should probably be a get request rather than post....
         # get every thumbnail url except first three which are statically loaded into
-        # the template        
-        images = (artisan_models.UserProductImage.objects
-                                       .select_related('user_profile')
-                                       .filter(active=True).order_by('?'))
+        # the template
+        body = json.loads(request.body.decode('utf-8'))
+        iteration = body['iteration']
+        images = json.loads(self.request.session['images'])
         ql = []
-        for image in images:    
-            ql.append(get_thumbnail(image.image_file, '1024x768', 
-                                    format="WEBP", crop='center', quality=80).url)
-        return http.JsonResponse(ql[3:], safe=False)
+        images_per_request = conf.settings.NUM_IMAGES_PER_REQUEST
+        # iteration is zero based
+        start = iteration * images_per_request
+        count = len(images)
+        finish = (count if iteration * images_per_request > count
+                        else iteration * images_per_request
+                        + images_per_request - 1)
+        fmt = "WEBP" if body['webp_support'] else "JPEG" 
+        screen_size = body['screen_size']
+        for image in images[start:finish]:
+            im = artisan_models.UserProductImage.objects.get(pk=image['pk'])
+            pic = get_thumbnail(im.image_file, screen_size, 
+                                    format=fmt, crop='center', quality=70).url
+            assert(pic is not None) 
+            ql.append({'id': image['pk'],
+                       'pic': pic}) 
+        return http.JsonResponse(ql, safe=False)
 
 
 class LandingPage(generic.base.TemplateView):
@@ -215,6 +231,7 @@ class LandingPage(generic.base.TemplateView):
         context['images'] = (artisan_models.UserProductImage.objects
                                        .select_related('user_profile')
                                        .filter(active=True).order_by('?'))
+        self.request.session['images'] = serializers.serialize("json", context['images'])
         context['image_size'] = "1024x768"
         #context['username'] = self.request.user.username # type: ignore
         context['csrftoken'] = csrf.get_token(self.request)
@@ -276,6 +293,7 @@ class UserProductImageUpload(mixins.LoginRequiredMixin, generic.edit.FormView):
         obj.user_profile: artisan_forms.ArtisanForumProfile = self.request.user.profile
         obj.save()
         img = Image.open(obj.image_file.path)
+        img = img.resize((1024,768))
         img = ImageOps.expand(img, border=10, fill='white')
         img.save(obj.image_file.path)
         return redirect('django_artisan:image_update')

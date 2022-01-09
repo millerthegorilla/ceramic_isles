@@ -1,4 +1,5 @@
 import sys, faker, uuid, os
+from PIL import Image, ImageOps
 from random import randrange
 
 from django import conf
@@ -51,16 +52,21 @@ class Command(base.BaseCommand):
             new_user.profile.display_name=first_name + '-' + last_name
             new_user.save()
             user_ids.append(new_user.id)
-            pic = imagefiles[randrange(8)]
-            try:
-                new_user.profile.forum_images.create(
-                    image_file=images.ImageFile(file=open(path + pic, 'rb')),
-                    image_text=pic,
-                    image_title=pic[:30],
-                    active=True)
-            except Exception as e:
-                raise base.CommandError('Error! creating image for user {} failed! {}'.format(i, e))
-                break
+            for i in range(conf.settings.MAX_USER_IMAGES):
+                pic = imagefiles[randrange(8)]
+                try:
+                    image = new_user.profile.forum_images.create(
+                            image_file=images.ImageFile(file=open(path + pic, 'rb')),
+                            image_text=pic,
+                            image_title=pic[:30],
+                            active=True)
+                    img = Image.open(image.image_file.path)
+                    img = img.resize((1024,768))
+                    img = ImageOps.expand(img, border=10, fill='white')
+                    img.save(image.image_file.path)
+                except Exception as e:
+                    raise base.CommandError('Error! creating image for user {} failed! {}'.format(i, e))
+                    break
 
         self.stdout.write(self.style.SUCCESS('Successfully created {} users.'.format(i + 1)))
         self.stdout.write(self.style.SUCCESS('User ids: {}'.format(user_ids)))

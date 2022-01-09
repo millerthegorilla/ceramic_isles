@@ -7,8 +7,7 @@
   {% include './carousel.html' %}
 </div>
 {% endblock content %}
-{% block body_js %}
+{% block extra_js %}
   {% javascript 'django_artisan_carousel' %} <!-- pipeline minified javascript tag -->
-  {% javascript 'django_artisan_imageLoader' %} <!-- pipeline minified javascript tag -->
   <!-- <script src="{% static 'django_artisan/js/carousel.js' %}" type="application/javascript" referrerpolicy="origin" defer=""></script> -->
-{% endblock body_js %}
+{% endblock extra_js %}

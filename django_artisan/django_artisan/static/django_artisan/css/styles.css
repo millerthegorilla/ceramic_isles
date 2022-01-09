@@ -214,7 +214,7 @@
 
 .carousel-image {
   position: relative;
-  object-fit: scale-down;
+  object-fit: contain;
   height: 87vh;
   width:100vw;
   margin: auto;
