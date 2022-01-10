@@ -1,7 +1,6 @@
 // https://dev.to/trezy/loading-images-with-web-workers-49ap
 self.addEventListener('message', async event => {
-  const NUM_OF_IMAGES=2
-  for (i=0; i < (event.data.len_im_els/NUM_OF_IMAGES); i ++)
+  for (i=0; i <(event.data.len_im_els/event.data.images_per_request); i++)
   {
     const request = new Request(
         event.data.request_url,

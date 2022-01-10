@@ -2,6 +2,7 @@
 {% load thumbnail %}
     <div id="carousel-large-background" class="carousel slide carousel-fade" data-bs-interval="5200" data-bs-ride="carousel" data-bs-pause="false">
       <input type="hidden" name="csrfmiddlewaretoken" value="{{csrftoken}}">
+      <input type="hidden" id="images_per_request" data-images="{{images_per_request}}">
       <div class="carousel-inner">
         {% for image in images %}
         {% if forloop.counter0 == 0 %}
@@ -9,7 +10,7 @@
         {% else %}
           <div id="image-{{ forloop.counter }}-carousel" class="carousel-item">
         {% endif %}
-        {% if forloop.counter0 < 3 %}
+        {% if forloop.counter0 < lazyload_offset %}
               <img src="{% thumbnail image.image_file image_size as im %}
                                       {{ im.url }}
                                     {% endthumbnail %}" 

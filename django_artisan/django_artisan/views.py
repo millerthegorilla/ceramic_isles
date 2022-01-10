@@ -197,28 +197,27 @@ class ImgURL(generic.base.View):
     # this is returning images in different order to that on the web page
     def post(self, request: http.HttpRequest) -> http.JsonResponse:
         # TODO should probably be a get request rather than post....
-        # get every thumbnail url except first three which are statically loaded into
-        # the template
         body = json.loads(request.body.decode('utf-8'))
         iteration = body['iteration']
         images = json.loads(self.request.session['images'])
         ql = []
         images_per_request = conf.settings.NUM_IMAGES_PER_REQUEST
+        lazyload_offset = conf.settings.LAZYLOAD_OFFSET
         # iteration is zero based
         start = iteration * images_per_request
         count = len(images)
         finish = (count if iteration * images_per_request > count
                         else iteration * images_per_request
-                        + images_per_request - 1)
+                        + images_per_request)
         fmt = "WEBP" if body['webp_support'] else "JPEG" 
         screen_size = body['screen_size']
-        for image in images[start:finish]:
-            im = artisan_models.UserProductImage.objects.get(pk=image['pk'])
-            pic = get_thumbnail(im.image_file, screen_size, 
-                                    format=fmt, crop='center', quality=70).url
-            assert(pic is not None) 
-            ql.append({'id': image['pk'],
-                       'pic': pic}) 
+        for i in range(start,finish):
+            if i >= lazyload_offset:
+                im = artisan_models.UserProductImage.objects.get(pk=images[i]['pk'])
+                pic = get_thumbnail(im.image_file, screen_size, 
+                                        format=fmt, crop='center', quality=70).url
+                ql.append({'id': images[i]['pk'],
+                           'pic': pic}) 
         return http.JsonResponse(ql, safe=False)
 
 
@@ -233,6 +232,8 @@ class LandingPage(generic.base.TemplateView):
                                        .filter(active=True).order_by('?'))
         self.request.session['images'] = serializers.serialize("json", context['images'])
         context['image_size'] = "1024x768"
+        context['images_per_request'] = conf.settings.NUM_IMAGES_PER_REQUEST
+        context['lazyload_offset'] = conf.settings.LAZYLOAD_OFFSET
         #context['username'] = self.request.user.username # type: ignore
         context['csrftoken'] = csrf.get_token(self.request)
         return context

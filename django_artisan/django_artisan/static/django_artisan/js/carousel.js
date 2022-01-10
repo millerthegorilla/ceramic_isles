@@ -4,6 +4,9 @@
 
 
 $(document).ready(function () {
+    const carouselEl = document.querySelector('#carousel-large-background')
+    const carousel = new bootstrap.Carousel(carouselEl)
+    carousel.pause()
     // display image captions on rollover
     $(".carousel-item").hover(function(){ $(".carousel-caption").hide();
       $(".carousel-caption").css('visibility', 'visible');
@@ -16,7 +19,7 @@ $(document).ready(function () {
       const screen_size = window.innerWidth < 500 ? "400x500" : "1024x768"  //TODO experiment with the sizes/read
       ImageLoaderWorker.addEventListener('message', event => {
         const imageData = event.data;
-    
+        
         var imageElement = document.querySelectorAll(`#image-${imageData.id}`)[0]
 
         var objectURL = URL.createObjectURL(imageData.blob)
@@ -25,16 +28,22 @@ $(document).ready(function () {
         if (imageElement)
         {
         imageElement.onload = () => {
+          if(carousel.isPaused)
+          {
+            carousel.cycle()
+          }
           URL.revokeObjectURL(objectURL)
         }
           imageElement.setAttribute('size', screen_size)
           imageElement.setAttribute('src', objectURL)
         }
       })
-      console.log(imgElements.length / 10)
+      console.log(imgElements.length / document.getElementById('images_per_request').getAttribute('data-images') )
       const siteurl = location.protocol + '//' + location.host + location.pathname + 'imgurl/'
       const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+      console.log(document.getElementById('images_per_request').getAttribute('data-images'))
       ImageLoaderWorker.postMessage({
+          'images_per_request': document.getElementById('images_per_request').getAttribute('data-images'),
           'len_im_els': imgElements.length,
           'webp_support': Modernizr.webp,
           'screen_size': screen_size,
