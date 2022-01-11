@@ -4,9 +4,16 @@
 
 
 $(document).ready(function () {
-    const carouselEl = document.querySelector('#carousel-large-background')
-    const carousel = new bootstrap.Carousel(carouselEl)
-    carousel.pause()
+    $("#carousel-large-background").on("slide.bs.carousel", function(e){
+        next_el = $($('.carousel-item img').get(e.to))
+        if (next_el.attr('src') == "")
+        {
+          $('#carousel-large-background').carousel("pause")
+          next_el.get()[0].onload = () => {
+            $('#carousel-large-background').carousel("cycle")
+          };
+        }
+    });
     // display image captions on rollover
     $(".carousel-item").hover(function(){ $(".carousel-caption").hide();
       $(".carousel-caption").css('visibility', 'visible');
@@ -28,17 +35,12 @@ $(document).ready(function () {
         if (imageElement)
         {
         imageElement.onload = () => {
-          if(carousel.isPaused)
-          {
-            carousel.cycle()
-          }
           URL.revokeObjectURL(objectURL)
         }
           imageElement.setAttribute('size', screen_size)
           imageElement.setAttribute('src', objectURL)
         }
       })
-      console.log(imgElements.length / document.getElementById('images_per_request').getAttribute('data-images') )
       const siteurl = location.protocol + '//' + location.host + location.pathname + 'imgurl/'
       const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
       console.log(document.getElementById('images_per_request').getAttribute('data-images'))
