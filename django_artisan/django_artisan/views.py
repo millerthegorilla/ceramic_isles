@@ -195,10 +195,8 @@ class AboutPage(generic.list.ListView):
 #webworker ajax request to here, returns url
 class ImgURL(generic.base.View):
     # this is returning images in different order to that on the web page
-    def post(self, request: http.HttpRequest) -> http.JsonResponse:
+    def get(self, request: http.HttpRequest, webp_support: str, screen_size: str, iteration: int) -> http.JsonResponse:
         # TODO should probably be a get request rather than post....
-        body = json.loads(request.body.decode('utf-8'))
-        iteration = body['iteration']
         images = json.loads(self.request.session['images'])
         ql = []
         images_per_request = conf.settings.NUM_IMAGES_PER_REQUEST
@@ -209,8 +207,7 @@ class ImgURL(generic.base.View):
         finish = (count if iteration * images_per_request > count
                         else iteration * images_per_request
                         + images_per_request)
-        fmt = "WEBP" if body['webp_support'] else "JPEG" 
-        screen_size = body['screen_size']
+        fmt = "WEBP" if webp_support else "JPEG" 
         for i in range(start,finish):
             if i >= lazyload_offset:
                 im = artisan_models.UserProductImage.objects.get(pk=images[i]['pk'])
