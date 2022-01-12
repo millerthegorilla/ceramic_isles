@@ -167,26 +167,27 @@ $(document).ready(function() {
     const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
     const ImageLoaderWorker = new Worker('./static/django_artisan/js/image_loader_min.js');
     var iteration = 0;
+    const webp_support = Modernizr.webp
 
     function pm() {
         ImageLoaderWorker.postMessage({
             'iteration': iteration,
             'images_per_request': images_per_request,
             'len_im_els': imgElements.length,
-            'webp_support': Modernizr.webp,
+            'webp_support': webp_support,
             'screen_size': screen_size,
             'request_url': siteurl,
             'token': csrftoken,
         });
     }
     ImageLoaderWorker.addEventListener('message', event => {
-        const imageData = event.data;
-        // console.log(event.data.id)
-        //console.log('#image-' + imageData.id);
-        //console.log(`#image-${imageData.id}`)
-        var imageElement = document.querySelectorAll("#image-" + String(imageData.id))[0];
 
-        var objectURL = URL.createObjectURL(imageData.blob);
+        const imageData = event.data;
+        var id = new Int32Array(imageData.id)[0]
+        var mimestring = webp_support ? "image/png" : "image/jpeg"
+        var blob = new Blob([imageData.blob], { type: mimestring })
+        var imageElement = document.querySelectorAll("#image-" + String(id))[0];
+        var objectURL = URL.createObjectURL(blob);
 
         // Once the image is loaded, we'll want to do some extra cleanup
         if (imageElement)
