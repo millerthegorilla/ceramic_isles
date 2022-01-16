@@ -77,5 +77,4 @@ urlpatterns = [
                                model=artisan_models.Post,
         template_name='django_artisan/posts_and_comments/forum_post_list.html'), 
                                name='post_list_view'),
-    path('imgurl/<str:webp_support>/<str:screen_size>/<int:iteration>', artisan_views.ImgURL.as_view(), name='img_url'),
 ] + postview_patterns

@@ -1,6 +1,5 @@
 import random, logging, elasticsearch_dsl, typing, json, PIL
 from PIL import Image, ImageOps
-from sorl.thumbnail import delete, get_thumbnail
 
 from django_q import tasks
 
@@ -191,31 +190,6 @@ class AboutPage(generic.list.ListView):
             qs_bydate = self.model.objects.filter(time__gt=utils.timezone.now().replace(hour=0, minute=0, second=0, microsecond=0))
             qs_repeating = self.model.objects.filter(repeating=True)
             return qs_bydate | qs_repeating
-
-#webworker ajax request to here, returns url
-class ImgURL(generic.base.View):
-    # this is returning images in different order to that on the web page
-    def get(self, request: http.HttpRequest, webp_support: str, screen_size: str, iteration: int) -> http.JsonResponse:
-        # TODO should probably be a get request rather than post....
-        images = json.loads(self.request.session['images'])
-        ql = []
-        images_per_request = conf.settings.NUM_IMAGES_PER_REQUEST
-        lazyload_offset = conf.settings.LAZYLOAD_OFFSET
-        # iteration is zero based
-        start = iteration * images_per_request
-        count = len(images)
-        finish = (count if iteration * images_per_request > count
-                        else iteration * images_per_request
-                        + images_per_request)
-        fmt = "WEBP" if webp_support else "JPEG" 
-        for i in range(start,finish):
-            if i >= lazyload_offset:
-                im = artisan_models.UserProductImage.objects.get(pk=images[i]['pk'])
-                pic = get_thumbnail(im.image_file, screen_size, 
-                                        format=fmt, crop='center', quality=70).url
-                ql.append({'id': images[i]['pk'],
-                           'pic': pic}) 
-        return http.JsonResponse(ql, safe=False)
 
 
 class LandingPage(generic.base.TemplateView):

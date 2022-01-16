@@ -126,26 +126,69 @@
     e.Modernizr = Modernizr
 }(window, document);
 
+// https://stackoverflow.com/questions/1977871/check-if-an-image-is-loaded-no-errors-with-jquery
+function IsImageOk(img) {
+    // During the onload event, IE correctly identifies any images that
+    // weren’t downloaded as not complete. Others should too. Gecko-based
+    // browsers act like NS4 in that they report this incorrectly.
+    if (!img.complete) {
+        return false;
+    }
+
+    // However, they do have two very useful properties: naturalWidth and
+    // naturalHeight. These give the true size of the image. If it failed
+    // to load, either of these should be zero.
+    if (img.naturalWidth === 0) {
+        return false;
+    }
+
+    // No other way of checking: assume it’s ok.
+    return true;
+}
+
+function sleep (time) {
+  return new Promise((resolve) => setTimeout(resolve, time));
+}
+
 $(document).ready(function() {
     const myCarouselEl = document.querySelector('#carousel-large-background')
-    var carousel = new bootstrap.Carousel(myCarouselEl, {
-        interval: false
-    })
-    offset = document.getElementById('lazyload_offset').getAttribute('data-offset')
-    var img = document.querySelectorAll(".active")[0].parentElement.children[offset].children[0]
-        //$($(".active").siblings()[offset]).children('img').get(0)
-    observer = new MutationObserver((changes) => {
-        changes.forEach(change => {
-            if (change.attributeName.includes('src')) {
-                var carousel = new bootstrap.Carousel(myCarouselEl, {
-                    interval: 4200
-                })
-            }
+    myCarouselEl.addEventListener("slid.bs.carousel", function slid_listener() {
+      var carousel = new bootstrap.Carousel(myCarouselEl, {
+          interval: false
+      })  // stops carousel from cycling
+      // offset = document.getElementById('lazyload_offset').getAttribute('data-offset')
+      try
+      {
+        var next_active_img = document.querySelectorAll(".active")[0].nextElementSibling.children[0]
+      }
+      catch (err)
+      {
+        myCarouselEl.removeEventListener('slid.bs.carousel', slid_listener)
+        return
+      }
+      if (IsImageOk(next_active_img))
+      {
+         var carousel = new bootstrap.Carousel(myCarouselEl, {
+             interval: 6200
+         })
+      }
+      else
+      {
+        observer = new MutationObserver((changes) => {
+            changes.forEach(change => {
+                if (change.attributeName.includes('src')) {
+                    sleep(500)
+                    var carousel = new bootstrap.Carousel(myCarouselEl, {
+                        interval: 6200
+                    })
+                }
+            });
         });
-    });
-    observer.observe(img, {
-        attributes: true
-    });
+        observer.observe(next_active_img, {
+            attributes: true
+        });
+      }
+    })
     // display image captions on rollover
     $(".carousel-item").hover(function() {
             $(".carousel-caption").hide();
@@ -163,9 +206,9 @@ $(document).ready(function() {
     const images_per_request = document.getElementById('images_per_request').getAttribute('data-images');
     const screen_size = window.innerWidth < 500 ? "400x500" : "1024x768";
     const siteurl = location.protocol + "//" + location.host + location.pathname + "imgurl/";
-    console.log('siteurl = ' + siteurl)
+    //console.log('siteurl = ' + siteurl)
     const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-    const ImageLoaderWorker = new Worker('./static/django_artisan/js/image_loader_min.js');
+    const ImageLoaderWorker = new Worker('./static/django_bs_carousel_lazy_load/js/image_loader_min.js');
     var iteration = 0;
     const webp_support = Modernizr.webp
 
