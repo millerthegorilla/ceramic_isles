@@ -150,7 +150,7 @@ class UserProductImage(models.Model):
     class Meta:
         permissions = [('approve_image', 'Approve Image')]
 
-    image_file: safe_image_models.SafeImageField = safe_image_models.SafeImageField(upload_to=user_directory_path)
+    image_file: safe_image_models.SafeImageField = safe_image_models.SafeImageField(upload_to=user_directory_path, max_length=250)
     image_text: models.CharField = models.CharField(max_length=400, default='', blank=True)
     image_title: models.CharField = models.CharField(max_length=30, default='', blank=True)
     image_shop_link: models.CharField = models.CharField(max_length=50, default='', blank=True)

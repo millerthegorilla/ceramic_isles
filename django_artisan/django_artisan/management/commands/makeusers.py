@@ -23,7 +23,8 @@ class Command(base.BaseCommand):
                                 This command only works with a development install')
             sys.exit(1)
         fake = faker.Faker()
-        path = conf.settings.BASE_DIR + '/django_artisan/management/images/'
+
+        path = conf.settings.BASE_DIR + 'django_artisan/management/images/'
         try:
             path = conf.settings.MANAGEMENT_IMAGE_PATH
         except:

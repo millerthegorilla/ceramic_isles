@@ -1,13 +1,10 @@
 {% extends 'base.html' %}
 {% block title %}{{ siteName }}{% endblock title %}
 {% load static %}
-{% load pipeline %}
 {% block content %}
 <div class="container-fluid landing-page">
-  {% include './carousel.html' %}
+  {% include 'django_bs_carousel/carousel.html' %}
 </div>
 {% endblock content %}
 {% block body_js %}
-  {% javascript 'django_bs_carousel' %} <!-- pipeline minified javascript tag -->
-  <!-- <script src="{% static 'django_artisan/js/carousel.js' %}" type="application/javascript" referrerpolicy="origin" defer=""></script> -->
 {% endblock body_js %}

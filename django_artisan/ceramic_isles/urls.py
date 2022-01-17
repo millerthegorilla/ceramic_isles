@@ -8,7 +8,7 @@ from django.urls import include, path
 from django_email_verification import urls as mail_urls
 from django_users import urls as users_app_urls
 from django_forum import urls as forum_urls
-from django_bs_carousel_lazy_load import urls as lazyload_urls
+from django_bs_carousel import urls as carousel_urls
 from django_artisan import urls as artisan_urls
 from django_messages import urls as messages_urls
 from django.conf import settings
@@ -33,7 +33,7 @@ urlpatterns = [
            CustomRegister.as_view(form_class=artisan_forms.CustomRegistrationForm), 
          name='register'),
     path('', include(artisan_urls)),
-    path('', include(lazyload_urls)),
+    path('', include(carousel_urls)),
     path('forum/', include(forum_urls)),
     path('messages/', include(messages_urls)),
     path('users/', include(users_app_urls)),

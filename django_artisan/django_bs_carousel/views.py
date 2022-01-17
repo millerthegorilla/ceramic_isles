@@ -19,15 +19,17 @@ class ImgURL(generic.base.View):
         if lazyload_offset < 2: 
             lazyload_offset = 2
         # iteration is zero based
-        start = iteration * images_per_request
+        start = iteration * images_per_request + lazyload_offset
         count = len(images)
-        finish = (count if iteration * images_per_request > count
-                        else iteration * images_per_request
-                        + images_per_request)
+        finish = (count - 1 if (iteration == 0 and images_per_request > count) 
+                               or (iteration * images_per_request > count)
+                            else iteration * images_per_request
+                                 + images_per_request)
         fmt = "WEBP" if webp_support else "JPEG"
-
+        if start == finish:  # handle case where there are only three images.
+            finish += 1
         for i in range(start,finish):
-            if i >= lazyload_offset:
+            if i >= lazyload_offset - 1: 
                 #breakpoint()
                 im = (apps.get_model(*conf.settings.DJANGO_BS_CAROUSEL_IMAGE_MODEL
                                        .split('.')).objects.get(pk=images[i]['pk']))

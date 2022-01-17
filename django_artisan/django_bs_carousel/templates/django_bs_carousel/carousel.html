@@ -1,5 +1,6 @@
 {% load static %}
 {% load thumbnail %}
+{% load pipeline %}
     <div id="carousel-large-background" class="carousel slide carousel-fade" data-bs-interval="6200" data-bs-ride="carousel" data-bs-pause="false">
       <input type="hidden" name="csrfmiddlewaretoken" value="{{csrftoken}}">
       <input type="hidden" id="images_per_request" data-images="{{images_per_request}}">
@@ -17,7 +18,7 @@
                                     {% endthumbnail %}" 
                  class="carousel-image" id="image-{{forloop.counter}}-image" >
         {% else %}
-              <img src="" size="{{image_size}}" height="100%" class="carousel-image carousel-load" id="image-{{image.id}}">
+              <img src="{% static 'django_bs_carousel/images/loading_ani.gif' %}" size="{{image_size}}" height="100%" class="carousel-image carousel-load" id="image-{{image.id}}">
         {% endif %}
             <div class="carousel-caption p-2 col-sm-6 col-md-4 col-lg-3 d-md-block text-white">
               <h5>{{ image.image_title }}</h5>
@@ -40,3 +41,7 @@
         </a>
       {% endif %}
     </div>
+    {% block body_js %}
+      {% javascript 'django_bs_carousel' %} <!-- pipeline minified javascript tag -->
+      <!-- <script src="{% static 'django_artisan/js/carousel.js' %}" type="application/javascript" referrerpolicy="origin" defer=""></script> -->
+    {% endblock body_js %}

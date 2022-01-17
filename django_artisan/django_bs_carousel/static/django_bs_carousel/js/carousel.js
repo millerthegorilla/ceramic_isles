@@ -128,6 +128,11 @@
 
 // https://stackoverflow.com/questions/1977871/check-if-an-image-is-loaded-no-errors-with-jquery
 function IsImageOk(img) {
+
+    if (img.src == "/static/django_bs_carousel/images/loading_ani.gif")
+    {
+        return false;
+    }
     // During the onload event, IE correctly identifies any images that
     // weren’t downloaded as not complete. Others should too. Gecko-based
     // browsers act like NS4 in that they report this incorrectly.
@@ -168,6 +173,7 @@ $(document).ready(function() {
       }
       if (IsImageOk(next_active_img))
       {
+         sleep(500)
          var carousel = new bootstrap.Carousel(myCarouselEl, {
              interval: 6200
          })
@@ -208,7 +214,7 @@ $(document).ready(function() {
     const siteurl = location.protocol + "//" + location.host + location.pathname + "imgurl/";
     //console.log('siteurl = ' + siteurl)
     const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-    const ImageLoaderWorker = new Worker('./static/django_bs_carousel_lazy_load/js/image_loader_min.js');
+    const ImageLoaderWorker = new Worker('./static/django_bs_carousel/js/image_loader_min.js', {'type': 'classic', 'credentials': 'same-origin'});
     var iteration = 0;
     const webp_support = Modernizr.webp
 
