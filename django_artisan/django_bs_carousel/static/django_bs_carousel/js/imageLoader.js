@@ -15,12 +15,22 @@ self.addEventListener('message', async event => {
       .then(imgUrls => {
         imgUrls.forEach(async imgurl => {
           const pic = await fetch(imgurl.pic);
-          const blob = await pic.blob();
-          const ab = await blob.arrayBuffer()
-          self.postMessage({
-            'id': new Int32Array([imgurl.id]).buffer,
-            'blob': ab,
-          });
+          if(pic)
+          {
+            const blob = await pic.blob();
+            const ab = await blob.arrayBuffer()
+            self.postMessage({
+              'id': new Int32Array([imgurl.id]).buffer,
+              'blob': ab,
+            });
+          }
+          else
+          {
+            self.postMessage({
+              'id': "",
+              'blob': "",
+            });
+          }
         })
       })
 });

@@ -48,13 +48,10 @@
 			<div class="col-auto">
 				{% if images %}
 				<span class="ms-3 profile-names text-white"><h2 class="ms-3">{% if name %}{{ name }}'s Gallery...{% else %}Gallery...{% endif %}</h2></span>
-	    		{% include './carousel.html' %}
+	    		{% include 'django_bs_carousel/carousel.html' %}
 	    		{% endif %}
 	    	</div>
 	 	</div>
 	 {% endif %}
 </div>
 {% endblock content %}
-{% block body_js %}
-<script src="{% static 'django_artisan/js/carousel.js' %}" type="application/javascript" referrerpolicy="origin" defer=""></script>
-{% endblock body_js %}

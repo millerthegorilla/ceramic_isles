@@ -202,6 +202,7 @@ class LandingPage(generic.base.TemplateView):
                                        .select_related('user_profile')
                                        .filter(active=True).order_by('?'))
         self.request.session['images'] = serializers.serialize("json", context['images'])
+        context['loading_image'] = 'django_bs_carousel/images/loading_ani.gif'
         context['image_size'] = "1024x768"
         context['images_per_request'] = conf.settings.NUM_IMAGES_PER_REQUEST
         context['lazyload_offset'] = conf.settings.LAZYLOAD_OFFSET
@@ -221,8 +222,17 @@ class PersonalPage(generic.detail.DetailView):
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
-        context['images'] = artisan_models.UserProductImage.objects.filter(
-                                user_profile=self.object).filter(active=True).order_by('?')
+        context['images'] = (artisan_models.UserProductImage.objects
+                                       .select_related('user_profile')
+                                       .filter(user_profile=self.object)
+                                       .filter(active=True).order_by('?'))
+        self.request.session['images'] = serializers.serialize("json", context['images'])
+        context['loading_image'] = 'django_bs_carousel/images/loading_ani.gif'
+        context['image_size'] = "1024x768"
+        context['images_per_request'] = conf.settings.NUM_IMAGES_PER_REQUEST
+        context['lazyload_offset'] = conf.settings.LAZYLOAD_OFFSET
+        #context['username'] = self.request.user.username # type: ignore
+        context['csrftoken'] = csrf.get_token(self.request)
         u_p = self.get_queryset().first()
         context['profile_image_file'] = u_p.image_file
         if context['profile_image_file'].name == '':

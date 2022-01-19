@@ -127,9 +127,9 @@
 }(window, document);
 
 // https://stackoverflow.com/questions/1977871/check-if-an-image-is-loaded-no-errors-with-jquery
-function IsImageOk(img) {
+function IsImageOk(img, loading_image) {
 
-    if (img.src == "/static/django_bs_carousel/images/loading_ani.gif")
+    if (img.src == loading_image)
     {
         return false;
     }
@@ -156,12 +156,12 @@ function sleep (time) {
 }
 
 $(document).ready(function() {
+    const loading_image = document.getElementById('loading_image').getAttribute('loading_image')
     const myCarouselEl = document.querySelector('#carousel-large-background')
     myCarouselEl.addEventListener("slid.bs.carousel", function slid_listener() {
       var carousel = new bootstrap.Carousel(myCarouselEl, {
           interval: false
       })  // stops carousel from cycling
-      // offset = document.getElementById('lazyload_offset').getAttribute('data-offset')
       try
       {
         var next_active_img = document.querySelectorAll(".active")[0].nextElementSibling.children[0]
@@ -171,7 +171,7 @@ $(document).ready(function() {
         myCarouselEl.removeEventListener('slid.bs.carousel', slid_listener)
         return
       }
-      if (IsImageOk(next_active_img))
+      if (IsImageOk(next_active_img, loading_image))
       {
          sleep(500)
          var carousel = new bootstrap.Carousel(myCarouselEl, {
@@ -183,10 +183,18 @@ $(document).ready(function() {
         observer = new MutationObserver((changes) => {
             changes.forEach(change => {
                 if (change.attributeName.includes('src')) {
-                    sleep(500)
-                    var carousel = new bootstrap.Carousel(myCarouselEl, {
-                        interval: 6200
-                    })
+                    if(change.target.src = loading_image)
+                    {
+                       observer.observe(change.target, {
+                            attributes: true
+                        }); 
+                    }
+                    else
+                    {
+                        var carousel = new bootstrap.Carousel(myCarouselEl, {
+                            interval: 6200
+                        })
+                    }
                 }
             });
         });
@@ -211,10 +219,10 @@ $(document).ready(function() {
     const ieLength = imgElements.length;
     const images_per_request = document.getElementById('images_per_request').getAttribute('data-images');
     const screen_size = window.innerWidth < 500 ? "400x500" : "1024x768";
-    const siteurl = location.protocol + "//" + location.host + location.pathname + "imgurl/";
+    const siteurl = location.protocol + "//" + location.host + "/imgurl/";
     //console.log('siteurl = ' + siteurl)
     const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-    const ImageLoaderWorker = new Worker('./static/django_bs_carousel/js/image_loader_min.js', {'type': 'classic', 'credentials': 'same-origin'});
+    const ImageLoaderWorker = new Worker('/static/django_bs_carousel/js/image_loader_min.js', {'type': 'classic', 'credentials': 'same-origin'});
     var iteration = 0;
     const webp_support = Modernizr.webp
 
@@ -230,27 +238,32 @@ $(document).ready(function() {
         });
     }
     ImageLoaderWorker.addEventListener('message', event => {
-
         const imageData = event.data;
         var id = new Int32Array(imageData.id)[0]
-        var mimestring = webp_support ? "image/png" : "image/jpeg"
-        var blob = new Blob([imageData.blob], { type: mimestring })
-        var imageElement = document.querySelectorAll("#image-" + String(id))[0];
-        var objectURL = URL.createObjectURL(blob);
+        if(id)
+        {
+            var mimestring = webp_support ? "image/png" : "image/jpeg"
+            var blob = new Blob([imageData.blob], { type: mimestring })
+            var imageElement = document.querySelectorAll("#image-" + String(id))[0];
+            var objectURL = URL.createObjectURL(blob);
 
-        // Once the image is loaded, we'll want to do some extra cleanup
-        if (imageElement)
-        {
-          imageElement.onload = () => {
-            URL.revokeObjectURL(objectURL);
-          }
-          imageElement.setAttribute('size', screen_size);
-          imageElement.setAttribute('src', objectURL);
+            // Once the image is loaded, we'll want to do some extra cleanup
+            if (imageElement)
+            {
+              imageElement.onload = () => {
+                URL.revokeObjectURL(objectURL);
+              }
+              imageElement.setAttribute('size', screen_size);
+              imageElement.setAttribute('src', objectURL);
+            }
         }
-        if (iteration < (ieLength/images_per_request))
+        else
         {
-          pm();
-          iteration++;
+            if(iteration < imgElements.length / images_per_request)
+            {
+                pm();
+                iteration++;
+            }
         }
     })
 

@@ -62,7 +62,7 @@ class Command(base.BaseCommand):
                             image_title=pic[:30],
                             active=True)
                     img = Image.open(image.image_file.path)
-                    img = img.resize((1024,768))
+                    img = ImageOps.fit(img, (1024,768))
                     img = ImageOps.expand(img, border=10, fill='white')
                     img.save(image.image_file.path)
                 except Exception as e:
