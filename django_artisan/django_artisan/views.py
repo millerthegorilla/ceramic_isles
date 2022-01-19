@@ -202,7 +202,7 @@ class LandingPage(generic.base.TemplateView):
                                        .select_related('user_profile')
                                        .filter(active=True).order_by('?'))
         self.request.session['images'] = serializers.serialize("json", context['images'])
-        context['loading_image'] = 'django_bs_carousel/images/loading_ani.gif'
+        context['loading_image'] = 'django_bs_carousel/images/spinning-circles.svg'
         context['image_size'] = "1024x768"
         context['images_per_request'] = conf.settings.NUM_IMAGES_PER_REQUEST
         context['lazyload_offset'] = conf.settings.LAZYLOAD_OFFSET
@@ -227,7 +227,7 @@ class PersonalPage(generic.detail.DetailView):
                                        .filter(user_profile=self.object)
                                        .filter(active=True).order_by('?'))
         self.request.session['images'] = serializers.serialize("json", context['images'])
-        context['loading_image'] = 'django_bs_carousel/images/loading_ani.gif'
+        context['loading_image'] = 'django_bs_carousel/images/spinning-circles.svg'
         context['image_size'] = "1024x768"
         context['images_per_request'] = conf.settings.NUM_IMAGES_PER_REQUEST
         context['lazyload_offset'] = conf.settings.LAZYLOAD_OFFSET
