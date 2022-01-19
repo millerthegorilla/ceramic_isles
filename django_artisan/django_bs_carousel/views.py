@@ -28,13 +28,17 @@ class ImgURL(generic.base.View):
         fmt = "WEBP" if webp_support else "JPEG"
         if start == finish:  # handle case where there are only three images.
             finish += 1
+        #breakpoint()
+        image_pk_list = []
         for i in range(start,finish):
-            if i >= lazyload_offset - 1: 
-                im = (apps.get_model(*conf.settings.DJANGO_BS_CAROUSEL_IMAGE_MODEL
-                                       .split('.')).objects.get(pk=images[i]['pk']))
-                pic = get_thumbnail(im.image_file, screen_size, 
-                                        format=fmt, crop='center', quality=70).url
-                ql.append({'id': images[i]['pk'],
-                           'pic': pic}) 
+            if i >= lazyload_offset - 1:
+                image_pk_list.append(images[i]['pk'])
+        image_qs = (apps.get_model(*conf.settings.DJANGO_BS_CAROUSEL_IMAGE_MODEL
+                                       .split('.')).objects.filter(pk__in=image_pk_list)) 
+        for im in image_qs.iterator():
+            pic = get_thumbnail(im.image_file, screen_size, 
+                                    format=fmt, crop='center', quality=70).url
+            ql.append({'id': im.pk,
+                       'pic': pic}) 
         ql.append({'id': '', 'pic': ''})
         return http.JsonResponse(ql, safe=False)

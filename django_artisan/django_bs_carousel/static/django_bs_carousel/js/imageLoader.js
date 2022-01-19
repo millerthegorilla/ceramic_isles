@@ -30,6 +30,7 @@ self.addEventListener('message', async event => {
               'id': "",
               'blob': "",
             });
+            self.close()
           }
         })
       })

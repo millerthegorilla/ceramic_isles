@@ -203,7 +203,7 @@ class LandingPage(generic.base.TemplateView):
                                        .filter(active=True).order_by('?'))
         self.request.session['images'] = serializers.serialize("json", context['images'])
         context['loading_image'] = 'django_bs_carousel/images/spinning-circles.svg'
-        context['image_size'] = "1024x768"
+        context['image_size'] = "300x300"
         context['images_per_request'] = conf.settings.NUM_IMAGES_PER_REQUEST
         context['lazyload_offset'] = conf.settings.LAZYLOAD_OFFSET
         #context['username'] = self.request.user.username # type: ignore

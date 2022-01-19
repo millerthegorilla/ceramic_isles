@@ -173,7 +173,7 @@ $(document).ready(function() {
       }
       if (IsImageOk(next_active_img, loading_image))
       {
-         sleep(500)
+         sleep(6000)
          var carousel = new bootstrap.Carousel(myCarouselEl, {
              interval: 6200
          })
@@ -183,7 +183,9 @@ $(document).ready(function() {
         observer = new MutationObserver((changes) => {
             changes.forEach(change => {
                 if (change.attributeName.includes('src')) {
-                    if(change.target.src = loading_image)
+                    console.log('target ' + change.target.src)
+                    console.log('loading image ' + loading_image)
+                    if(change.target.src == loading_image)
                     {
                        observer.observe(change.target, {
                             attributes: true
@@ -191,6 +193,7 @@ $(document).ready(function() {
                     }
                     else
                     {
+                        sleep(6000)
                         var carousel = new bootstrap.Carousel(myCarouselEl, {
                             interval: 6200
                         })
@@ -224,8 +227,13 @@ $(document).ready(function() {
     const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
     const ImageLoaderWorker = new Worker('/static/django_bs_carousel/js/image_loader_min.js', {'type': 'classic', 'credentials': 'same-origin'});
     var iteration = 0;
-    const webp_support = Modernizr.webp
+    const webp_support = Modernizr.webp;
 
+    function closingCode(){
+       ImageLoaderWorker.terminate();
+       return null;
+    }
+    window.onbeforeunload = closingCode;
     function pm() {
         ImageLoaderWorker.postMessage({
             'iteration': iteration,

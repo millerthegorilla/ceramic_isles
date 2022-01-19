@@ -18,7 +18,7 @@
                                     {% endthumbnail %}" 
                  class="carousel-image" id="image-{{forloop.counter}}-image" >
         {% else %}
-              <img src="{% static loading_image %}" size="{{image_size}}" height="40%" class="carousel-image carousel-load" id="image-{{image.id}}">
+              <img src="{% static loading_image %}" size="{{image_size}}" height="100%" class="carousel-image carousel-load" id="image-{{image.id}}">
         {% endif %}
             <div class="carousel-caption p-2 col-sm-6 col-md-4 col-lg-3 d-md-block text-white">
               <h5>{{ image.image_title }}</h5>
