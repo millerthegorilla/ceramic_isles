@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}{{ siteName }} - Profile{% endblock title %}
 {% load static %}
+{% load pipeline %}
 {% load crispy_forms_tags %}
 {% if user.is_authenticated %}
     {% load thumbnail %}
@@ -48,6 +49,7 @@
     {% block body_imports %}
     {% endblock body_imports %}
     {% block body_js %}
-        <script src="{% static 'django_artisan/js/profileUpdate.js' %}" type="application/javascript" referrerpolicy="origin" defer=""></script>
+        {% javascript 'django_artisan' %}
+        <!-- <script src="{% static 'django_artisan/js/profileUpdate.js' %}" type="application/javascript" referrerpolicy="origin" defer=""></script> -->
     {% endblock body_js %}
 {% endif %}

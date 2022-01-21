@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load pipeline %}
 {% block title %}{{ siteName }} - Post{% endblock title %}
 {% block extra_js %}
 {% endblock extra_js %}
@@ -16,5 +17,6 @@
 </div>
 {% endblock %}
 {% block body_js %}
-  <script src="{% static 'django_forum/js/forum_post_detail.js' %}" type="application/javascript" referrerpolicy="origin" defer></script>
+  {% javascript 'django_forum' %}
+  <!-- <script src="{% static 'django_forum/js/forum_post_detail.js' %}" type="application/javascript" referrerpolicy="origin" defer></script> -->
 {% endblock body_js %}

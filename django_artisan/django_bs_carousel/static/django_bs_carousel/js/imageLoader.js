@@ -18,17 +18,21 @@ self.addEventListener('message', async event => {
           if(pic)
           {
             const blob = await pic.blob();
-            const ab = await blob.arrayBuffer()
-            self.postMessage({
-              'id': new Int32Array([imgurl.id]).buffer,
-              'blob': ab,
-            });
+            const ab = await blob.arrayBuffer(Boolean(event.data.webp_support) ? type='image/webp' : type='image/jpeg')
+            obj = { id: imgurl.id, pic:ab }
+            self.postMessage(
+              obj, [obj.pic]
+             );
+            if(ab)
+            {
+              self.postMessage({id:999, pic:blob})
+            }
           }
           else
           {
             self.postMessage({
-              'id': "",
-              'blob': "",
+              'id': 666,
+              'pic': "",
             });
             self.close()
           }

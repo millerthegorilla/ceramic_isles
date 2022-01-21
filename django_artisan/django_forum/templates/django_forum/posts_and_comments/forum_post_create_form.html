@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}{{ siteName }} - Create a Post!{% endblock title %}
 {% load static %}
+{% load pipeline %}
 {% block form_media %}
 {{ form.media }}
 {% endblock form_media %}
@@ -20,5 +21,6 @@
 {% block body_js %}
 {% endblock body_js %}
 {% block body_imports %}
-    <script src="{% static 'django_forum/js/postCreate.js' %}" type="application/javascript" referrerpolicy="origin"></script>
+    {% javascript 'django_forum' %}
+    <!-- <script src="{% static 'django_forum/js/postCreate.js' %}" type="application/javascript" referrerpolicy="origin"></script> -->
 {% endblock body_imports %}

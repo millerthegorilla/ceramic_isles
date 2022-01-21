@@ -1,5 +1,6 @@
 import random, logging, elasticsearch_dsl, typing, json, PIL
 from PIL import Image, ImageOps
+from sorl.thumbnail import get_thumbnail
 
 from django_q import tasks
 
@@ -278,6 +279,10 @@ class UserProductImageUpload(mixins.LoginRequiredMixin, generic.edit.FormView):
         img = img.resize((1024,768))
         img = ImageOps.expand(img, border=10, fill='white')
         img.save(obj.image_file.path)
+        get_thumbnail(img.image_file, "1024x768", 
+                                    format="WEBP", crop='center', quality=70)
+        get_thumbnail(img.image_file, "500x700", 
+                                    format="WEBP", crop='center', quality=70)
         return redirect('django_artisan:image_update')
 
     def form_invalid(self, form: forms.ModelForm) -> http.HttpResponse:

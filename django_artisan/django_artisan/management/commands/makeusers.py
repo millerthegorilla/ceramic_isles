@@ -62,9 +62,13 @@ class Command(base.BaseCommand):
                             image_title=pic[:30],
                             active=True)
                     img = Image.open(image.image_file.path)
-                    img = ImageOps.fit(img, (1024,768))
+                    #img = ImageOps.fit(img, (1024,768))
                     img = ImageOps.expand(img, border=10, fill='white')
                     img.save(image.image_file.path)
+                    get_thumbnail(img.image_file, "1024x768", 
+                                                format="WEBP", crop='center', quality=70)
+                    get_thumbnail(img.image_file, "500x700", 
+                                                format="WEBP", crop='center', quality=70)
                 except Exception as e:
                     raise base.CommandError('Error! creating image for user {} failed! {}'.format(i, e))
                     break

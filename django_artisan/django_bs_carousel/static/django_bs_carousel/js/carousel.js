@@ -225,7 +225,7 @@ $(document).ready(function() {
     const siteurl = location.protocol + "//" + location.host + "/imgurl/";
     //console.log('siteurl = ' + siteurl)
     const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-    const ImageLoaderWorker = new Worker('/static/django_bs_carousel/js/image_loader_min.js', {'type': 'classic', 'credentials': 'same-origin'});
+    const ImageLoaderWorker = new Worker('/static/django_bs_carousel/js/il_min.js', {'type': 'classic', 'credentials': 'same-origin'});
     var iteration = 0;
     const webp_support = Modernizr.webp;
 
@@ -247,11 +247,13 @@ $(document).ready(function() {
     }
     ImageLoaderWorker.addEventListener('message', event => {
         const imageData = event.data;
-        var id = new Int32Array(imageData.id)[0]
-        if(id)
+        var mimestring = webp_support ? "image/png" : "image/jpeg"
+        var blob = new Blob([imageData.pic], { type: mimestring }) //unnecessary cast if no transferrables.
+        if(blob)
         {
-            var mimestring = webp_support ? "image/png" : "image/jpeg"
-            var blob = new Blob([imageData.blob], { type: mimestring })
+            console.dir(event.data)
+            var id = int(imageData.id)
+            
             var imageElement = document.querySelectorAll("#image-" + String(id))[0];
             var objectURL = URL.createObjectURL(blob);
 

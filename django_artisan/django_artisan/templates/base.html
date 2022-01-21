@@ -2,6 +2,7 @@
 <html lang='en'>
     <head>
         {% load static %}
+        {% load pipeline %}
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <title>{% block title %}{{ siteName }}{% endblock title %}</title>
@@ -10,9 +11,10 @@
         <meta name="description" content="A website for ceramicists and potters and clay users and sculptors in Jersey and Guernsey and Alderney and Sark in the channel islands.  Events and Questions in a Forum, as well as Pictures and details of Work by Artists and Makers.">
          <meta name="keywords" content="ceramicists, potters, clay, sculptors, wares, china, pottery, pots, sculptures, raku, stoneware, earthenware, pit firings, handmade items, for sale, pottery, arts, crafts, artisan, pictures, work, potters, Jersey, Guernsey, Alderney, Sark, Channel Islands">
          <meta name="author" content="ceramic isles">
-        <link href="{% static 'django_artisan/css/styles.css' %}" rel="stylesheet">
+         {% stylesheet 'main_styles' %}
+        <!-- <link href="{% static 'django_artisan/css/styles.css' %}" rel="stylesheet">
         <link href="{% static 'django_forum/css/styles.css' %}" rel="stylesheet">
-        <link href="{% static 'django_users/css/styles.css' %}" rel="stylesheet">
+        <link href="{% static 'django_users/css/styles.css' %}" rel="stylesheet"> -->
         <link rel="preconnect" href="https://fonts.gstatic.com">
         <link href="https://fonts.googleapis.com/css2?family=Akaya+Kanadaka&family=Lobster+Two&family=Ubuntu:ital,wght@0,300;1,300&display=swap" rel="stylesheet">
         {% block extra_css %}

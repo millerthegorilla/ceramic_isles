@@ -173,7 +173,7 @@ def auto_delete_file_on_delete(sender: UserProductImage, instance: UserProductIm
     fd = os.path.dirname(fp)
     if instance.image_file:
         thumbnail.delete(instance.image_file)  # removes from cache - sorl thumbnail
-        if len(os.listdir(fd)) == 0:
+        if os.path.exists(fd) and len(os.listdir(fd)) == 0:
             shutil.rmtree(conf.settings.MEDIA_ROOT + 'uploads/users/' + instance.user_profile.display_name, ignore_errors=True)
 
 # the below function was commented out
