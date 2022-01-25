@@ -1,6 +1,7 @@
 import sys, faker, uuid, os
 from PIL import Image, ImageOps
 from random import randrange
+from sorl.thumbnail import get_thumbnail
 
 from django import conf
 from django.core.management import base
@@ -53,7 +54,7 @@ class Command(base.BaseCommand):
             new_user.profile.display_name=first_name + '-' + last_name
             new_user.save()
             user_ids.append(new_user.id)
-            for i in range(conf.settings.MAX_USER_IMAGES):
+            for n in range(conf.settings.MAX_USER_IMAGES):
                 pic = imagefiles[randrange(8)]
                 try:
                     image = new_user.profile.forum_images.create(
@@ -65,9 +66,9 @@ class Command(base.BaseCommand):
                     #img = ImageOps.fit(img, (1024,768))
                     img = ImageOps.expand(img, border=10, fill='white')
                     img.save(image.image_file.path)
-                    get_thumbnail(img.image_file, "1024x768", 
+                    get_thumbnail(image.image_file, "1024x768", 
                                                 format="WEBP", crop='center', quality=70)
-                    get_thumbnail(img.image_file, "500x700", 
+                    get_thumbnail(image.image_file, "500x700", 
                                                 format="WEBP", crop='center', quality=70)
                 except Exception as e:
                     raise base.CommandError('Error! creating image for user {} failed! {}'.format(i, e))

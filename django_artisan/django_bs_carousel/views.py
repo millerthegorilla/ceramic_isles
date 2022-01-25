@@ -28,7 +28,6 @@ class ImgURL(generic.base.View):
         fmt = "WEBP" if webp_support else "JPEG"
         if start == finish:  # handle case where there are only three images.
             finish += 1
-        #breakpoint()
         image_pk_list = []
         for i in range(start,finish):
             if i >= lazyload_offset - 1:

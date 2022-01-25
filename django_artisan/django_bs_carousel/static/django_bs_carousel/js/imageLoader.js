@@ -1,4 +1,5 @@
 self.addEventListener('message', async event => {
+      // const mimetype = Boolean(event.data.webp_support) ? 'image/webp' : type='image/jpeg'
       const request = new Request(
           `${event.data.request_url}${event.data.webp_support}/${event.data.screen_size}/${event.data.iteration}`,
           {
@@ -14,24 +15,20 @@ self.addEventListener('message', async event => {
       })
       .then(imgUrls => {
         imgUrls.forEach(async imgurl => {
-          const pic = await fetch(imgurl.pic);
-          if(pic)
+          if(imgurl.id)
           {
+            const pic = await fetch(imgurl.pic);
             const blob = await pic.blob();
-            const ab = await blob.arrayBuffer(Boolean(event.data.webp_support) ? type='image/webp' : type='image/jpeg')
+            const ab = await blob.arrayBuffer()
             obj = { id: imgurl.id, pic:ab }
             self.postMessage(
               obj, [obj.pic]
              );
-            if(ab)
-            {
-              self.postMessage({id:999, pic:blob})
-            }
           }
           else
           {
             self.postMessage({
-              'id': 666,
+              'id': -1,
               'pic': "",
             });
             self.close()

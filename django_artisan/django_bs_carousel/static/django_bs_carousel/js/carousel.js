@@ -128,7 +128,6 @@
 
 // https://stackoverflow.com/questions/1977871/check-if-an-image-is-loaded-no-errors-with-jquery
 function IsImageOk(img, loading_image) {
-
     if (img.src == loading_image)
     {
         return false;
@@ -155,57 +154,60 @@ function sleep (time) {
   return new Promise((resolve) => setTimeout(resolve, time));
 }
 
-$(document).ready(function() {
-    const loading_image = document.getElementById('loading_image').getAttribute('loading_image')
-    const myCarouselEl = document.querySelector('#carousel-large-background')
-    myCarouselEl.addEventListener("slid.bs.carousel", function slid_listener() {
-      var carousel = new bootstrap.Carousel(myCarouselEl, {
-          interval: false
-      })  // stops carousel from cycling
-      try
-      {
+$(window).on('load', function() {
+    const loading_image = location.protocol + "//" + location.host + document.getElementById('loading_image').dataset.loadingImage;
+    var myCarouselEl = document.querySelector('#carousel-large-background');
+    const carousel = bootstrap.Carousel.getInstance(myCarouselEl);
+
+    myCarouselEl.addEventListener('slid.bs.carousel', function() {
+        carousel.pause()
+    });
+    try
+    {
         var next_active_img = document.querySelectorAll(".active")[0].nextElementSibling.children[0]
-      }
-      catch (err)
-      {
+        console.dir(next_active_img)
+    }
+    catch (err)
+    {
         myCarouselEl.removeEventListener('slid.bs.carousel', slid_listener)
         return
-      }
-      if (IsImageOk(next_active_img, loading_image))
-      {
-         sleep(6000)
-         var carousel = new bootstrap.Carousel(myCarouselEl, {
-             interval: 6200
-         })
-      }
-      else
-      {
-        observer = new MutationObserver((changes) => {
-            changes.forEach(change => {
-                if (change.attributeName.includes('src')) {
-                    console.log('target ' + change.target.src)
-                    console.log('loading image ' + loading_image)
-                    if(change.target.src == loading_image)
-                    {
-                       observer.observe(change.target, {
-                            attributes: true
-                        }); 
-                    }
-                    else
-                    {
-                        sleep(6000)
-                        var carousel = new bootstrap.Carousel(myCarouselEl, {
-                            interval: 6200
-                        })
-                    }
+    }
+    if (IsImageOk(next_active_img, loading_image))
+    {
+        //sleep(6000)
+        carousel.cycle()
+    }
+    else
+    {
+    const callback = function(changes, observer)
+    {
+        changes.forEach(change => {
+            console.log('hey '+change.attributeName)
+            if (change.attributeName.includes('src')) {
+                console.log('target ' + change.target.src)
+                console.log('loading image ' + loading_image)
+                if(change.target.src == loading_image)
+                {
+                   observer.observe(change.target, {
+                        attributes: true
+                    }); 
                 }
-            });
+                else
+                {
+                    console.log('self is ' + self)
+                    sleep(6000)
+                    carousel.cycle()
+                }
+            }
         });
-        observer.observe(next_active_img, {
-            attributes: true
-        });
-      }
-    })
+    };
+    observer = new MutationObserver(callback)
+    config = { attributes: true }
+    observer.observe(next_active_img, config );
+    }
+})
+
+$(document).ready(function () {
     // display image captions on rollover
     $(".carousel-item").hover(function() {
             $(".carousel-caption").hide();
@@ -216,7 +218,8 @@ $(document).ready(function() {
             $(".carousel-caption").stop().fadeOut(800, function() {
                 $(".carousel-caption").css('visibility', 'hidden');
             });
-        });
+        }
+    );
 
     const imgElements = document.querySelectorAll('.carousel-load');
     const ieLength = imgElements.length;
@@ -247,14 +250,13 @@ $(document).ready(function() {
     }
     ImageLoaderWorker.addEventListener('message', event => {
         const imageData = event.data;
-        var mimestring = webp_support ? "image/png" : "image/jpeg"
-        var blob = new Blob([imageData.pic], { type: mimestring }) //unnecessary cast if no transferrables.
-        if(blob)
+        var id = parseInt(imageData.id)
+        if(id!=-1)
         {
-            console.dir(event.data)
-            var id = int(imageData.id)
+            var mimestring = webp_support ? "image/png" : "image/jpeg"
+            var blob = new Blob([imageData.pic], { type: mimestring }) //unnecessary cast if no transferrables.
             
-            var imageElement = document.querySelectorAll("#image-" + String(id))[0];
+            var imageElement = document.getElementById("image-" + String(id));
             var objectURL = URL.createObjectURL(blob);
 
             // Once the image is loaded, we'll want to do some extra cleanup
