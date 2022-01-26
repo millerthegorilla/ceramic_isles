@@ -155,24 +155,24 @@ function sleep (time) {
 }
 
 $(window).on('load', function() {
-    const loading_image = location.protocol + "//" + location.host + document.getElementById('loading_image').dataset.loadingImage;
+    const loading_image = location.protocol + "//" + location.host + document.getElementById('loading-image').dataset.loadingImage;
     var myCarouselEl = document.querySelector('#carousel-large-background');
     const carousel = bootstrap.Carousel.getInstance(myCarouselEl);
+    const lazyload_offset = parseInt(document.getElementById('images-offset').getAttribute('data-lazyload-offset'));
 
     myCarouselEl.addEventListener('slid.bs.carousel', function() {
         carousel.pause()
     });
     try
     {
-        var next_active_img = document.querySelectorAll(".active")[0].nextElementSibling.children[0]
-        console.dir(next_active_img)
+        var first_active_img = document.getElementById(`image-${lazyload_offset + 1}-carousel`);
     }
     catch (err)
     {
         myCarouselEl.removeEventListener('slid.bs.carousel', slid_listener)
         return
     }
-    if (IsImageOk(next_active_img, loading_image))
+    if (IsImageOk(first_active_img, loading_image))
     {
         //sleep(6000)
         carousel.cycle()
@@ -203,9 +203,9 @@ $(window).on('load', function() {
     };
     observer = new MutationObserver(callback)
     config = { attributes: true }
-    observer.observe(next_active_img, config );
+    observer.observe(first_active_img, config );
     }
-})
+});
 
 $(document).ready(function () {
     // display image captions on rollover
@@ -223,7 +223,7 @@ $(document).ready(function () {
 
     const imgElements = document.querySelectorAll('.carousel-load');
     const ieLength = imgElements.length;
-    const images_per_request = document.getElementById('images_per_request').getAttribute('data-images');
+    const images_per_request = document.getElementById('images-per-request').getAttribute('data-images-per-request');
     const screen_size = window.innerWidth < 500 ? "400x500" : "1024x768";
     const siteurl = location.protocol + "//" + location.host + "/imgurl/";
     //console.log('siteurl = ' + siteurl)
@@ -237,6 +237,7 @@ $(document).ready(function () {
        return null;
     }
     window.onbeforeunload = closingCode;
+    
     function pm() {
         ImageLoaderWorker.postMessage({
             'iteration': iteration,
@@ -248,9 +249,11 @@ $(document).ready(function () {
             'token': csrftoken,
         });
     }
+
     ImageLoaderWorker.addEventListener('message', event => {
         const imageData = event.data;
         var id = parseInt(imageData.id)
+        console.log("hey + " + id)
         if(id!=-1)
         {
             var mimestring = webp_support ? "image/png" : "image/jpeg"
@@ -271,6 +274,10 @@ $(document).ready(function () {
         }
         else
         {
+            console.log('iteration ' + iteration)
+            console.log('imgElements.length = ' + imgElements.length + " images_per_request = " + images_per_request);
+            console.log(imgElements.length / images_per_request)
+
             if(iteration < imgElements.length / images_per_request)
             {
                 pm();
