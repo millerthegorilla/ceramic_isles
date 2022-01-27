@@ -157,15 +157,43 @@ function sleep (time) {
 $(window).on('load', function() {
     const loading_image = location.protocol + "//" + location.host + document.getElementById('loading-image').dataset.loadingImage;
     var myCarouselEl = document.querySelector('#carousel-large-background');
-    const carousel = bootstrap.Carousel.getInstance(myCarouselEl);
+    let carousel = bootstrap.Carousel.getInstance(myCarouselEl);
     const lazyload_offset = parseInt(document.getElementById('images-offset').getAttribute('data-lazyload-offset'));
 
-    myCarouselEl.addEventListener('slid.bs.carousel', function() {
-        carousel.pause()
+    const callback = function(changes, observer)
+    {
+        changes.forEach(change => {
+            if (change.attributeName.includes('src')) {
+                if(change.target.src == loading_image)
+                {
+                   observer.observe(change.target, {
+                        attributes: true
+                    }); 
+                }
+                else
+                {
+                    sleep(6000)
+                    let carousel = bootstrap.Carousel.getInstance(myCarouselEl);
+                    carousel.cycle()
+                }
+            }
+        });
+    };
+
+    myCarouselEl.addEventListener('slid.bs.carousel', function(e) {
+        let nextImg = e.relatedTarget.nextElementSibling.children[0]
+        if (nextImg.getAttribute('src') == loading_image)
+        {
+            carousel.pause()
+            let observer = new MutationObserver(callback)
+            config = { attributes: true }
+            observer.observe(nextImg, config );
+        }
     });
+
     try
     {
-        var first_active_img = document.getElementById(`image-${lazyload_offset + 1}-carousel`);
+        var first_active_img = document.getElementById(`image-${lazyload_offset + 1}-carousel`).children[0];
     }
     catch (err)
     {
@@ -175,36 +203,11 @@ $(window).on('load', function() {
     
     if (IsImageOk(first_active_img, loading_image))
     {
-        //sleep(6000)
-        console.log('ok');
         carousel.cycle();
     }
     else
-    {
-        console.log('not ok')
-        const callback = function(changes, observer)
-        {
-            changes.forEach(change => {
-                console.log('hey '+change.attributeName)
-                if (change.attributeName.includes('src')) {
-                    console.log('target ' + change.target.src)
-                    console.log('loading image ' + loading_image)
-                    if(change.target.src == loading_image)
-                    {
-                       observer.observe(change.target, {
-                            attributes: true
-                        }); 
-                    }
-                    else
-                    {
-                        console.log('self is ' + self)
-                        sleep(6000)
-                        carousel.cycle()
-                    }
-                }
-            });
-        };
-        observer = new MutationObserver(callback)
+    {   
+        let observer = new MutationObserver(callback)
         config = { attributes: true }
         observer.observe(first_active_img, config );
     }
@@ -229,7 +232,6 @@ $(document).ready(function () {
     const images_per_request = document.getElementById('images-per-request').getAttribute('data-images-per-request');
     const screen_size = window.innerWidth < 500 ? "400x500" : "1024x768";
     const siteurl = location.protocol + "//" + location.host + "/imgurl/";
-    //console.log('siteurl = ' + siteurl)
     const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
     const ImageLoaderWorker = new Worker('/static/django_bs_carousel/js/il_min.js', {'type': 'classic', 'credentials': 'same-origin'});
     var iteration = 0;
@@ -276,10 +278,6 @@ $(document).ready(function () {
         }
         else
         {
-            // console.log('iteration ' + iteration)
-            // console.log('imgElements.length = ' + imgElements.length + " images_per_request = " + images_per_request);
-            // console.log(imgElements.length / images_per_request)
-
             if(iteration < imgElements.length / images_per_request)
             {
                 pm();
