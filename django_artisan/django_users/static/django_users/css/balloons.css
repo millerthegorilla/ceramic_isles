@@ -1,3 +1,7 @@
+.balloons {
+  text-align:center;
+}
+
 .balloon {
   display:inline-block;
    width:120px;
@@ -43,7 +47,7 @@
 }
 
 .balloon:nth-child(2){ background:hsl(245,40%,65%); animation-duration:3.5s; }
-.balloon:nth-child(2):before { color:hsl(245,40%,65%);  }
+.balloon:nth-child(2):before { color:hsl(245,30%,55%);  }
 
 .balloon:nth-child(3){ background:hsl(139,50%,60%); animation-duration:3s; }
 .balloon:nth-child(3):before { color:hsl(139,30%,50%);  }

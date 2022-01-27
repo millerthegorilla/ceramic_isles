@@ -4,7 +4,9 @@
 <!-- TODO: check need for integrity and sanitize link to css etc -->
 {% block extra_css %}
     {% load static %}
-    <link href="{% static 'django_users/css/balloons.css' %}" rel="stylesheet">
+    {% load pipeline %}
+    {% stylesheet 'registration_styles' %}
+    <!-- <link href="{% static 'django_users/css/balloons.css' %}" rel="stylesheet"> -->
 {% endblock extra_css %}
 {% block content %}
 	<div class="container register-container">
@@ -14,11 +16,13 @@
 					<h2>Congratulations <span class="text-white">{{ user.profile.display_name }}...</span><br>
 						<span class="ps-5">your account is confirmed!</span></h2><br>
 					<span><h4><a class="text-white" href="{% url 'logout' %}?next={% url 'login' %}">Login</a></h4></span>
-					<div class="balloon"></div>
-					<div class="balloon"></div>
-					<div class="balloon"></div>
-					<div class="balloon"></div>
-					<div class="balloon"></div>
+					<div class="balloons">
+						<div class="balloon"></div>
+						<div class="balloon"></div>
+						<div class="balloon"></div>
+						<div class="balloon"></div>
+						<div class="balloon"></div>
+					</div>
 				{% else %}
 					<div class="text-white">
 					<h2>Error!</h2><br>

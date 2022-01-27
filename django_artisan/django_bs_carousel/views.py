@@ -9,7 +9,9 @@ from django.views import generic
 
 #webworker ajax request to here, returns url
 class ImgURL(generic.base.View):
-    # this is returning images in different order to that on the web page
+    # TODO - create a threaded function inside the get, that pushes its handle to 
+    # a 'global' array.  Then, if user leaves page, request is made to here from
+    # beforeunload handler with an iteration = -1, and threads in array are closed.
     def get(self, request: http.HttpRequest, webp_support: str, screen_size: str, iteration: int) -> http.JsonResponse:
         images = json.loads(self.request.session['images'])
         ql = []
@@ -39,5 +41,5 @@ class ImgURL(generic.base.View):
                                     format=fmt, crop='center', quality=70).url
             ql.append({'id': im.pk,
                        'pic': pic})
-        ql.append({'id': '-1', 'pic': ''})
+        ql.append({'id': -1, 'pic': ''})
         return http.JsonResponse(ql, safe=False)

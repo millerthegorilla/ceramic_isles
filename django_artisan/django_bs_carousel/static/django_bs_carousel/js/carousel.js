@@ -166,27 +166,29 @@ $(window).on('load', function() {
             if (change.attributeName.includes('src')) {
                 if(change.target.src == loading_image)
                 {
-                   observer.observe(change.target, {
+                    observer.disconnect()
+                    observer.observe(change.target, {
                         attributes: true
                     }); 
                 }
                 else
                 {
-                    sleep(6000)
+                    //sleep(6000)
                     let carousel = bootstrap.Carousel.getInstance(myCarouselEl);
                     carousel.cycle()
                 }
             }
         });
     };
+    const observer = new MutationObserver(callback)
 
     myCarouselEl.addEventListener('slid.bs.carousel', function(e) {
         let nextImg = e.relatedTarget.nextElementSibling.children[0]
-        if (nextImg.getAttribute('src') == loading_image)
+        if (nextImg.src == loading_image)
         {
             carousel.pause()
-            let observer = new MutationObserver(callback)
             config = { attributes: true }
+            observer.disconnect()
             observer.observe(nextImg, config );
         }
     });
@@ -207,7 +209,6 @@ $(window).on('load', function() {
     }
     else
     {   
-        let observer = new MutationObserver(callback)
         config = { attributes: true }
         observer.observe(first_active_img, config );
     }
@@ -236,32 +237,42 @@ $(document).ready(function () {
     const ImageLoaderWorker = new Worker('/static/django_bs_carousel/js/il_min.js', {'type': 'classic', 'credentials': 'same-origin'});
     var iteration = 0;
     const webp_support = Modernizr.webp;
-
+    let closing = false;
     function closingCode(){
-       ImageLoaderWorker.terminate();
-       return null;
+        closing == true;
+        ImageLoaderWorker.terminate();
+        imgs = document.querySelectorAll('.carousel-image')
+        for(const im of imgs)
+        {
+            im.setAttribute('src', '/static/django_artisan/images/transparent.gif')
+            im.parentElement.removeChild(im);
+        }
+        return null;
     }
     window.onbeforeunload = closingCode;
     
     function pm() {
-        ImageLoaderWorker.postMessage({
-            'iteration': iteration,
-            'images_per_request': images_per_request,
-            'len_im_els': imgElements.length,
-            'webp_support': webp_support,
-            'screen_size': screen_size,
-            'request_url': siteurl,
-            'token': csrftoken,
-        });
+        if (!closing)
+        {
+            ImageLoaderWorker.postMessage({
+                'iteration': iteration,
+                'images_per_request': images_per_request,
+                'len_im_els': imgElements.length,
+                'webp_support': webp_support,
+                'screen_size': screen_size,
+                'request_url': siteurl,
+                'token': csrftoken,
+            });
+        }
     }
 
     ImageLoaderWorker.addEventListener('message', event => {
         const imageData = event.data;
         var id = parseInt(imageData.id)
-        if(id!=-1)
+        if(id!=-1 && !closing)
         {
             var mimestring = webp_support ? "image/png" : "image/jpeg"
-            var blob = new Blob([imageData.pic], { type: mimestring }) //unnecessary cast if no transferrables.
+            var blob = new Blob([imageData.pic], { type: mimestring }) 
             
             var imageElement = document.getElementById("image-" + String(id));
             var objectURL = URL.createObjectURL(blob);
