@@ -38,5 +38,6 @@ class ImgURL(generic.base.View):
             pic = get_thumbnail(im.image_file, screen_size, 
                                     format=fmt, crop='center', quality=70).url
             ql.append({'id': im.pk,
-                       'pic': pic}) 
+                       'pic': pic})
+        ql.append({'id': '-1', 'pic': ''})
         return http.JsonResponse(ql, safe=False)

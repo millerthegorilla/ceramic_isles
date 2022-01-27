@@ -9,6 +9,7 @@ self.addEventListener('message', async event => {
           mode: 'same-origin',
       }
   );
+
   fetch(request).then(function(response) {
      // response.json then has the list of the urls
       return response.json();
@@ -23,5 +24,5 @@ self.addEventListener('message', async event => {
         obj, [obj.pic]
       );
     });
-  });
+  })
 });

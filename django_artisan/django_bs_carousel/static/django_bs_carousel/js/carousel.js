@@ -172,38 +172,41 @@ $(window).on('load', function() {
         myCarouselEl.removeEventListener('slid.bs.carousel', slid_listener)
         return
     }
+    
     if (IsImageOk(first_active_img, loading_image))
     {
         //sleep(6000)
-        carousel.cycle()
+        console.log('ok');
+        carousel.cycle();
     }
     else
     {
-    const callback = function(changes, observer)
-    {
-        changes.forEach(change => {
-            console.log('hey '+change.attributeName)
-            if (change.attributeName.includes('src')) {
-                console.log('target ' + change.target.src)
-                console.log('loading image ' + loading_image)
-                if(change.target.src == loading_image)
-                {
-                   observer.observe(change.target, {
-                        attributes: true
-                    }); 
+        console.log('not ok')
+        const callback = function(changes, observer)
+        {
+            changes.forEach(change => {
+                console.log('hey '+change.attributeName)
+                if (change.attributeName.includes('src')) {
+                    console.log('target ' + change.target.src)
+                    console.log('loading image ' + loading_image)
+                    if(change.target.src == loading_image)
+                    {
+                       observer.observe(change.target, {
+                            attributes: true
+                        }); 
+                    }
+                    else
+                    {
+                        console.log('self is ' + self)
+                        sleep(6000)
+                        carousel.cycle()
+                    }
                 }
-                else
-                {
-                    console.log('self is ' + self)
-                    sleep(6000)
-                    carousel.cycle()
-                }
-            }
-        });
-    };
-    observer = new MutationObserver(callback)
-    config = { attributes: true }
-    observer.observe(first_active_img, config );
+            });
+        };
+        observer = new MutationObserver(callback)
+        config = { attributes: true }
+        observer.observe(first_active_img, config );
     }
 });
 
@@ -253,7 +256,6 @@ $(document).ready(function () {
     ImageLoaderWorker.addEventListener('message', event => {
         const imageData = event.data;
         var id = parseInt(imageData.id)
-        console.log("hey + " + id)
         if(id!=-1)
         {
             var mimestring = webp_support ? "image/png" : "image/jpeg"
@@ -274,9 +276,9 @@ $(document).ready(function () {
         }
         else
         {
-            console.log('iteration ' + iteration)
-            console.log('imgElements.length = ' + imgElements.length + " images_per_request = " + images_per_request);
-            console.log(imgElements.length / images_per_request)
+            // console.log('iteration ' + iteration)
+            // console.log('imgElements.length = ' + imgElements.length + " images_per_request = " + images_per_request);
+            // console.log(imgElements.length / images_per_request)
 
             if(iteration < imgElements.length / images_per_request)
             {
