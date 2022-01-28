@@ -1,6 +1,9 @@
 {% load static %}
 {% load thumbnail %}
 {% load pipeline %}
+{% block extra_css %}
+  {% stylesheet 'carousel_styles' %}
+{% endblock extra_css %}
     <div id="carousel-large-background" class="carousel slide carousel-fade" data-bs-interval="6200" data-bs-ride="carousel" data-bs-pause="false">
       <input type="hidden" name="csrfmiddlewaretoken" value="{{csrftoken}}">
       <input type="hidden" id="images-per-request" data-images-per-request="{{images_per_request}}">

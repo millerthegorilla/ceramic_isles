@@ -41,5 +41,6 @@ class ImgURL(generic.base.View):
                                     format=fmt, crop='center', quality=70).url
             ql.append({'id': im.pk,
                        'pic': pic})
-        ql.append({'id': -1, 'pic': ''})
+        # ql.append({'id': -1, 'pic': ''})
+        # breakpoint()
         return http.JsonResponse(ql, safe=False)

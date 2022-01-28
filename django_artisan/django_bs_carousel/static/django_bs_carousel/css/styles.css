@@ -1,0 +1,45 @@
+/* CAROUSEL */
+
+#carousel-large-background {
+  height: 100vh;
+}
+
+.carousel-inner {
+  height: 100vh;
+}
+
+.carousel-control-next {
+  opacity: 0;
+}
+
+.carousel-control-prev {
+  opacity: 0;
+}
+
+.carousel-caption {
+  font-family: 'Ubuntu', sans-serif;
+  background-color: rgba(23, 62, 67, 0.75);
+  visibility: hidden;
+  opacity: 0;
+  transition: all 1s ease-out;
+}
+
+.carousel-image {
+  display: flex;
+  position: relative;
+  align-self: center;
+  object-fit: contain;
+  height: 87vh;
+/*  width:100vw;*/
+  margin: auto;
+}
+
+.carousel-image:hover + .carousel-caption {
+  visibility: visible;
+  opacity: 1;
+  transition: all 1s ease-in;
+}
+/*.carousel-item
+{
+    transition: transform 1s ease-in-out;
+}*/

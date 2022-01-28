@@ -15,22 +15,19 @@ self.addEventListener('message', async event => {
       return response.json();
   })
   .then(imgUrls => {
+    const abs = []
+    const ids = []
     imgUrls.forEach(async imgurl => {
-      if(imgurl.id != -1)
-      {
         const pic = await fetch(imgurl.pic);
         const blob = await pic.blob();
-        const ab = await blob.arrayBuffer()
-        obj = { id:imgurl.id, pic:ab }
-        self.postMessage(
-          obj, [obj.pic]
-        );
-      }
-      else
-      {
-        self.postMessage({ id:-1, pic:""})
-      }
-
-    });
+        abs.push(await blob.arrayBuffer())
+        ids.push(imgurl.id)
+        if(ids.length == imgUrls.length)
+        {
+          self.postMessage(
+            {'ids': ids, 'abs':abs}, abs 
+          );
+        }
+    })
   })
 });

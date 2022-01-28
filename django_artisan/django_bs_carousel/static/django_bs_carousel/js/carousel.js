@@ -216,17 +216,16 @@ $(window).on('load', function() {
 
 $(document).ready(function () {
     // display image captions on rollover
-    $(".carousel-item").hover(function() {
-            $(".carousel-caption").hide();
-            $(".carousel-caption").css('visibility', 'visible');
-            $(".carousel-caption").stop().fadeIn(1000);
-        },
-        function() {
-            $(".carousel-caption").stop().fadeOut(800, function() {
-                $(".carousel-caption").css('visibility', 'hidden');
-            });
-        }
-    );
+    // $(".carousel-item").hover(function() {
+    //         $(".carousel-caption").css('visibility', 'visible');
+    //         $(".carousel-caption").fadeIn(1000)
+    //     },
+    //     function() {
+    //         $(".carousel-caption").fadeOut(800, function() {
+    //             $(".carousel-caption").css('visibility', 'hidden');
+    //         });
+    //     }
+    // );
 
     const imgElements = document.querySelectorAll('.carousel-load');
     const ieLength = imgElements.length;
@@ -241,12 +240,12 @@ $(document).ready(function () {
     function closingCode(){
         closing == true;
         ImageLoaderWorker.terminate();
-        imgs = document.querySelectorAll('.carousel-image')
-        for(const im of imgs)
-        {
-            im.setAttribute('src', '/static/django_artisan/images/transparent.gif')
-            im.parentElement.removeChild(im);
-        }
+        // imgs = document.querySelectorAll('.carousel-image')
+        // for(const im of imgs)
+        // {
+        //     im.setAttribute('src', '/static/django_artisan/images/transparent.gif')
+        //     im.parentElement.removeChild(im);
+        // }
         return null;
     }
     window.onbeforeunload = closingCode;
@@ -268,11 +267,11 @@ $(document).ready(function () {
 
     ImageLoaderWorker.addEventListener('message', event => {
         const imageData = event.data;
-        var id = parseInt(imageData.id)
-        if(id!=-1 && !closing)
-        {
-            var mimestring = webp_support ? "image/png" : "image/jpeg"
-            var blob = new Blob([imageData.pic], { type: mimestring }) 
+        const ids = imageData.ids;
+        const abs = imageData.abs;
+        ids.forEach((id,idx) =>{
+            var mimestring = webp_support ? "image/png" : "image/jpeg";
+            var blob = new Blob([abs[idx]], { type: mimestring });
             
             var imageElement = document.getElementById("image-" + String(id));
             var objectURL = URL.createObjectURL(blob);
@@ -283,17 +282,14 @@ $(document).ready(function () {
               imageElement.onload = () => {
                 URL.revokeObjectURL(objectURL);
               }
-              imageElement.setAttribute('size', screen_size);
+              imageElement.setAttribute('size', "360x640");
               imageElement.setAttribute('src', objectURL);
             }
-        }
-        else
+        })   
+        if(iteration < imgElements.length / images_per_request)
         {
-            if(iteration < imgElements.length / images_per_request)
-            {
-                pm();
-                iteration++;
-            }
+            pm();
+            iteration++;
         }
     })
 
