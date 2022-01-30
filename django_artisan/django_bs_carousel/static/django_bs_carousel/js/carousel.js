@@ -155,10 +155,11 @@ function sleep (time) {
 }
 
 $(window).on('load', function() {
-    const loading_image = location.protocol + "//" + location.host + document.getElementById('loading-image').dataset.loadingImage;
+    const dataEl = document.getElementById('hidden-data');
+    const loading_image = location.protocol + "//" + location.host + dataEl.dataset.loadingImage;
     var myCarouselEl = document.querySelector('#carousel-large-background');
     let carousel = bootstrap.Carousel.getInstance(myCarouselEl);
-    const lazyload_offset = parseInt(document.getElementById('images-offset').getAttribute('data-lazyload-offset'));
+    const lazyload_offset = parseInt(dataEl.dataset.lazyloadOffset);
 
     const callback = function(changes, observer)
     {
@@ -215,48 +216,38 @@ $(window).on('load', function() {
 });
 
 $(document).ready(function () {
-    // display image captions on rollover
-    // $(".carousel-item").hover(function() {
-    //         $(".carousel-caption").css('visibility', 'visible');
-    //         $(".carousel-caption").fadeIn(1000)
-    //     },
-    //     function() {
-    //         $(".carousel-caption").fadeOut(800, function() {
-    //             $(".carousel-caption").css('visibility', 'hidden');
-    //         });
-    //     }
-    // );
-
+    const dataEl = document.getElementById('hidden-data');
+    const lazyload_offset = parseInt(dataEl.dataset.lazyloadOffset);
     const imgElements = document.querySelectorAll('.carousel-load');
     const ieLength = imgElements.length;
-    const images_per_request = document.getElementById('images-per-request').getAttribute('data-images-per-request');
-    const screen_size = window.innerWidth < 500 ? "400x500" : "1024x768";
+    const images_per_request = parseInt(dataEl.dataset.imagesPerRequest);
+    const image_size_large = dataEl.dataset.imageSizeLarge;
+    const image_size_small = dataEl.dataset.imageSizeSmall;
+    const screen_size = window.innerWidth < 500 ? image_size_small : image_size_large;
     const siteurl = location.protocol + "//" + location.host + "/imgurl/";
     const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-    const ImageLoaderWorker = new Worker('/static/django_bs_carousel/js/il_min.js', {'type': 'classic', 'credentials': 'same-origin'});
+    var ImageLoaderWorker;
+    if(ieLength > lazyload_offset)
+    {     
+        ImageLoaderWorker = new Worker('/static/django_bs_carousel/js/il_min.js', {'type': 'classic', 'credentials': 'same-origin'});
+    }
     var iteration = 0;
     const webp_support = Modernizr.webp;
     let closing = false;
     function closingCode(){
         closing == true;
         ImageLoaderWorker.terminate();
-        // imgs = document.querySelectorAll('.carousel-image')
-        // for(const im of imgs)
-        // {
-        //     im.setAttribute('src', '/static/django_artisan/images/transparent.gif')
-        //     im.parentElement.removeChild(im);
-        // }
         return null;
     }
     window.onbeforeunload = closingCode;
     
     function pm() {
-        if (!closing)
+        if (!closing && ieLength > lazyload_offset)
         {
             ImageLoaderWorker.postMessage({
                 'iteration': iteration,
                 'images_per_request': images_per_request,
-                'len_im_els': imgElements.length,
+                'len_im_els': ieLength,
                 'webp_support': webp_support,
                 'screen_size': screen_size,
                 'request_url': siteurl,
@@ -265,6 +256,7 @@ $(document).ready(function () {
         }
     }
 
+    let hid = false;
     ImageLoaderWorker.addEventListener('message', event => {
         const imageData = event.data;
         const ids = imageData.ids;
@@ -282,17 +274,35 @@ $(document).ready(function () {
               imageElement.onload = () => {
                 URL.revokeObjectURL(objectURL);
               }
-              imageElement.setAttribute('size', "360x640");
+              imageElement.setAttribute('size', screen_size);
               imageElement.setAttribute('src', objectURL);
             }
         })   
         if(iteration < imgElements.length / images_per_request)
         {
-            pm();
-            iteration++;
+            if(!document.hidden && window.location.pathname == '/')
+            {
+                pm();
+                iteration++;
+            }
+            else
+            {
+                hid = true;
+            }
         }
     })
 
     pm();
     iteration++;
+
+    document.addEventListener('visibilitychange', function (event) {
+        if (!document.hidden) {
+            if (window.location.pathname == '/' && hid)
+            {
+                hid = false;
+                pm();
+                iteration++;
+            }
+        }
+    });
 });

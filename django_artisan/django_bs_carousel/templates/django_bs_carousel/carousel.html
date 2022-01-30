@@ -6,9 +6,7 @@
 {% endblock extra_css %}
     <div id="carousel-large-background" class="carousel slide carousel-fade" data-bs-interval="6200" data-bs-ride="carousel" data-bs-pause="false">
       <input type="hidden" name="csrfmiddlewaretoken" value="{{csrftoken}}">
-      <input type="hidden" id="images-per-request" data-images-per-request="{{images_per_request}}">
-      <input type="hidden" id="images-offset" data-lazyload-offset="{{lazyload_offset}}">
-      <input type="hidden" id="loading-image" data-loading-image="{% static loading_image %}">
+      <input type="hidden" id="hidden-data" data-images-per-request="{{images_per_request}}" data-lazyload-offset="{{lazyload_offset}}" data-loading-image="{% static loading_image %}" data-image-size-large="{{image_size_large}}" data-image-size-small="{{image_size_small}}">
       <div class="carousel-inner">
         {% for image in images %}
         {% if forloop.counter0 == 0 %}
@@ -17,7 +15,7 @@
           <div id="image-{{ forloop.counter }}-carousel" class="carousel-item">
         {% endif %}
         {% if forloop.counter0 < lazyload_offset %}
-              <img src="{% thumbnail image.image_file image_size as im %}
+              <img src="{% thumbnail image.image_file image_size_large as im %}
                                       {{ im.url }}
                                     {% endthumbnail %}" 
                  class="carousel-image" id="image-{{forloop.counter}}-image" >
