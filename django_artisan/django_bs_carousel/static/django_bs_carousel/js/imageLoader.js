@@ -1,15 +1,15 @@
 self.addEventListener('message', async event => {
   // const mimetype = Boolean(event.data.webp_support) ? 'image/webp' : type='image/jpeg'
-  const request = new Request(
-      `${event.data.request_url}${event.data.webp_support}/${event.data.screen_size}/${event.data.iteration}`,
-      {
-          method: 'GET',
-          headers: {'X-CSRFToken': event.data.token,
-                    'Content-Type': 'application/json'},
-          mode: 'same-origin',
-      }
-  );
-
+  if(event.data.cache)
+  {
+    const request = new Request(
+        `${event.data.request_url}${event.data.webp_support}/${event.data.screen_size}/${event.data.iteration}/[3,4,5]`,
+        {
+            method: 'GET',
+            headers: {'X-CSRFToken': event.data.token,
+                      'Content-Type': 'application/json'},
+            mode: 'same-origin',
+        });
   fetch(request).then(function(response) {
      // response.json then has the list of the urls
       return response.json();

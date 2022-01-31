@@ -154,12 +154,18 @@ function sleep (time) {
   return new Promise((resolve) => setTimeout(resolve, time));
 }
 
+function fisherYatesShuffle(arr){
+    for(var i =arr.length-1 ; i>0 ;i--){
+        var j = Math.floor( Math.random() * (i + 1) ); //random index
+        [arr[i],arr[j]]=[arr[j],arr[i]]; // swap
+    }
+}
+
 $(window).on('load', function() {
     const dataEl = document.getElementById('hidden-data');
     const loading_image = location.protocol + "//" + location.host + dataEl.dataset.loadingImage;
     var myCarouselEl = document.querySelector('#carousel-large-background');
     let carousel = bootstrap.Carousel.getInstance(myCarouselEl);
-    const lazyload_offset = parseInt(dataEl.dataset.lazyloadOffset);
 
     const callback = function(changes, observer)
     {
@@ -183,7 +189,8 @@ $(window).on('load', function() {
     };
     const observer = new MutationObserver(callback)
 
-    myCarouselEl.addEventListener('slid.bs.carousel', function(e) {
+
+    function slid_listener(e) {
         let nextImg = e.relatedTarget.nextElementSibling.children[0]
         if (nextImg.src == loading_image)
         {
@@ -192,7 +199,9 @@ $(window).on('load', function() {
             observer.disconnect()
             observer.observe(nextImg, config );
         }
-    });
+    };
+
+    myCarouselEl.addEventListener('slid.bs.carousel', slid_listener);
 
     try
     {
@@ -217,22 +226,26 @@ $(window).on('load', function() {
 
 $(document).ready(function () {
     const dataEl = document.getElementById('hidden-data');
-    const lazyload_offset = parseInt(dataEl.dataset.lazyloadOffset);
-    const imgElements = document.querySelectorAll('.carousel-load');
+    const useCache = Boolean(dataEl.dataset.useCache);
+    const randomizeImages = Boolean(dataEl.dataset.randomizeImages);
+    const imgElements = document.querySelectorAll('.carousel-image');
     const ieLength = imgElements.length;
-    const images_per_request = parseInt(dataEl.dataset.imagesPerRequest);
-    const image_size_large = dataEl.dataset.imageSizeLarge;
-    const image_size_small = dataEl.dataset.imageSizeSmall;
-    const screen_size = window.innerWidth < 500 ? image_size_small : image_size_large;
-    const siteurl = location.protocol + "//" + location.host + "/imgurl/";
-    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-    var ImageLoaderWorker;
-    if(ieLength > lazyload_offset)
-    {     
-        ImageLoaderWorker = new Worker('/static/django_bs_carousel/js/il_min.js', {'type': 'classic', 'credentials': 'same-origin'});
+    let elIndexes = [];
+    for (var elIndexes=[],i=0;i<ieLength;++i) elIndexes[i]=i;        
+    if(ieLength && randomizeImages)
+    {
+        fisherYatesShuffle(elIndexes);
     }
+    console.log(elIndexes)
+    const imagesPerRequest = parseInt(dataEl.dataset.imagesPerRequest);
+    const imageSizeLarge = dataEl.dataset.imageSizeLarge;
+    const imageSizeSmall = dataEl.dataset.imageSizeSmall;
+    const screenSize = window.innerWidth < 500 ? imageSizeSmall : imageSizeLarge;
+    const siteUrl = location.protocol + "//" + location.host + "/imgurl/";
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    const ImageLoaderWorker = new Worker('/static/django_bs_carousel/js/il_min.js', {'type': 'classic', 'credentials': 'same-origin'});
     var iteration = 0;
-    const webp_support = Modernizr.webp;
+    const webpSupport = Modernizr.webp;
     let closing = false;
     function closingCode(){
         closing == true;
@@ -242,15 +255,14 @@ $(document).ready(function () {
     window.onbeforeunload = closingCode;
     
     function pm() {
-        if (!closing && ieLength > lazyload_offset)
+        if (!closing && ieLength > 0)
         {
             ImageLoaderWorker.postMessage({
-                'iteration': iteration,
-                'images_per_request': images_per_request,
-                'len_im_els': ieLength,
-                'webp_support': webp_support,
-                'screen_size': screen_size,
-                'request_url': siteurl,
+                'indexes': elIndexes.slice(iteration * imagesPerRequest, iteration * imagesPerRequest + imagesPerRequest),
+                'cache': useCache,
+                'webp_support': webpSupport,
+                'screen_size': screenSize,
+                'request_url': siteUrl,
                 'token': csrftoken,
             });
         }
@@ -262,7 +274,7 @@ $(document).ready(function () {
         const ids = imageData.ids;
         const abs = imageData.abs;
         ids.forEach((id,idx) =>{
-            var mimestring = webp_support ? "image/png" : "image/jpeg";
+            var mimestring = webpSupport ? "image/png" : "image/jpeg";
             var blob = new Blob([abs[idx]], { type: mimestring });
             
             var imageElement = document.getElementById("image-" + String(id));
@@ -278,7 +290,7 @@ $(document).ready(function () {
               imageElement.setAttribute('src', objectURL);
             }
         })   
-        if(iteration < imgElements.length / images_per_request)
+        if(iteration < imgElements.length / imagesPerRequest)
         {
             if(!document.hidden && window.location.pathname == '/')
             {

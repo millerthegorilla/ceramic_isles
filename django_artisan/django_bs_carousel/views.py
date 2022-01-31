@@ -12,16 +12,13 @@ class ImgURL(generic.base.View):
     # TODO - create a threaded function inside the get, that pushes its handle to 
     # a 'global' array.  Then, if user leaves page, request is made to here from
     # beforeunload handler with an iteration = -1, and threads in array are closed.
-    def get(self, request: http.HttpRequest, webp_support: str, screen_size: str, iteration: int) -> http.JsonResponse:
-        images = json.loads(self.request.session['images'])
+    def get(self, request: http.HttpRequest, webp_support: str, screen_size: str, iteration: int, bob: str) -> http.JsonResponse:
+        bob = request.GET.getList(bob)
+        breakpoint()
         ql = []
         images_per_request = conf.settings.NUM_IMAGES_PER_REQUEST
-        lazyload_offset = conf.settings.LAZYLOAD_OFFSET
-        if lazyload_offset < 2: 
-            lazyload_offset = 2
         # iteration is zero based
-        offset = lazyload_offset if iteration == 0 else 0
-        start = iteration * images_per_request + offset
+        start = iteration * images_per_request
         count = len(images)
         finish = (count - 1 if (iteration == 0 and images_per_request > count) 
                     or (iteration * images_per_request + images_per_request > count)

@@ -201,14 +201,13 @@ class LandingPage(generic.base.TemplateView):
         context = super().get_context_data(**kwargs)
         context['images'] = (artisan_models.UserProductImage.objects
                                        .select_related('user_profile')
-                                       .filter(active=True).order_by('?'))
-        self.request.session['images'] = serializers.serialize("json", context['images'])
+                                       .filter(active=True))
+        context['randomize_images'] = conf.settings.CAROUSEL_RANDOMIZE_IMAGES
+        context['use_cache'] = conf.settings.CAROUSEL_USE_CACHE
         context['loading_image'] = 'django_bs_carousel/images/spinning-circles.svg'
         context['image_size_large'] = conf.settings.IMAGE_SIZE_LARGE
         context['image_size_small'] = conf.settings.IMAGE_SIZE_SMALL
         context['images_per_request'] = conf.settings.NUM_IMAGES_PER_REQUEST
-        context['lazyload_offset'] = conf.settings.LAZYLOAD_OFFSET
-        #context['username'] = self.request.user.username # type: ignore
         context['csrftoken'] = csrf.get_token(self.request)
         return context
 
