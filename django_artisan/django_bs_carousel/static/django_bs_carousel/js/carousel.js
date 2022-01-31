@@ -127,8 +127,8 @@
 }(window, document);
 
 // https://stackoverflow.com/questions/1977871/check-if-an-image-is-loaded-no-errors-with-jquery
-function IsImageOk(img, loading_image) {
-    if (img.src == loading_image)
+function IsImageOk(img, loadingImage) {
+    if (img.src == loadingImage)
     {
         return false;
     }
@@ -161,17 +161,20 @@ function fisherYatesShuffle(arr){
     }
 }
 
+let elIndexes = [];
+
 $(window).on('load', function() {
     const dataEl = document.getElementById('hidden-data');
-    const loading_image = location.protocol + "//" + location.host + dataEl.dataset.loadingImage;
+    const loadingImage = location.protocol + "//" + location.host + dataEl.dataset.loadingImage;
     var myCarouselEl = document.querySelector('#carousel-large-background');
     let carousel = bootstrap.Carousel.getInstance(myCarouselEl);
+    const imgElements = document.querySelectorAll('.carousel-image');
 
     const callback = function(changes, observer)
     {
         changes.forEach(change => {
             if (change.attributeName.includes('src')) {
-                if(change.target.src == loading_image)
+                if(change.target.src == loadingImage)
                 {
                     observer.disconnect()
                     observer.observe(change.target, {
@@ -190,7 +193,7 @@ $(window).on('load', function() {
     const observer = new MutationObserver(callback)
 
 
-    function slid_listener(e) {
+    function slidListener(e) {
         let nextImg = e.relatedTarget.nextElementSibling.children[0]
         if (nextImg.src == loading_image)
         {
@@ -201,42 +204,41 @@ $(window).on('load', function() {
         }
     };
 
-    myCarouselEl.addEventListener('slid.bs.carousel', slid_listener);
+    myCarouselEl.addEventListener('slid.bs.carousel', slidListener);
 
     try
     {
-        var first_active_img = document.getElementById(`image-${lazyload_offset + 1}-carousel`).children[0];
+        var firstActiveImg = imgElements[elIndexes[0]];
     }
     catch (err)
     {
-        myCarouselEl.removeEventListener('slid.bs.carousel', slid_listener)
+        myCarouselEl.removeEventListener('slid.bs.carousel', slidListener)
         return
     }
     
-    if (IsImageOk(first_active_img, loading_image))
+    if (IsImageOk(firstActiveImg, loadingImage))
     {
         carousel.cycle();
     }
     else
     {   
         config = { attributes: true }
-        observer.observe(first_active_img, config );
+        observer.observe(firstActiveImg, config );
     }
 });
 
 $(document).ready(function () {
     const dataEl = document.getElementById('hidden-data');
-    const useCache = Boolean(dataEl.dataset.useCache);
+    const useCache = dataEl.dataset.useCache == 'False' ? false : true;
     const randomizeImages = Boolean(dataEl.dataset.randomizeImages);
     const imgElements = document.querySelectorAll('.carousel-image');
     const ieLength = imgElements.length;
-    let elIndexes = [];
+    
     for (i=0;i<ieLength;++i) elIndexes[i]=i;        
     if(ieLength && randomizeImages)
     {
         fisherYatesShuffle(elIndexes);
     }
-    console.log(elIndexes)
     const imagesPerRequest = parseInt(dataEl.dataset.imagesPerRequest);
     const imageSizeLarge = dataEl.dataset.imageSizeLarge;
     const imageSizeSmall = dataEl.dataset.imageSizeSmall;
@@ -263,10 +265,10 @@ $(document).ready(function () {
             {
                 ImageLoaderWorker.postMessage({
                     'indexes': elIndexes.slice(start, finish),
-                    'cache': useCache,
-                    'webp_support': webpSupport,
-                    'screen_size': screenSize,
-                    'request_url': siteUrl,
+                    'useCache': useCache,
+                    'webpSupport': webpSupport,
+                    'screenSize': screenSize,
+                    'requestUrl': siteUrl,
                     'token': csrftoken,
                 });
             }
@@ -277,13 +279,12 @@ $(document).ready(function () {
                 {
                     urls.push({'id': i, 'url': imgElements[i].dataset.imageSrc});
                 }
-                console.log(urls)
                 ImageLoaderWorker.postMessage({
                    'urls': urls,
-                   'cache': useCache,
-                   'webp_support': webpSupport,
-                   'screen_size': screenSize,
-                   'request_url': siteUrl,
+                   'useCache': useCache,
+                   'webpSupport': webpSupport,
+                   'screenSize': screenSize,
+                   'requestUrl': siteUrl,
                    'token': csrftoken,
                }); 
             }
@@ -299,7 +300,8 @@ $(document).ready(function () {
             var mimestring = webpSupport ? "image/png" : "image/jpeg";
             var blob = new Blob([abs[idx]], { type: mimestring });
             
-            var imageElement = document.getElementById("image-" + String(id));
+            var imageElement = imgElements[elIndexes[id]];
+            console.log(imageElement)
             var objectURL = URL.createObjectURL(blob);
 
             // Once the image is loaded, we'll want to do some extra cleanup
@@ -308,12 +310,12 @@ $(document).ready(function () {
               imageElement.onload = () => {
                 URL.revokeObjectURL(objectURL);
               }
-              imageElement.setAttribute('size', screen_size);
+              imageElement.setAttribute('size', screenSize);
               imageElement.setAttribute('src', objectURL);
             }
-        })   
+        }) 
         if(iteration < imgElements.length / imagesPerRequest)
-        {
+        { 
             if(!document.hidden && window.location.pathname == '/')
             {
                 pm();
