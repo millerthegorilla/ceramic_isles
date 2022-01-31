@@ -222,6 +222,7 @@ $(window).on('load', function() {
     }
     else
     {   
+        //firstActiveImg.parent.addClass('active');
         config = { attributes: true }
         observer.observe(firstActiveImg, config );
     }
