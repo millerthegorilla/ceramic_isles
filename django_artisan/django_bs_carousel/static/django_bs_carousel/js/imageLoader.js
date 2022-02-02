@@ -1,5 +1,6 @@
 self.addEventListener('message', async event => {
   // const mimetype = Boolean(event.data.webp_support) ? 'image/webp' : type='image/jpeg'
+  console.log('hi')
   const cache = event.data.useCache;
   if(cache)
   {
@@ -43,6 +44,7 @@ self.addEventListener('message', async event => {
         const blob = await pic.blob();
         abs.push(await blob.arrayBuffer())
         ids.push(imgurl.id)
+        console.log(imgurl.id)
         if(ids.length == urls.length)
         {
           self.postMessage(

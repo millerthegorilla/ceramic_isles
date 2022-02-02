@@ -161,185 +161,276 @@ function fisherYatesShuffle(arr){
     }
 }
 
-let elIndexes = [];
+// let elIndexes = function(rand) {
+//     let eli = []
+//     for (i=0;i<ieLength;++i) eli[i]=i;
+//     if(rand)    
+//     {
+//         return fisherYatesShuffle(eli); 
+//     }
+//     else
+//     {
+//         return eli
+//     }
+// };
+
+function* nextELIndex() 
+{ 
+    i=0; 
+    while (i < elIndexes.length)
+    {
+        yield elIndexes[i];
+        i++;
+    }
+}
+
+var Singleton = (function(){
+    function Singleton(rand, ieLength) {
+        this._eli = [];
+        if(ieLength)
+        {
+            for (i=0;i<ieLength;++i) this._eli[i]=i;
+            if(rand)    
+            {
+                return fisherYatesShuffle(this._eli); 
+            }
+            else
+            {
+                return this._eli;
+            }
+        }
+    }
+    Singleton.prototype.getEli = function()
+    {
+        return this._eli;
+    }
+    Singleton.prototype._eli = [];
+    Singleton.prototype._nextELIndex = function* () 
+    { 
+        i=0; 
+        while (i < this._eli.length)
+        {
+            yield this._eli[i];
+            i++;
+        }
+    }
+    var instance;
+    return {
+        getInstance: function(rand, ieLength){
+            if (null == instance) {
+                instance = new Singleton(rand, ieLength);               
+                instance.constructor = null; // Note how the constructor is hidden to prevent instantiation
+            }
+            return instance; //return the singleton instance
+        }
+   };
+})();
 
 $(window).on('load', function() {
-    const dataEl = document.getElementById('hidden-data');
-    const loadingImage = location.protocol + "//" + location.host + dataEl.dataset.loadingImage;
-    var myCarouselEl = document.querySelector('#carousel-large-background');
-    let carousel = bootstrap.Carousel.getInstance(myCarouselEl);
     const imgElements = document.querySelectorAll('.carousel-image');
-
-    const callback = function(changes, observer)
+    const ieLength = imgElements.length;
+    if(ieLength)
     {
-        changes.forEach(change => {
-            if (change.attributeName.includes('src')) {
-                if(change.target.src == loadingImage)
-                {
-                    observer.disconnect()
-                    observer.observe(change.target, {
-                        attributes: true
-                    }); 
-                }
-                else
-                {
-                    //sleep(6000)
-                    let carousel = bootstrap.Carousel.getInstance(myCarouselEl);
-                    carousel.cycle()
-                }
-            }
-        });
-    };
-    const observer = new MutationObserver(callback)
+        const dataEl = document.getElementById('hidden-data');
+        const imgPause = dataEl.dataset.imgPause;
+        const loadingImage = location.protocol + "//" + location.host + dataEl.dataset.loadingImage;
+        var myCarouselEl = document.querySelector('#carousel-large-background');
+        let carousel = bootstrap.Carousel.getInstance(myCarouselEl);
+        var elInds = Singleton.getInstance();
+        var elIter = elInds._nextELIndex(); 
+        var firstImgInd = elIter.next()
+        var firstActiveImg = {}
 
-
-    function slidListener(e) {
-        let nextImg = e.relatedTarget.nextElementSibling.children[0]
-        if (nextImg.src == loading_image)
+        const callback = function(changes, observer)
         {
-            carousel.pause()
-            config = { attributes: true }
-            observer.disconnect()
-            observer.observe(nextImg, config );
+            changes.forEach(change => {
+                if (change.attributeName.includes('src')) {
+                    if(change.target.src == loadingImage)
+                    {
+                        observer.disconnect()
+                        observer.observe(change.target, {
+                            attributes: true
+                        }); 
+                    }
+                    else
+                    {
+                        //sleep(6000)
+                        //let carousel = bootstrap.Carousel.getInstance(myCarouselEl);
+                        if (change.target == firstActiveImg)
+                        {
+                            firstActiveImg.parentElement.classList.add('active');
+                            carousel.pause();
+                        }
+                        var nextImgInd = elIter.next()
+                        if(nextImgInd.done)
+                        {
+                            elIter = elInds.iter();
+                            nextImgInd = elIter.next()
+                        }
+                        setTimeout(function(i){ carousel.to(i); carousel.cycle(); }, 6500, nextImgInd.value);
+                    }
+                }
+            });
+        };
+        const observer = new MutationObserver(callback)
+
+        function slidListener(e) {
+            carousel.pause();
+            var nextImgInd = elIter.next()
+            if(nextImgInd.done)
+            {
+                elIter = elInds._nextELIndex();
+                nextImgInd = elIter.next()
+            }
+            var nextImg = imgElements[nextImgInd.value]
+            if (nextImg.src == loadingImage)
+            {
+                config = { attributes: true }
+                observer.disconnect()
+                observer.observe(nextImg, config );
+            }
+            else
+            {
+                setTimeout(function(i) { carousel.to(i); carousel.cycle(); }, 6500, nextImgInd.value);
+            }
+        };
+
+        myCarouselEl.addEventListener('slid.bs.carousel', slidListener);
+
+        try
+        {
+            firstActiveImg = imgElements[firstImgInd.value];
         }
-    };
-
-    myCarouselEl.addEventListener('slid.bs.carousel', slidListener);
-
-    try
-    {
-        var firstActiveImg = imgElements[elIndexes[0]];
-    }
-    catch (err)
-    {
-        myCarouselEl.removeEventListener('slid.bs.carousel', slidListener)
-        return
-    }
-    
-    if (IsImageOk(firstActiveImg, loadingImage))
-    {
-        carousel.cycle();
-    }
-    else
-    {   
-        //firstActiveImg.parent.addClass('active');
-        config = { attributes: true }
-        observer.observe(firstActiveImg, config );
+        catch (err)
+        {
+            myCarouselEl.removeEventListener('slid.bs.carousel', slidListener)
+            return
+        }
+        
+        if (IsImageOk(firstActiveImg, loadingImage))
+        {
+            firstActiveImg.parentElement.classList.add('active');
+            carousel.pause()
+            var nextImgInd = elInds.next()
+            setTimeout(function(i) { carousel.to(i); carousel.cycle(); }, 6500, nextImgInd.value);
+        }
+        else
+        {   
+            config = { attributes: true }
+            observer.observe(firstActiveImg, config );
+        }
     }
 });
 
 $(document).ready(function () {
-    const dataEl = document.getElementById('hidden-data');
-    const useCache = dataEl.dataset.useCache == 'False' ? false : true;
-    const randomizeImages = Boolean(dataEl.dataset.randomizeImages);
     const imgElements = document.querySelectorAll('.carousel-image');
     const ieLength = imgElements.length;
-    
-    for (i=0;i<ieLength;++i) elIndexes[i]=i;        
-    if(ieLength && randomizeImages)
+    if(ieLength)
     {
-        fisherYatesShuffle(elIndexes);
-    }
-    const imagesPerRequest = parseInt(dataEl.dataset.imagesPerRequest);
-    const imageSizeLarge = dataEl.dataset.imageSizeLarge;
-    const imageSizeSmall = dataEl.dataset.imageSizeSmall;
-    const screenSize = window.innerWidth < 500 ? imageSizeSmall : imageSizeLarge;
-    const siteUrl = location.protocol + "//" + location.host + "/imgurl/";
-    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-    const ImageLoaderWorker = new Worker('/static/django_bs_carousel/js/il_min.js', {'type': 'classic', 'credentials': 'same-origin'});
-    var iteration = 0;
-    const webpSupport = Modernizr.webp;
-    let closing = false;
-    function closingCode(){
-        closing == true;
-        ImageLoaderWorker.terminate();
-        return null;
-    }
-    window.onbeforeunload = closingCode;
-    
-    function pm() {
-        if (!closing && ieLength > 0)
-        {
-            let start = iteration * imagesPerRequest;
-            let finish = iteration * imagesPerRequest + imagesPerRequest;
-            if(useCache)
+        const dataEl = document.getElementById('hidden-data');
+        const useCache = dataEl.dataset.useCache == 'False' ? false : true;
+        const randomizeImages = Boolean(dataEl.dataset.randomizeImages);
+        const elInds = Singleton.getInstance(randomizeImages, ieLength);
+        const imagesPerRequest = parseInt(dataEl.dataset.imagesPerRequest);
+        const imageSizeLarge = dataEl.dataset.imageSizeLarge;
+        const imageSizeSmall = dataEl.dataset.imageSizeSmall;
+        const screenSize = window.innerWidth < 500 ? imageSizeSmall : imageSizeLarge;
+        const siteUrl = location.protocol + "//" + location.host + "/imgurl/";
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        const ImageLoaderWorker = new Worker('/static/django_bs_carousel/js/il_min.js', {'type': 'classic', 'credentials': 'same-origin'});
+        var iteration = 0;
+        const webpSupport = Modernizr.webp;
+        let closing = false;
+        function closingCode(){
+            closing == true;
+            ImageLoaderWorker.terminate();
+            return null;
+        }
+        window.onbeforeunload = closingCode;
+        
+        function pm() {
+            if (!closing && ieLength > 0)
             {
-                ImageLoaderWorker.postMessage({
-                    'indexes': elIndexes.slice(start, finish),
-                    'useCache': useCache,
-                    'webpSupport': webpSupport,
-                    'screenSize': screenSize,
-                    'requestUrl': siteUrl,
-                    'token': csrftoken,
-                });
-            }
-            else
-            {
-                let urls = [];
-                for (i in elIndexes.slice(start, finish))
+                let start = iteration * imagesPerRequest;
+                let finish = iteration * imagesPerRequest + imagesPerRequest;
+                if(useCache)
                 {
-                    urls.push({'id': i, 'url': imgElements[i].dataset.imageSrc});
+                    ImageLoaderWorker.postMessage({
+                        'indexes': elInds.getEli().slice(start, finish),
+                        'useCache': useCache,
+                        'webpSupport': webpSupport,
+                        'screenSize': screenSize,
+                        'requestUrl': siteUrl,
+                        'token': csrftoken,
+                    });
                 }
-                ImageLoaderWorker.postMessage({
-                   'urls': urls,
-                   'useCache': useCache,
-                   'webpSupport': webpSupport,
-                   'screenSize': screenSize,
-                   'requestUrl': siteUrl,
-                   'token': csrftoken,
-               }); 
+                else
+                {
+                    let urls = [];
+                    for (i of elInds.getEli().slice(start, finish))
+                    {
+                        urls.push({'id': i, 'url': imgElements[i].dataset.imageSrc});
+                    }
+                    ImageLoaderWorker.postMessage({
+                       'urls': urls,
+                       'useCache': useCache,
+                       'webpSupport': webpSupport,
+                       'screenSize': screenSize,
+                       'requestUrl': siteUrl,
+                       'token': csrftoken,
+                   }); 
+                }
             }
         }
+
+        let hid = false;
+        ImageLoaderWorker.addEventListener('message', event => {
+            const imageData = event.data;
+            const ids = imageData.ids;
+            const abs = imageData.abs;
+            ids.forEach((id,idx) =>{
+                var mimestring = webpSupport ? "image/png" : "image/jpeg";
+                var blob = new Blob([abs[idx]], { type: mimestring });
+                
+                var imageElement = imgElements[id];
+                var objectURL = URL.createObjectURL(blob);
+
+                // Once the image is loaded, we'll want to do some extra cleanup
+                if (imageElement)
+                {
+                  imageElement.onload = () => {
+                    URL.revokeObjectURL(objectURL);
+                  }
+                  imageElement.setAttribute('size', screenSize);
+                  imageElement.setAttribute('src', objectURL);
+                }
+            }) 
+            if(iteration < imgElements.length / imagesPerRequest)
+            { 
+                if(!document.hidden && window.location.pathname == '/')
+                {
+                    pm();
+                    iteration++;
+                }
+                else
+                {
+                    hid = true;
+                }
+            }
+        })
+
+        pm();
+        iteration++;
+
+        document.addEventListener('visibilitychange', function (event) {
+            if (!document.hidden) {
+                if (window.location.pathname == '/' && hid)
+                {
+                    hid = false;
+                    pm();
+                    iteration++;
+                }
+            }
+        });
     }
-
-    let hid = false;
-    ImageLoaderWorker.addEventListener('message', event => {
-        const imageData = event.data;
-        const ids = imageData.ids;
-        const abs = imageData.abs;
-        ids.forEach((id,idx) =>{
-            var mimestring = webpSupport ? "image/png" : "image/jpeg";
-            var blob = new Blob([abs[idx]], { type: mimestring });
-            
-            var imageElement = imgElements[elIndexes[id]];
-            console.log(imageElement)
-            var objectURL = URL.createObjectURL(blob);
-
-            // Once the image is loaded, we'll want to do some extra cleanup
-            if (imageElement)
-            {
-              imageElement.onload = () => {
-                URL.revokeObjectURL(objectURL);
-              }
-              imageElement.setAttribute('size', screenSize);
-              imageElement.setAttribute('src', objectURL);
-            }
-        }) 
-        if(iteration < imgElements.length / imagesPerRequest)
-        { 
-            if(!document.hidden && window.location.pathname == '/')
-            {
-                pm();
-                iteration++;
-            }
-            else
-            {
-                hid = true;
-            }
-        }
-    })
-
-    pm();
-    iteration++;
-
-    document.addEventListener('visibilitychange', function (event) {
-        if (!document.hidden) {
-            if (window.location.pathname == '/' && hid)
-            {
-                hid = false;
-                pm();
-                iteration++;
-            }
-        }
-    });
 });

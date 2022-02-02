@@ -208,6 +208,7 @@ class LandingPage(generic.base.TemplateView):
         context['image_size_large'] = conf.settings.IMAGE_SIZE_LARGE
         context['image_size_small'] = conf.settings.IMAGE_SIZE_SMALL
         context['images_per_request'] = conf.settings.NUM_IMAGES_PER_REQUEST
+        context['image_pause'] = conf.settings.CAROUSEL_IMG_PAUSE
         context['csrftoken'] = csrf.get_token(self.request)
         return context
 
