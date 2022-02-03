@@ -192,11 +192,7 @@ var Singleton = (function(){
             for (i=0;i<ieLength;++i) this._eli[i]=i;
             if(rand)    
             {
-                return fisherYatesShuffle(this._eli); 
-            }
-            else
-            {
-                return this._eli;
+                fisherYatesShuffle(this._eli); 
             }
         }
     }
@@ -264,7 +260,7 @@ $(window).on('load', function() {
                         var nextImgInd = elIter.next()
                         if(nextImgInd.done)
                         {
-                            elIter = elInds.iter();
+                            elIter = elInds._nextELIndex();
                             nextImgInd = elIter.next()
                         }
                         setTimeout(function(i){ carousel.to(i); carousel.cycle(); }, 6500, nextImgInd.value);
@@ -329,7 +325,7 @@ $(document).ready(function () {
     {
         const dataEl = document.getElementById('hidden-data');
         const useCache = dataEl.dataset.useCache == 'False' ? false : true;
-        const randomizeImages = Boolean(dataEl.dataset.randomizeImages);
+        const randomizeImages = dataEl.dataset.randomizeImages == 'False' ? false : true;
         const elInds = Singleton.getInstance(randomizeImages, ieLength);
         const imagesPerRequest = parseInt(dataEl.dataset.imagesPerRequest);
         const imageSizeLarge = dataEl.dataset.imageSizeLarge;
@@ -355,8 +351,16 @@ $(document).ready(function () {
                 let finish = iteration * imagesPerRequest + imagesPerRequest;
                 if(useCache)
                 {
+                    pks = [];
+                    elis = elInds.getEli().slice(start, finish);
+                    for(i of elis)
+                    {
+                        pks.push(imgElements[i].id);
+                    }
                     ImageLoaderWorker.postMessage({
-                        'indexes': elInds.getEli().slice(start, finish),
+                        'pks': pks,
+                        'iteration': iteration,
+                        'indexes': elis,
                         'useCache': useCache,
                         'webpSupport': webpSupport,
                         'screenSize': screenSize,
@@ -388,6 +392,7 @@ $(document).ready(function () {
             const imageData = event.data;
             const ids = imageData.ids;
             const abs = imageData.abs;
+            console.log(ids);
             ids.forEach((id,idx) =>{
                 var mimestring = webpSupport ? "image/png" : "image/jpeg";
                 var blob = new Blob([abs[idx]], { type: mimestring });

@@ -5,6 +5,9 @@
 }
 
 .carousel-inner {
+  display: flex;
+  flex-direction: column;
+  align-content: flex-start;
   height: 100vh;
 }
 
@@ -21,7 +24,7 @@
   background-color: rgba(23, 62, 67, 0.75);
   visibility: hidden;
   opacity: 0;
-  transition: all 1s ease-out;
+  transition: all 2s ease-out;
 }
 
 .carousel-image {
@@ -30,7 +33,7 @@
   align-self: center;
   object-fit: contain;
   height: 87vh;
-/*  width:100vw;*/
+  width:100%;
   margin: auto;
 }
 
@@ -38,6 +41,11 @@
   visibility: visible;
   opacity: 1;
   transition: all 1s ease-in;
+}
+
+.carousel-caption:hover {
+  visibility: visible;
+  opacity: 1;
 }
 /*.carousel-item
 {

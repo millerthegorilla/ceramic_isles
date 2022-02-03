@@ -1,12 +1,12 @@
 self.addEventListener('message', async event => {
   // const mimetype = Boolean(event.data.webp_support) ? 'image/webp' : type='image/jpeg'
-  console.log('hi')
   const cache = event.data.useCache;
   if(cache)
   {
     var arrStr = encodeURIComponent(JSON.stringify(event.data.indexes));
+    var pkStr = encodeURIComponent(JSON.stringify(event.data.pks));
     const request = new Request(
-        `${event.data.requestUrl}${event.data.webpSupport}/${event.data.screenSize}/${arrStr}`,
+        `${event.data.requestUrl}${event.data.webpSupport}/${event.data.screenSize}/${event.data.iteration}/${pkStr}/${arrStr}`,
         {
             method: 'GET',
             headers: {'X-CSRFToken': event.data.token,
@@ -27,6 +27,7 @@ self.addEventListener('message', async event => {
           ids.push(imgurl.id)
           if(ids.length == imgUrls.length)
           {
+            console.log(ids);
             self.postMessage(
               {'ids': ids, 'abs':abs}, abs 
             );
@@ -44,7 +45,6 @@ self.addEventListener('message', async event => {
         const blob = await pic.blob();
         abs.push(await blob.arrayBuffer())
         ids.push(imgurl.id)
-        console.log(imgurl.id)
         if(ids.length == urls.length)
         {
           self.postMessage(

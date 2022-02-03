@@ -10,7 +10,7 @@
       <div class="carousel-inner">
         {% for image in images %}
           <div id="image-{{ forloop.counter }}-carousel" class="carousel-item">
-            <img src="{% static loading_image %}" size="{{image_size}}" height="100%" class="carousel-image" id="image-{{image.id}}" data-image-src="{{image.image_file.url}}">
+            <img src="{% static loading_image %}" size="{{image_size}}" height="100%" class="carousel-image" id="{{image.id}}" data-image-src="{{image.image_file.url}}">
             <div class="carousel-caption p-2 col-sm-6 col-md-4 col-lg-3 d-md-block text-white">
               <h5>{{ image.image_title }}</h5>
               <p>{{ image.image_text }}</p>
