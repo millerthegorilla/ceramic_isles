@@ -138,6 +138,10 @@ function IsImageOk(img, loadingImage) {
     if (!img.complete) {
         return false;
     }
+    else
+    {
+        return true;
+    }
 
     // However, they do have two very useful properties: naturalWidth and
     // naturalHeight. These give the true size of the image. If it failed
@@ -147,11 +151,7 @@ function IsImageOk(img, loadingImage) {
     }
 
     // No other way of checking: assume it’s ok.
-    return true;
-}
-
-function sleep (time) {
-  return new Promise((resolve) => setTimeout(resolve, time));
+    return false;
 }
 
 function fisherYatesShuffle(arr){
@@ -161,35 +161,12 @@ function fisherYatesShuffle(arr){
     }
 }
 
-// let elIndexes = function(rand) {
-//     let eli = []
-//     for (i=0;i<ieLength;++i) eli[i]=i;
-//     if(rand)    
-//     {
-//         return fisherYatesShuffle(eli); 
-//     }
-//     else
-//     {
-//         return eli
-//     }
-// };
-
-function* nextELIndex() 
-{ 
-    i=0; 
-    while (i < elIndexes.length)
-    {
-        yield elIndexes[i];
-        i++;
-    }
-}
-
 var Singleton = (function(){
     function Singleton(rand, ieLength) {
         this._eli = [];
         if(ieLength)
         {
-            for (i=0;i<ieLength;++i) this._eli[i]=i;
+            for (var i=0;i<ieLength;++i) this._eli[i]=i;
             if(rand)    
             {
                 fisherYatesShuffle(this._eli); 
@@ -203,11 +180,11 @@ var Singleton = (function(){
     Singleton.prototype._eli = [];
     Singleton.prototype._nextELIndex = function* () 
     { 
-        i=0; 
+        let j=0; 
         while (i < this._eli.length)
         {
-            yield this._eli[i];
-            i++;
+            yield this._eli[j];
+            j++;
         }
     }
     var instance;
@@ -228,13 +205,13 @@ $(window).on('load', function() {
     if(ieLength)
     {
         const dataEl = document.getElementById('hidden-data');
-        const imgPause = dataEl.dataset.imgPause;
+        const imgPause = parseInt(dataEl.dataset.imgPause);
         const loadingImage = location.protocol + "//" + location.host + dataEl.dataset.loadingImage;
         var myCarouselEl = document.querySelector('#carousel-large-background');
         let carousel = bootstrap.Carousel.getInstance(myCarouselEl);
         var elInds = Singleton.getInstance();
         var elIter = elInds._nextELIndex(); 
-        var firstImgInd = elIter.next()
+        var firstImgInd = elIter.next();
         var firstActiveImg = {}
 
         const callback = function(changes, observer)
@@ -250,8 +227,6 @@ $(window).on('load', function() {
                     }
                     else
                     {
-                        //sleep(6000)
-                        //let carousel = bootstrap.Carousel.getInstance(myCarouselEl);
                         if (change.target == firstActiveImg)
                         {
                             firstActiveImg.parentElement.classList.add('active');
@@ -263,7 +238,7 @@ $(window).on('load', function() {
                             elIter = elInds._nextELIndex();
                             nextImgInd = elIter.next()
                         }
-                        setTimeout(function(i){ carousel.to(i); carousel.cycle(); }, 6500, nextImgInd.value);
+                        setTimeout(function(i){ carousel.to(i); carousel.cycle(); }, imgPause, nextImgInd.value);
                     }
                 }
             });
@@ -287,7 +262,7 @@ $(window).on('load', function() {
             }
             else
             {
-                setTimeout(function(i) { carousel.to(i); carousel.cycle(); }, 6500, nextImgInd.value);
+                setTimeout(function(i) { carousel.to(i); carousel.cycle(); }, imgPause, nextImgInd.value);
             }
         };
 
@@ -299,20 +274,20 @@ $(window).on('load', function() {
         }
         catch (err)
         {
-            myCarouselEl.removeEventListener('slid.bs.carousel', slidListener)
-            return
+            myCarouselEl.removeEventListener('slid.bs.carousel', slidListener);
+            return;
         }
         
         if (IsImageOk(firstActiveImg, loadingImage))
         {
             firstActiveImg.parentElement.classList.add('active');
-            carousel.pause()
-            var nextImgInd = elInds.next()
-            setTimeout(function(i) { carousel.to(i); carousel.cycle(); }, 6500, nextImgInd.value);
+            carousel.pause();
+            var nextImgInd = elInds.next();
+            setTimeout(function(i) { carousel.to(i); carousel.cycle(); }, imgPause, nextImgInd.value);
         }
         else
         {   
-            config = { attributes: true }
+            config = { attributes: true };
             observer.observe(firstActiveImg, config );
         }
     }
@@ -366,6 +341,7 @@ $(document).ready(function () {
                         'screenSize': screenSize,
                         'requestUrl': siteUrl,
                         'token': csrftoken,
+                        'randomizeImages': randomizeImages,
                     });
                 }
                 else
@@ -392,23 +368,8 @@ $(document).ready(function () {
             const imageData = event.data;
             const ids = imageData.ids;
             const abs = imageData.abs;
-            console.log(imageData)
-            // if(randomizeImages && useCache)
-            // {
-            //     function compare(a, b) {
-            //       if (a < b) { //lt
-            //         return -1;
-            //       }
-            //       if (a is greater than b by the ordering criterion) { //gt
-            //         return 1;
-            //       }
-            //       // a must be equal to b - cannot happen - assertion or raise error
-            //       return 0;
-            //     }
-
-            // }
             ids.forEach((id,idx) =>{
-                var mimestring = webpSupport ? "image/png" : "image/jpeg";
+                var mimestring = useCache && webpSupport ? "image/webp" : "image/jpeg";
                 var blob = new Blob([abs[idx]], { type: mimestring });
                 
                 var imageElement = imgElements[id];

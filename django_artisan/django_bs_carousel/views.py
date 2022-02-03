@@ -31,4 +31,5 @@ class ImgURL(generic.base.View):
                        'pic': pic})
             i = i + 1
         r = { 'list': ql }
+        breakpoint()
         return http.JsonResponse(r)

@@ -3,13 +3,13 @@ function isValid(value) {
 }
 
 self.addEventListener('message', async event => {
-  // const mimetype = Boolean(event.data.webp_support) ? 'image/webp' : type='image/jpeg'
   const cache = event.data.useCache;
 
   if(cache)
   {
-    var indStr = encodeURIComponent(JSON.stringify(event.data.indexes));
-    var pkStr = encodeURIComponent(JSON.stringify(event.data.pks));
+    const indStr = encodeURIComponent(JSON.stringify(event.data.indexes));
+    const pkStr = encodeURIComponent(JSON.stringify(event.data.pks));
+    const randomizeImages = event.data.randomizeImages;
     const request = new Request(
         `${event.data.requestUrl}${event.data.webpSupport}/${event.data.screenSize}/${event.data.iteration}/${pkStr}/${indStr}`,
         {
@@ -19,34 +19,31 @@ self.addEventListener('message', async event => {
             mode: 'same-origin',
         });
     fetch(request).then(function(response) {
-       // response.json then has the list of the urls
         return response.json();
     })
     .then(imgUrls => {
       var imgUrls = imgUrls.list;
-      console.log('imgurls = ',imgUrls);
       const abs = []
-      const ids = []
       const idxs = event.data.indexes;
+      let idx = 0
       imgUrls.forEach(async imgurl => {
-            const pic = await fetch(imgurl.pic);
-            const blob = await pic.blob();
-            const ab = await blob.arrayBuffer();
-            abs[imgurl.id] = ab
-          // ids is the offset of abs into the array 
-          //so, ids[3] == 6 then abs[6] is in the 3rd position in the array
+          const id = parseInt(imgurl.id);
+          const pic = await fetch(imgurl.pic);
+          const blob = await pic.blob();
+          const ab = await blob.arrayBuffer();
+          if(!randomizeImages)
+          {
+            abs[id] = ab;
+          }
+          else
+          {
+            var bob = idxs.findIndex((el)=>el==id);
+            console.log(bob);
+            abs[bob] = ab;
+          }
           if(abs.filter(isValid).length == imgUrls.length)
           {
-             var abs2 = abs.filter(isValid); 
-          //   var abs2 = [];
-          //   var ids2= [];
-               
-          //   idxs.forEach((id,idx) =>
-          //   {
-          //     //find idx inside ids and return its offset
-          //     //take the abs at that offset and 
-          //     abs2[idx] = abs[ids[idx]]
-          //   });
+            var abs2 = abs.filter(isValid);
             self.postMessage(
               {'ids': idxs, 'abs':abs2}, abs2
             );
