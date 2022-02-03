@@ -24,11 +24,11 @@ class ImgURL(generic.base.View):
         image_qs = (apps.get_model(*conf.settings.DJANGO_BS_CAROUSEL_IMAGE_MODEL
                                        .split('.')).objects.filter(pk__in=image_pks)) 
         i = 0;
-        breakpoint()
         for im in image_qs.iterator():
             pic = get_thumbnail(im.image_file, screen_size, 
                                     format=fmt, quality=70).url
-            ql.append({'id': image_idxs[i],
+            ql.append({'id': str(image_idxs[i]),
                        'pic': pic})
             i = i + 1
-        return http.JsonResponse(ql, safe=False)
+        r = { 'list': ql }
+        return http.JsonResponse(r)

@@ -355,7 +355,7 @@ $(document).ready(function () {
                     elis = elInds.getEli().slice(start, finish);
                     for(i of elis)
                     {
-                        pks.push(imgElements[i].id);
+                        pks.push(parseInt(imgElements[i].id));
                     }
                     ImageLoaderWorker.postMessage({
                         'pks': pks,
@@ -392,7 +392,21 @@ $(document).ready(function () {
             const imageData = event.data;
             const ids = imageData.ids;
             const abs = imageData.abs;
-            console.log(ids);
+            console.log(imageData)
+            // if(randomizeImages && useCache)
+            // {
+            //     function compare(a, b) {
+            //       if (a < b) { //lt
+            //         return -1;
+            //       }
+            //       if (a is greater than b by the ordering criterion) { //gt
+            //         return 1;
+            //       }
+            //       // a must be equal to b - cannot happen - assertion or raise error
+            //       return 0;
+            //     }
+
+            // }
             ids.forEach((id,idx) =>{
                 var mimestring = webpSupport ? "image/png" : "image/jpeg";
                 var blob = new Blob([abs[idx]], { type: mimestring });
