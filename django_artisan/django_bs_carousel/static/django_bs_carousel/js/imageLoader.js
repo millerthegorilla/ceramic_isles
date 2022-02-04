@@ -55,7 +55,6 @@ self.addEventListener('message', async event => {
     const abs = []
     const ids = []
     const urls = event.data.urls;
-    console.log(urls);
     urls.forEach(async imgurl => {
         const pic = await fetch(imgurl.url);
         const blob = await pic.blob();

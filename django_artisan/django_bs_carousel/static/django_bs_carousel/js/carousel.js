@@ -188,8 +188,8 @@ var Singleton = (function(){
             this.currentImage++;
         }
     }
-    Singleton.prototype.nextImage = () => { console.log(this, self) }; //return this.currentImage = this._eli[this._eli.findIndex((el) => el==this.currentImage) + 1] }
-    Singleton.prototype.prevImage = () => { return this.currentImage = this._eli[this._eli.findIndex((el) => el==this.currentImage) - 1] }
+    Singleton.prototype.nextImage = (that) => { return that.currentImage = that._eli[that._eli.findIndex((el) => el==that.currentImage) + 1] }
+    Singleton.prototype.prevImage = (that) => { return that.currentImage = that._eli[that._eli.findIndex((el) => el==that.currentImage) - 1] }
     var instance;
     return {
         getInstance: function(rand, ieLength){
@@ -216,7 +216,7 @@ $(window).on('load', function() {
         var elIter = elInds._nextELIndex(); 
         var firstImgInd = elIter.next();
         var firstActiveImg = {}
-
+        var tohandle = 0;
         const callback = function(changes, observer)
         {
             changes.forEach(change => {
@@ -241,7 +241,15 @@ $(window).on('load', function() {
                             elIter = elInds._nextELIndex();
                             nextImgInd = elIter.next()
                         }
-                        setTimeout(function(i){ carousel.to(i); carousel.cycle(); }, imgPause, nextImgInd.value);
+                        if(tohandle)
+                        {
+                           clearInterval(tohandle);
+                           tohandle = setTimeout(function(i) { carousel.to(i); }, imgPause, elInds.currentImage);
+                        }
+                        else
+                        {
+                            tohandle = setTimeout(function(i){ carousel.to(i); }, imgPause, nextImgInd.value);
+                        }
                     }
                 }
             });
@@ -265,7 +273,15 @@ $(window).on('load', function() {
             }
             else
             {
-                setTimeout(function(i) { carousel.to(i); carousel.cycle(); }, imgPause, nextImgInd.value);
+                if(tohandle)
+                {
+                   clearInterval(tohandle);
+                   tohandle = setTimeout(function(i) { carousel.to(i); }, imgPause, elInds.currentImage);
+                }
+                else
+                {
+                    tohandle = setTimeout(function(i) { carousel.to(i); }, imgPause, nextImgInd.value);
+                }
             }
         };
 
@@ -287,7 +303,7 @@ $(window).on('load', function() {
         if (IsImageOk(firstActiveImg, loadingImage))
         {
             var nextImgInd = elInds.next();
-            setTimeout(function(i) { carousel.to(i); carousel.cycle(); }, imgPause, nextImgInd.value);
+            tohandle = setTimeout(function(i) { carousel.to(i); }, imgPause, nextImgInd.value);
         }
         else
         {   
@@ -299,8 +315,8 @@ $(window).on('load', function() {
         // var nextControlArr = document.querySelectorAll('carousel-control-next');
         function pr() {}
 
-        carousel.next = () => { carousel.to(elInds.nextImage().bind(Singleton.getInstance()) ) };
-        carousel.prev = () => { carousel.to(elInds.prevImage().bind(Singleton.getInstance()) ) };
+        carousel.next = () => { carousel.to(elInds.nextImage(elInds)) };
+        carousel.prev = () => { carousel.to(elInds.prevImage(elInds)) };
         // for(i of prevControlArr)
         // {
         //     prevControlArr[i].addEventListener('click', (e)=>{e.preventDefault(); c})
