@@ -38,18 +38,18 @@ def callback(sender: DjangoArtisan, **kwargs) -> None:
 @admin.register(UserProductImage)
 class Image(admin.ModelAdmin):
     list_display = (
-        'active', 'image_file',
-        'image_shop_link',
-        'image_title', 'image_text',
-        'image_shop_link_title'
+        'active', 'file',
+        'shop_link',
+        'shop_link_title',
+        'title', 'text',
     )
     list_filter = (
-        'active', 'image_file',
-        'image_title'
+        'active', 'file',
+        'title'
     )
     search_fields = (
-        'image_text', 'image_title',
-        'image_shop_link'
+        'text', 'title',
+        'shop_link'
     )
     actions = ['approve_image']
 
@@ -70,7 +70,7 @@ class Image(admin.ModelAdmin):
 class Event(admin.ModelAdmin):
     list_display = (
         'active', 'title',
-        'text', 'event_date',
+        'text', 'date',
         'repeating'
     )
     actions = ['approve_event', 'disapprove_event']

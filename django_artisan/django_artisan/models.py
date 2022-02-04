@@ -150,18 +150,19 @@ class UserProductImage(models.Model):
     class Meta:
         permissions = [('approve_image', 'Approve Image')]
 
-    image_file: safe_image_models.SafeImageField = safe_image_models.SafeImageField(upload_to=user_directory_path, max_length=250)
-    image_text: models.CharField = models.CharField(max_length=400, default='', blank=True)
-    image_title: models.CharField = models.CharField(max_length=30, default='', blank=True)
-    image_shop_link: models.CharField = models.CharField(max_length=50, default='', blank=True)
-    image_shop_link_title: models.CharField = models.CharField(
+    
+    file: safe_image_models.SafeImageField = safe_image_models.SafeImageField(upload_to=user_directory_path, max_length=250)
+    text: models.CharField = models.CharField(max_length=400, default='', blank=True)
+    caption: models.CharField = models.CharField(max_length=400, default='', blank=True)
+    title: models.CharField = models.CharField(max_length=30, default='', blank=True)
+    shop_link: models.CharField = models.CharField(max_length=50, default='', blank=True)
+    shop_link_title: models.CharField = models.CharField(
         max_length=30, default='', blank=True)
     active: models.BooleanField = models.BooleanField(default=False)
     user_profile: models.ForeignKey = models.ForeignKey(
         ArtisanForumProfile,
         on_delete=models.CASCADE,
         related_name="forum_images")
-    image_id: models.UUIDField = models.UUIDField(default=uuid.uuid4, editable=False)
 
 @receiver(signals.post_delete, sender=UserProductImage)
 def auto_delete_file_on_delete(sender: UserProductImage, instance: UserProductImage, **kwargs):
@@ -212,6 +213,6 @@ class Event(models.Model):
     text: models.CharField = models.CharField(max_length=400)
     time: models.TimeField = models.TimeField(auto_now_add=False)
     every: models.CharField = models.CharField(max_length=40, blank=True, null=True)
-    event_date: models.DateField = models.DateField(auto_now_add=False, blank=True, null=True)
+    date: models.DateField = models.DateField(auto_now_add=False, blank=True, null=True)
     repeating: models.BooleanField = models.BooleanField(default=False)
     active:models.BooleanField = models.BooleanField(default=True)

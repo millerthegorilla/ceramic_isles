@@ -116,7 +116,7 @@ MAX_NUMBER_OF_IMAGES = settings.MAX_USER_IMAGES
 
 
 class UserProductImage(forms.ModelForm):
-    image_file = safe_image_forms.SafeImageField(allowed_extensions=('jpg', 'png'),
+    file = safe_image_forms.SafeImageField(allowed_extensions=('jpg', 'png'),
                                                  check_content_type=True,
                                                  scan_viruses=True,
                                                  media_integrity=True,
@@ -124,8 +124,8 @@ class UserProductImage(forms.ModelForm):
 
     class Meta:
         model= artisan_models.UserProductImage
-        fields = ['image_file', 'image_title', 'image_text',
-                  'image_shop_link', 'image_shop_link_title']
+        fields = ['file', 'title', 'text',
+                  'shop_link', 'shop_link_title']
 
     def __init__(self, instance: 'UserProductImage' = None, user: User = None, *args, **kwargs) -> None:
         self.user = user
@@ -136,11 +136,11 @@ class UserProductImage(forms.ModelForm):
         self.helper.layout = layout.Layout(
             layout.Fieldset(
                             '',
-                            artisan_fields.FileInput('image_file', name="image_file"),
-                            bootstrap5.FloatingField('image_title'),
-                            bootstrap5.FloatingField('image_text'),
-                            bootstrap5.FloatingField('image_shop_link'),
-                            bootstrap5.FloatingField('image_shop_link_title'),),
+                            artisan_fields.FileInput('file', name="image_file"),
+                            bootstrap5.FloatingField('title'),
+                            bootstrap5.FloatingField('text'),
+                            bootstrap5.FloatingField('shop_link'),
+                            bootstrap5.FloatingField('shop_link_title'),),
         )
         self.helper.form_id = 'id-upload-form'
         self.helper.form_method = 'post'

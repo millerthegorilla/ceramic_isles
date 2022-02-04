@@ -58,17 +58,17 @@ class Command(base.BaseCommand):
                 pic = imagefiles[randrange(8)]
                 try:
                     image = new_user.profile.forum_images.create(
-                            image_file=images.ImageFile(file=open(path + pic, 'rb')),
-                            image_text=pic,
-                            image_title=pic[:30],
+                            file=images.ImageFile(file=open(path + pic, 'rb')),
+                            caption="<h3>{}</h3>".format(pic),
+                            title=pic[:30],
                             active=True)
-                    img = Image.open(image.image_file.path)
+                    img = Image.open(image.file.path)
                     #img = ImageOps.fit(img, (1024,768))
                     img = ImageOps.expand(img, border=10, fill='white')
-                    img.save(image.image_file.path)
-                    get_thumbnail(image.image_file, "1024x768", 
+                    img.save(image.file.path)
+                    get_thumbnail(image.file, "1024x768", 
                                                 format="WEBP", crop='center', quality=70)
-                    get_thumbnail(image.image_file, "500x700", 
+                    get_thumbnail(image.file, "500x700", 
                                                 format="WEBP", crop='center', quality=70)
                 except Exception as e:
                     raise base.CommandError('Error! creating image for user {} failed! {}'.format(i, e))

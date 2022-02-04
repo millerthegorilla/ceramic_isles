@@ -178,15 +178,18 @@ var Singleton = (function(){
         return this._eli;
     }
     Singleton.prototype._eli = [];
+    Singleton.prototype.currentImage = 0;
     Singleton.prototype._nextELIndex = function* () 
     { 
-        let j=0; 
-        while (i < this._eli.length)
+        this.currentImage = 0; 
+        while (this.currentImage < this._eli.length)
         {
-            yield this._eli[j];
-            j++;
+            yield this._eli[this.currentImage];
+            this.currentImage++;
         }
     }
+    Singleton.prototype.nextImage = () => { console.log(this, self) }; //return this.currentImage = this._eli[this._eli.findIndex((el) => el==this.currentImage) + 1] }
+    Singleton.prototype.prevImage = () => { return this.currentImage = this._eli[this._eli.findIndex((el) => el==this.currentImage) - 1] }
     var instance;
     return {
         getInstance: function(rand, ieLength){
@@ -291,6 +294,23 @@ $(window).on('load', function() {
             config = { attributes: true };
             observer.observe(firstActiveImg, config );
         }
+
+        // var prevControlArr = document.querySelectorAll('carousel-control-prev');
+        // var nextControlArr = document.querySelectorAll('carousel-control-next');
+        function pr() {}
+
+        carousel.next = () => { carousel.to(elInds.nextImage().bind(Singleton.getInstance()) ) };
+        carousel.prev = () => { carousel.to(elInds.prevImage().bind(Singleton.getInstance()) ) };
+        // for(i of prevControlArr)
+        // {
+        //     prevControlArr[i].addEventListener('click', (e)=>{e.preventDefault(); c})
+        // }
+
+        // for(i of nextControlArr)
+        // {
+        //     nextControlArr[i].addEventListener('click', (e)=>{e.preventDefault(); carousel.to(elInds.nextImage())})
+        // }
+
     }
 });
 

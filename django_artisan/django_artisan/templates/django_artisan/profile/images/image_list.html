@@ -15,22 +15,22 @@
             <form action="{% url 'django_artisan:remove_images' image.image_id|stringformat:'s' %}" method="post" class="mb-3">
                 {% csrf_token %}
                 <div>
-                {% thumbnail image.image_file "80x80" as im %}
+                {% thumbnail image.file "80x80" as im %}
                     <input type="image" src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}" name="saveForm-{{ forloop.counter }}" class="btTxt submit img-thumbnail card-img-left" id="saveForm-{{ forloop.counter }}" />
                 {% endthumbnail %}
                 </div>
             </form>
-            {% if image.image_title %}
-                <h6 class="text-white card-title">Image text : {{ image.image_title }}</h6>
+            {% if image.title %}
+                <h6 class="text-white card-title">Image text : {{ image.title }}</h6>
             {% endif %}
-            {% if image.image_text %}
-                <h6 class="text-white card-title">Image text : {{ image.image_text }}</h6>
+            {% if image.text %}
+                <h6 class="text-white card-title">Image text : {{ image.text }}</h6>
             {% endif %}
-            {% if image.image_shop_link %}
-                <h6 class="text-white card-title">Link to shop page : {{ image.image_shop_link }}</h6>
+            {% if image.shop_link %}
+                <h6 class="text-white card-title">Link to shop page : {{ image.shop_link }}</h6>
             {% endif %}
-            {% if image.image_shop_link_title %}
-                <h6 class="text-white card-title">Link text : {{ image.image_shop_link_title }}</h6>
+            {% if image.shop_link_title %}
+                <h6 class="text-white card-title">Link text : {{ image.shop_link_title }}</h6>
             {% endif %}
         </div>
     </div>
