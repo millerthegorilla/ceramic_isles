@@ -5,9 +5,6 @@
 }
 
 .carousel-inner {
-  display: flex;
-  flex-direction: column;
-  align-content: flex-start;
   height: 100vh;
 }
 
