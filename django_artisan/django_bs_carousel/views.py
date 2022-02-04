@@ -22,14 +22,13 @@ class ImgURL(generic.base.View):
         fmt = "WEBP" if webp_support else "JPEG"
         ql = []
         image_qs = (apps.get_model(*conf.settings.DJANGO_BS_CAROUSEL_IMAGE_MODEL
-                                       .split('.')).objects.filter(pk__in=image_pks)) 
+                                       .split('.')).objects.filter(pk__in=image_pks))
         i = 0;
         for im in image_qs.iterator():
             pic = get_thumbnail(im.image_file, screen_size, 
                                     format=fmt, quality=70).url
-            ql.append({'id': str(image_idxs[i]),
+            ql.append({'id': str(image_idxs[image_pks.index(im.pk)]),
                        'pic': pic})
             i = i + 1
         r = { 'list': ql }
-        breakpoint()
         return http.JsonResponse(r)

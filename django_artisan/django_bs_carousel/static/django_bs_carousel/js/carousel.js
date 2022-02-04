@@ -278,10 +278,11 @@ $(window).on('load', function() {
             return;
         }
         
+        firstActiveImg.parentElement.classList.add('active');
+        carousel.pause();
+
         if (IsImageOk(firstActiveImg, loadingImage))
         {
-            firstActiveImg.parentElement.classList.add('active');
-            carousel.pause();
             var nextImgInd = elInds.next();
             setTimeout(function(i) { carousel.to(i); carousel.cycle(); }, imgPause, nextImgInd.value);
         }

@@ -23,9 +23,8 @@ self.addEventListener('message', async event => {
     })
     .then(imgUrls => {
       var imgUrls = imgUrls.list;
-      const abs = []
-      const idxs = event.data.indexes;
-      let idx = 0
+      const abs = [];
+      var idxs = (randomizeImages ? [] : event.data.indexes);
       imgUrls.forEach(async imgurl => {
           const id = parseInt(imgurl.id);
           const pic = await fetch(imgurl.pic);
@@ -37,8 +36,8 @@ self.addEventListener('message', async event => {
           }
           else
           {
-            var bob = idxs.findIndex((el)=>el==id);
-            console.log(bob);
+            var bob = event.data.indexes.findIndex((el)=>el==id);
+            idxs[bob] = id;
             abs[bob] = ab;
           }
           if(abs.filter(isValid).length == imgUrls.length)
