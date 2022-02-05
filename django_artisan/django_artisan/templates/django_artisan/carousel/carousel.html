@@ -10,13 +10,13 @@
       <div class="carousel-inner">
         {% for image in images %}
           <div id="image-{{ forloop.counter }}-carousel" class="carousel-item">
-            <img src="{% static loading_image %}" size="{{image_size}}" height="100%" class="carousel-image" id="{{image.id}}" data-image-src="{{image.image_file.url}}">
+            <img src="{% static loading_image %}" size="{{image_size}}" height="100%" class="carousel-image" id="{{image.id}}" data-image-src="{{image.file.url}}">
             <div class="carousel-caption p-2 col-sm-6 col-md-4 col-lg-3 d-md-block text-white">
               <h5>{{ image.title }}</h5>
               <p>{{ image.text }}</p>
               <p>Made by <a class="headline-text" href='{% if image.user_profile.display_personal_page %}{% url "django_artisan:personal_page_view" name_slug=image.user_profile.display_name %}{% else %}#{% endif %}'>{{image.user_profile.display_name}}</a>
               {% if image.shop_link %}
-              <p>You can buy this at <a href="{{ image.image_shop_link }}" target="blank" class="landing-img-link text-warning">{{ image.shop_link_title }}</a></p>{% endif %}
+              <p>You can buy this at <a href="{{ image.shop_link }}" target="blank" class="landing-img-link text-warning">{{ image.shop_link_title }}</a></p>{% endif %}
             </div>
           </div>
         {% endfor %}

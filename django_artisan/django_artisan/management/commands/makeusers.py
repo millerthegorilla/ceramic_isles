@@ -59,7 +59,7 @@ class Command(base.BaseCommand):
                 try:
                     image = new_user.profile.forum_images.create(
                             file=images.ImageFile(file=open(path + pic, 'rb')),
-                            caption="<h3>{}</h3>".format(pic),
+                            text=str(path) + str(pic),
                             title=pic[:30],
                             active=True)
                     img = Image.open(image.file.path)

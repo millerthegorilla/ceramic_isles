@@ -150,7 +150,7 @@ function IsImageOk(img, loadingImage) {
         return false;
     }
 
-    // No other way of checking: assume it’s ok.
+    // No other way of checking: assume it’s not ok.
     return false;
 }
 
@@ -178,18 +178,22 @@ var Singleton = (function(){
         return this._eli;
     }
     Singleton.prototype._eli = [];
-    Singleton.prototype.currentImage = 0;
+    Singleton.prototype.currentImageIndex = 0;
     Singleton.prototype._nextELIndex = function* () 
     { 
-        this.currentImage = 0; 
-        while (this.currentImage < this._eli.length)
+        this.currentImageIndex = 0; 
+        while (this.currentImageIndex < this._eli.length)
         {
-            yield this._eli[this.currentImage];
-            this.currentImage++;
+            yield this._eli[this.currentImageIndex];
+            this.currentImageIndex++;
         }
     }
-    Singleton.prototype.nextImage = (that) => { return that.currentImage = that._eli[that._eli.findIndex((el) => el==that.currentImage) + 1] }
-    Singleton.prototype.prevImage = (that) => { return that.currentImage = that._eli[that._eli.findIndex((el) => el==that.currentImage) - 1] }
+    Singleton.prototype.nextImageIndex = (that) => { 
+        that.currentImageIndex = that.currentImageIndex++ % that._eli.length; return that._eli[that._eli.findIndex((el) => el==that.currentImageIndex)]; 
+    }
+    Singleton.prototype.prevImageIndex = (that) => { 
+        that.currentImageIndex = that.currentImageIndex-- < 0 ? that._eli.length - 1 : that.currentImageIndex; return that._eli[that._eli.findIndex((el) => el==that.currentImageIndex)]; 
+    }
     var instance;
     return {
         getInstance: function(rand, ieLength){
@@ -220,6 +224,7 @@ $(window).on('load', function() {
         const callback = function(changes, observer)
         {
             changes.forEach(change => {
+                carousel.pause()
                 if (change.attributeName.includes('src')) {
                     if(change.target.src == loadingImage)
                     {
@@ -243,12 +248,12 @@ $(window).on('load', function() {
                         }
                         if(tohandle)
                         {
-                           clearInterval(tohandle);
-                           tohandle = setTimeout(function(i) { carousel.to(i); }, imgPause, elInds.currentImage);
+                           clearTimeout(tohandle);
+                           tohandle = setTimeout(function(i) { carousel.to(i); carousel.pause(); tohandle=undefined}, imgPause, elInds._eli[elInds.currentImageIndex]);
                         }
                         else
                         {
-                            tohandle = setTimeout(function(i){ carousel.to(i); }, imgPause, nextImgInd.value);
+                            tohandle = setTimeout(function(i){ carousel.to(i); carousel.pause(); tohandle=undefined}, imgPause, nextImgInd.value);
                         }
                     }
                 }
@@ -275,12 +280,12 @@ $(window).on('load', function() {
             {
                 if(tohandle)
                 {
-                   clearInterval(tohandle);
-                   tohandle = setTimeout(function(i) { carousel.to(i); }, imgPause, elInds.currentImage);
+                   clearTimeout(tohandle);
+                   tohandle = setTimeout(function(i) { carousel.to(i); tohandle=undefined }, imgPause, elInds._eli[elInds.currentImage]);
                 }
                 else
                 {
-                    tohandle = setTimeout(function(i) { carousel.to(i); }, imgPause, nextImgInd.value);
+                    tohandle = setTimeout(function(i) { carousel.to(i); tohandle=undefined }, imgPause, nextImgInd.value);
                 }
             }
         };
@@ -290,20 +295,19 @@ $(window).on('load', function() {
         try
         {
             firstActiveImg = imgElements[firstImgInd.value];
+            firstActiveImg.parentElement.classList.add('active');
+            carousel.pause();
         }
         catch (err)
         {
             myCarouselEl.removeEventListener('slid.bs.carousel', slidListener);
             return;
         }
-        
-        firstActiveImg.parentElement.classList.add('active');
-        carousel.pause();
 
         if (IsImageOk(firstActiveImg, loadingImage))
         {
             var nextImgInd = elInds.next();
-            tohandle = setTimeout(function(i) { carousel.to(i); }, imgPause, nextImgInd.value);
+            tohandle = setTimeout(function(i) { carousel.to(i); carousel.pause(); tohandle=undefined}, imgPause, nextImgInd.value);
         }
         else
         {   
@@ -311,22 +315,8 @@ $(window).on('load', function() {
             observer.observe(firstActiveImg, config );
         }
 
-        // var prevControlArr = document.querySelectorAll('carousel-control-prev');
-        // var nextControlArr = document.querySelectorAll('carousel-control-next');
-        function pr() {}
-
-        carousel.next = () => { carousel.to(elInds.nextImage(elInds)) };
-        carousel.prev = () => { carousel.to(elInds.prevImage(elInds)) };
-        // for(i of prevControlArr)
-        // {
-        //     prevControlArr[i].addEventListener('click', (e)=>{e.preventDefault(); c})
-        // }
-
-        // for(i of nextControlArr)
-        // {
-        //     nextControlArr[i].addEventListener('click', (e)=>{e.preventDefault(); carousel.to(elInds.nextImage())})
-        // }
-
+        carousel.next = () => { clearTimeout(tohandle); tohandle=undefined; carousel.to(elInds.nextImageIndex(elInds)); carousel.cycle(); carousel.pause(); };
+        carousel.prev = () => { clearTimeout(tohandle); tohandle=undefined; carousel.to(elInds.prevImageIndex(elInds)); carousel.cycle(); carousel.pause(); };
     }
 });
 
@@ -338,7 +328,7 @@ $(document).ready(function () {
         const dataEl = document.getElementById('hidden-data');
         const useCache = dataEl.dataset.useCache == 'False' ? false : true;
         const randomizeImages = dataEl.dataset.randomizeImages == 'False' ? false : true;
-        const elInds = Singleton.getInstance(randomizeImages, ieLength);
+        const elInds = Singleton.getInstance(randomizeImages, ieLength, imgElements);
         const imagesPerRequest = parseInt(dataEl.dataset.imagesPerRequest);
         const imageSizeLarge = dataEl.dataset.imageSizeLarge;
         const imageSizeSmall = dataEl.dataset.imageSizeSmall;
@@ -418,6 +408,7 @@ $(document).ready(function () {
                   imageElement.onload = () => {
                     URL.revokeObjectURL(objectURL);
                   }
+                  imageElement.removeAttribute('data-image-src');
                   imageElement.setAttribute('size', screenSize);
                   imageElement.setAttribute('src', objectURL);
                 }

@@ -170,10 +170,10 @@ def auto_delete_file_on_delete(sender: UserProductImage, instance: UserProductIm
     Deletes file from filesystem
     when corresponding `MediaFile` object is deleted.
     """
-    fp = instance.image_file.path
+    fp = instance.file.path
     fd = os.path.dirname(fp)
-    if instance.image_file:
-        thumbnail.delete(instance.image_file)  # removes from cache - sorl thumbnail
+    if instance.file:
+        thumbnail.delete(instance.file)  # removes from cache - sorl thumbnail
         if os.path.exists(fd) and len(os.listdir(fd)) == 0:
             shutil.rmtree(conf.settings.MEDIA_ROOT + 'uploads/users/' + instance.user_profile.display_name, ignore_errors=True)
 
@@ -193,7 +193,7 @@ def auto_delete_file_on_change(sender: UserProductImage, instance:UserProductIma
         logger.info("New UserProductImage being installed?: {0}".format(e))
         return False
 
-    new_file = instance.image_file
+    new_file = instance.file
     if not old_image_field.file == new_file:
         if os.path.isfile(old_image_field.file.path):
             thumbnail.delete(old_image_field) # clear thumbs from cache
