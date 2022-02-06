@@ -188,12 +188,26 @@ var Singleton = (function(){
             this.currentImageIndex++;
         }
     }
-    // Singleton.prototype.nextImageIndex = (that, eln, elp) => { 
-    //     that.currentImageIndex = that.currentImageIndex++ % that._eli.length; return that._eli[that._eli.findIndex((el) => el==that.currentImageIndex)]; 
-    // }
-    // Singleton.prototype.prevImageIndex = (that, eln, elp) => { 
-    //     that.currentImageIndex = that.currentImageIndex-- < 0 ? that._eli.length - 1 : that.currentImageIndex; return that._eli[that._eli.findIndex((el) => el==that.currentImageIndex)]; 
-    // }
+    Singleton.prototype.prev = function () {
+        if(this.currentImageIndex == 0)
+        {
+            return this._eli[this._eli.length - 1];
+        }
+        else
+        {
+            return this._eli[this.currentImageIndex - 1];
+        }
+    }
+    Singleton.prototype.next = function () {
+        if(this.currentImageIndex == this._eli.length - 1)
+        {
+            return this._eli[0];
+        }
+        else
+        {
+            return this._eli[this.currentImageIndex + 1];
+        }
+    }
     var instance;
     return {
         getInstance: function(rand, ieLength){
@@ -207,20 +221,6 @@ var Singleton = (function(){
 })();
 
 $(window).on('load', function() {
-
-    //$(document).off('bs.carousel.data-api');
-    
-    // function nexti () { 
-    //     console.log('next');
-    //     //clearTimeout(tohandle); tohandle=undefined; carousel.to(elInds.nextImageIndex(elInds)); carousel.cycle(); carousel.pause(); 
-    // };
-    // function previ(e) {
-    //     return e.preventDefault();
-    //     //clearTimeout(tohandle); tohandle=undefined; carousel.to(elInds.prevImageIndex(elInds)); carousel.cycle(); carousel.pause(); 
-    // };
-    // const prevBtn = document.querySelector('.carousel-control-prev');
-
-    // prevBtn.addEventListener('click', previ);
     const imgElements = document.querySelectorAll('.carousel-image');
     const ieLength = imgElements.length;
     if(ieLength)
@@ -232,10 +232,11 @@ $(window).on('load', function() {
         const dataEl = document.getElementById('hidden-data');
         const imgPause = parseInt(dataEl.dataset.imgPause);
         const offset = dataEl.dataset.offset == 'False' ? false : true;
+        const randomizeImages = dataEl.dataset.randomizeImages == 'False' ? false : true;
         const loadingImage = location.protocol + "//" + location.host + dataEl.dataset.loadingImage;
-        var myCarouselEl = document.querySelector('#carousel-large-background');
-        let carousel = bootstrap.Carousel.getInstance(myCarouselEl);
-        var elInds = Singleton.getInstance();
+        var carouselEl = document.querySelector('#carousel-large-background');
+        let carousel = bootstrap.Carousel.getInstance(carouselEl);
+        var elInds = Singleton.getInstance(randomizeImages, ieLength, imgElements);
         var elIter = elInds._nextELIndex(); 
         var firstImgInd = elIter.next();
         var firstActiveImg = {}
@@ -246,8 +247,12 @@ $(window).on('load', function() {
             tohandle=undefined;
             carousel.to(i);
             carousel.pause();
-            nextIndicator.setAttribute('data-bs-slide-to', elInds._eli[elInds.currentImageIndex + 1])
-            prevIndicator.setAttribute('data-bs-slide-to', elInds._eli[elInds.currentImageIndex - 1])
+            nextIndicator.setAttribute('data-bs-slide-to', elInds.next());
+            document.querySelector('.carousel-item-next').classList.remove('carousel-item-next')
+            imgElements[elInds.next()].parentElement.classList.add('carousel-item-next');
+            prevIndicator.setAttribute('data-bs-slide-to', elInds.prev());
+            document.querySelector('.carousel-item-prev').classList.remove('carousel-item-prev')
+            imgElements[elInds.prev()].parentElement.classList.add('carousel-item-prev');
         }
 
         const callback = function(changes, observer)
@@ -256,7 +261,8 @@ $(window).on('load', function() {
                 carousel.pause()
                 if (change.attributeName == 'src') {
                     observer.disconnect();
-                    if(change.target.src == loadingImage)
+                    console.log(change.target.src)
+                    if(change.target.src == loadingImage || change.target.src == change.target.dataset.imageSrc)
                     {
                         observer.observe(change.target, {
                             attributes: true
@@ -306,22 +312,29 @@ $(window).on('load', function() {
             }
         };
 
-        myCarouselEl.addEventListener('slid.bs.carousel', slidListener);
-        try
-        {
+        carouselEl.addEventListener('slid.bs.carousel', slidListener);
+        // try
+        // {
             firstActiveImg = imgElements[firstImgInd.value];
             if(offset)
             {
                 firstActiveImg.src = firstActiveImg.dataset.imageSrc;
             }
-            firstActiveImg.parentElement.classList.add('active');
+            firstActiveImg.classList.add('active');
+            nextIndicator.setAttribute('data-bs-slide-to', elInds.next());
+            //document.querySelector('.carousel-item-next').classList.remove('carousel-item-next')
+            imgElements[elInds.next()].parentElement.classList.add('carousel-item-next');
+            console.log(imgElements[elInds.next()]);
+            prevIndicator.setAttribute('data-bs-slide-to', elInds.prev());
+            //document.querySelector('.carousel-item-prev').classList.remove('carousel-item-prev')
+            imgElements[elInds.prev()].parentElement.classList.add('carousel-item-prev');
             carousel.pause();
-        }
-        catch (err)
-        {
-            myCarouselEl.removeEventListener('slid.bs.carousel', slidListener);
-            return;
-        }
+        // }
+        // catch (err)
+        // {
+        //     carouselEl.removeEventListener('slid.bs.carousel', slidListener);
+        //     return;
+        // }
 
         if (IsImageOk(firstActiveImg, loadingImage))
         {
