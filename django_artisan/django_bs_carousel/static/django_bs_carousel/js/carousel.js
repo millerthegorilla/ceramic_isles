@@ -231,6 +231,7 @@ $(window).on('load', function() {
         prevIndicator.setAttribute('data-bs-slide', "");
         const dataEl = document.getElementById('hidden-data');
         const imgPause = parseInt(dataEl.dataset.imgPause);
+        const offset = dataEl.dataset.offset == 'False' ? false : true;
         const loadingImage = location.protocol + "//" + location.host + dataEl.dataset.loadingImage;
         var myCarouselEl = document.querySelector('#carousel-large-background');
         let carousel = bootstrap.Carousel.getInstance(myCarouselEl);
@@ -279,7 +280,6 @@ $(window).on('load', function() {
         function slidListener(e) {
             carousel.pause();
             var nextImgInd = elIter.next()
-            console.log('269',nextImgInd.value);
             if(nextImgInd.done)
             {
                 elIter = elInds._nextELIndex();
@@ -307,10 +307,13 @@ $(window).on('load', function() {
         };
 
         myCarouselEl.addEventListener('slid.bs.carousel', slidListener);
-
         try
         {
             firstActiveImg = imgElements[firstImgInd.value];
+            if(offset)
+            {
+                firstActiveImg.src = firstActiveImg.dataset.imageSrc;
+            }
             firstActiveImg.parentElement.classList.add('active');
             carousel.pause();
         }
@@ -342,6 +345,7 @@ $(document).ready(function () {
         const dataEl = document.getElementById('hidden-data');
         const useCache = dataEl.dataset.useCache == 'False' ? false : true;
         const randomizeImages = dataEl.dataset.randomizeImages == 'False' ? false : true;
+        // if randomizeImages - turn off touch swiping.
         const elInds = Singleton.getInstance(randomizeImages, ieLength, imgElements);
         const imagesPerRequest = parseInt(dataEl.dataset.imagesPerRequest);
         const imageSizeLarge = dataEl.dataset.imageSizeLarge;
