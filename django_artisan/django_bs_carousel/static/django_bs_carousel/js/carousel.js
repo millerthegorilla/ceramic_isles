@@ -188,12 +188,12 @@ var Singleton = (function(){
             this.currentImageIndex++;
         }
     }
-    Singleton.prototype.nextImageIndex = (that) => { 
-        that.currentImageIndex = that.currentImageIndex++ % that._eli.length; return that._eli[that._eli.findIndex((el) => el==that.currentImageIndex)]; 
-    }
-    Singleton.prototype.prevImageIndex = (that) => { 
-        that.currentImageIndex = that.currentImageIndex-- < 0 ? that._eli.length - 1 : that.currentImageIndex; return that._eli[that._eli.findIndex((el) => el==that.currentImageIndex)]; 
-    }
+    // Singleton.prototype.nextImageIndex = (that, eln, elp) => { 
+    //     that.currentImageIndex = that.currentImageIndex++ % that._eli.length; return that._eli[that._eli.findIndex((el) => el==that.currentImageIndex)]; 
+    // }
+    // Singleton.prototype.prevImageIndex = (that, eln, elp) => { 
+    //     that.currentImageIndex = that.currentImageIndex-- < 0 ? that._eli.length - 1 : that.currentImageIndex; return that._eli[that._eli.findIndex((el) => el==that.currentImageIndex)]; 
+    // }
     var instance;
     return {
         getInstance: function(rand, ieLength){
@@ -207,10 +207,28 @@ var Singleton = (function(){
 })();
 
 $(window).on('load', function() {
+
+    //$(document).off('bs.carousel.data-api');
+    
+    // function nexti () { 
+    //     console.log('next');
+    //     //clearTimeout(tohandle); tohandle=undefined; carousel.to(elInds.nextImageIndex(elInds)); carousel.cycle(); carousel.pause(); 
+    // };
+    // function previ(e) {
+    //     return e.preventDefault();
+    //     //clearTimeout(tohandle); tohandle=undefined; carousel.to(elInds.prevImageIndex(elInds)); carousel.cycle(); carousel.pause(); 
+    // };
+    // const prevBtn = document.querySelector('.carousel-control-prev');
+
+    // prevBtn.addEventListener('click', previ);
     const imgElements = document.querySelectorAll('.carousel-image');
     const ieLength = imgElements.length;
     if(ieLength)
     {
+        const nextIndicator = document.querySelector('.carousel-control-next');
+        nextIndicator.setAttribute('data-bs-slide', "");
+        const prevIndicator = document.querySelector('.carousel-control-prev');
+        prevIndicator.setAttribute('data-bs-slide', "");
         const dataEl = document.getElementById('hidden-data');
         const imgPause = parseInt(dataEl.dataset.imgPause);
         const loadingImage = location.protocol + "//" + location.host + dataEl.dataset.loadingImage;
@@ -221,40 +239,37 @@ $(window).on('load', function() {
         var firstImgInd = elIter.next();
         var firstActiveImg = {}
         var tohandle = 0;
+
+        function slide(i) {
+            clearTimeout(tohandle);
+            tohandle=undefined;
+            carousel.to(i);
+            carousel.pause();
+            nextIndicator.setAttribute('data-bs-slide-to', elInds._eli[elInds.currentImageIndex + 1])
+            prevIndicator.setAttribute('data-bs-slide-to', elInds._eli[elInds.currentImageIndex - 1])
+        }
+
         const callback = function(changes, observer)
         {
             changes.forEach(change => {
                 carousel.pause()
-                if (change.attributeName.includes('src')) {
+                if (change.attributeName == 'src') {
+                    observer.disconnect();
                     if(change.target.src == loadingImage)
                     {
-                        observer.disconnect()
                         observer.observe(change.target, {
                             attributes: true
                         }); 
                     }
                     else
                     {
-                        if (change.target == firstActiveImg)
-                        {
-                            firstActiveImg.parentElement.classList.add('active');
-                            carousel.pause();
-                        }
-                        var nextImgInd = elIter.next()
+                        var nextImgInd = elIter.next();
                         if(nextImgInd.done)
                         {
                             elIter = elInds._nextELIndex();
-                            nextImgInd = elIter.next()
+                            nextImgInd = elIter.next();
                         }
-                        if(tohandle)
-                        {
-                           clearTimeout(tohandle);
-                           tohandle = setTimeout(function(i) { carousel.to(i); carousel.pause(); tohandle=undefined}, imgPause, elInds._eli[elInds.currentImageIndex]);
-                        }
-                        else
-                        {
-                            tohandle = setTimeout(function(i){ carousel.to(i); carousel.pause(); tohandle=undefined}, imgPause, nextImgInd.value);
-                        }
+                        tohandle = setTimeout(slide, imgPause, nextImgInd.value);
                     }
                 }
             });
@@ -264,6 +279,7 @@ $(window).on('load', function() {
         function slidListener(e) {
             carousel.pause();
             var nextImgInd = elIter.next()
+            console.log('269',nextImgInd.value);
             if(nextImgInd.done)
             {
                 elIter = elInds._nextELIndex();
@@ -281,11 +297,11 @@ $(window).on('load', function() {
                 if(tohandle)
                 {
                    clearTimeout(tohandle);
-                   tohandle = setTimeout(function(i) { carousel.to(i); tohandle=undefined }, imgPause, elInds._eli[elInds.currentImage]);
+                   tohandle = setTimeout(slide, imgPause, elInds._eli[elInds.currentImage]);
                 }
                 else
                 {
-                    tohandle = setTimeout(function(i) { carousel.to(i); tohandle=undefined }, imgPause, nextImgInd.value);
+                    tohandle = setTimeout(slide, imgPause, nextImgInd.value);
                 }
             }
         };
@@ -306,17 +322,15 @@ $(window).on('load', function() {
 
         if (IsImageOk(firstActiveImg, loadingImage))
         {
-            var nextImgInd = elInds.next();
-            tohandle = setTimeout(function(i) { carousel.to(i); carousel.pause(); tohandle=undefined}, imgPause, nextImgInd.value);
+            //doesn't get here for the moment
+            var nextImgInd = elIter.next();
+            tohandle = setTimeout(slide, imgPause, nextImgInd.value);
         }
         else
         {   
             config = { attributes: true };
             observer.observe(firstActiveImg, config );
         }
-
-        carousel.next = () => { clearTimeout(tohandle); tohandle=undefined; carousel.to(elInds.nextImageIndex(elInds)); carousel.cycle(); carousel.pause(); };
-        carousel.prev = () => { clearTimeout(tohandle); tohandle=undefined; carousel.to(elInds.prevImageIndex(elInds)); carousel.cycle(); carousel.pause(); };
     }
 });
 

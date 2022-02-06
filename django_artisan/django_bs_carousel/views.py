@@ -6,6 +6,8 @@ from django import shortcuts, http, conf
 from django.apps import apps
 from django.views import generic
 
+
+
 #webworker ajax request to here, returns url
 class ImgURL(generic.base.View):
     # TODO - create a threaded function inside the get, that pushes its handle to 
@@ -25,7 +27,7 @@ class ImgURL(generic.base.View):
                                        .split('.')).objects.filter(pk__in=image_pks))
         i = 0;
         for im in image_qs.iterator():
-            pic = get_thumbnail(im.image_file, screen_size, 
+            pic = get_thumbnail(im.file, screen_size, 
                                     format=fmt, quality=70).url
             ql.append({'id': str(image_idxs[image_pks.index(im.pk)]),
                        'pic': pic})

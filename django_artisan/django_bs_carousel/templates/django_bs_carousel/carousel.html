@@ -4,7 +4,7 @@
 {% block extra_css %}
   {% stylesheet 'carousel_styles' %}
 {% endblock extra_css %}
-    <div id="carousel-large-background" class="carousel slide carousel-fade" data-bs-interval="6200" data-bs-ride="carousel" data-bs-pause="false">
+    <div id="carousel-large-background" class="carousel slide carousel-fade" data-bs-interval="false" data-bs-ride="carousel" data-bs-pause="false">
       <input type="hidden" name="csrfmiddlewaretoken" value="{{csrftoken}}">
       <input type="hidden" id="hidden-data" data-images-per-request="{{images_per_request}}" data-use-cache="{{use_cache}}" data-randomize-images="{{randomize_images}}" data-loading-image="{% static loading_image %}" data-image-size-large="{{image_size_large}}" data-image-size-small="{{image_size_small}}" data-img-pause="{{image_pause}}">
       <div class="carousel-inner">
