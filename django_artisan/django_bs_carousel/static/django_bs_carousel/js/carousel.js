@@ -188,7 +188,7 @@ var Singleton = (function(){
             this.currentImageIndex++;
         }
     }
-    Singleton.prototype.prev = function () {
+    Singleton.prototype.prevIndex = function () {
         if(this.currentImageIndex == 0)
         {
             return this._eli[this._eli.length - 1];
@@ -198,7 +198,7 @@ var Singleton = (function(){
             return this._eli[this.currentImageIndex - 1];
         }
     }
-    Singleton.prototype.next = function () {
+    Singleton.prototype.nextIndex = function () {
         if(this.currentImageIndex == this._eli.length - 1)
         {
             return this._eli[0];
@@ -207,6 +207,9 @@ var Singleton = (function(){
         {
             return this._eli[this.currentImageIndex + 1];
         }
+    }
+    Singleton.prototype.currIndex = function() {
+        return this._eli[this.currentImageIndex];
     }
     var instance;
     return {
@@ -226,9 +229,7 @@ $(window).on('load', function() {
     if(ieLength)
     {
         const nextIndicator = document.querySelector('.carousel-control-next');
-        nextIndicator.setAttribute('data-bs-slide', "");
         const prevIndicator = document.querySelector('.carousel-control-prev');
-        prevIndicator.setAttribute('data-bs-slide', "");
         const dataEl = document.getElementById('hidden-data');
         const imgPause = parseInt(dataEl.dataset.imgPause);
         const offset = dataEl.dataset.offset == 'False' ? false : true;
@@ -236,10 +237,10 @@ $(window).on('load', function() {
         const loadingImage = location.protocol + "//" + location.host + dataEl.dataset.loadingImage;
         var carouselEl = document.querySelector('#carousel-large-background');
         let carousel = bootstrap.Carousel.getInstance(carouselEl);
-        var elInds = Singleton.getInstance(randomizeImages, ieLength, imgElements);
-        var elIter = elInds._nextELIndex(); 
+        var elIndexes = Singleton.getInstance(randomizeImages, ieLength, imgElements);
+        var elIter = elIndexes._nextELIndex(); 
         var firstImgInd = elIter.next();
-        var firstActiveImg = {}
+        var firstActiveImg;
         var tohandle = 0;
 
         function slide(i) {
@@ -247,22 +248,16 @@ $(window).on('load', function() {
             tohandle=undefined;
             carousel.to(i);
             carousel.pause();
-            nextIndicator.setAttribute('data-bs-slide-to', elInds.next());
-            document.querySelector('.carousel-item-next').classList.remove('carousel-item-next')
-            imgElements[elInds.next()].parentElement.classList.add('carousel-item-next');
-            prevIndicator.setAttribute('data-bs-slide-to', elInds.prev());
-            document.querySelector('.carousel-item-prev').classList.remove('carousel-item-prev')
-            imgElements[elInds.prev()].parentElement.classList.add('carousel-item-prev');
         }
 
+        // handles first image.
         const callback = function(changes, observer)
         {
             changes.forEach(change => {
                 carousel.pause()
                 if (change.attributeName == 'src') {
                     observer.disconnect();
-                    console.log(change.target.src)
-                    if(change.target.src == loadingImage || change.target.src == change.target.dataset.imageSrc)
+                    if(change.target.src == loadingImage)
                     {
                         observer.observe(change.target, {
                             attributes: true
@@ -273,7 +268,7 @@ $(window).on('load', function() {
                         var nextImgInd = elIter.next();
                         if(nextImgInd.done)
                         {
-                            elIter = elInds._nextELIndex();
+                            elIter = elIndexes._nextELIndex();
                             nextImgInd = elIter.next();
                         }
                         tohandle = setTimeout(slide, imgPause, nextImgInd.value);
@@ -283,12 +278,82 @@ $(window).on('load', function() {
         };
         const observer = new MutationObserver(callback)
 
+        // const callback2 = function(changes, observer)
+        // { 
+        //     changes.forEach(change => { 
+        //         if(change.attributeName == 'class')
+        //         {
+        //             if(manualMove)
+        //             {
+        //                 if(change.target.classList.contains('active'))
+        //                 {
+        //                     if(change.target.classList.contains('carousel-item-next') || change.target.classList.contains('carousel-item-prev') || imgElements[elIndexes.curr()].parentElement != change.target)
+        //                     {
+        //                         clearTimeout(tohandle);
+        //                         change.target.classList.remove('active');
+        //                         imgElements[elIndexes.curr()].parentElement.classList.add('active');
+        //                         setIndicators();
+        //                     }
+        //                 }
+        //                 manualMove = false;
+        //             }
+        //         }
+        //     });
+        // };
+        // const observer2 = new MutationObserver(callback2);
+        // const root = document.querySelector('.carousel-inner');
+        // observer2.observe(root, {
+        //     subtree: true,
+        //     attributes: true
+        // }); 
+        function setIndicators()
+        {
+            nextIndicator.setAttribute('data-bs-slide-to', elIndexes.nextIndex());
+            var cn = document.querySelector('.carousel-item-next');
+            if (cn)
+            {
+                cn.classList.remove('carousel-item-next');
+            }
+            imgElements[elIndexes.nextIndex()].parentElement.classList.add('carousel-item-next');
+            prevIndicator.setAttribute('data-bs-slide-to', elIndexes.prevIndex());
+            var cp = document.querySelector('.carousel-item-prev');
+            if(cp)
+            {
+                cp.classList.remove('carousel-item-prev');
+            }
+            imgElements[elIndexes.prevIndex()].parentElement.classList.add('carousel-item-prev');
+        }
+
+        function manualMove(e) 
+        { 
+            console.log(tohandle);
+            clearTimeout(tohandle);
+            tohandle = undefined;
+            e.preventDefault();
+            e.stopPropagation();
+            // have to move twice to take care of the unremoveable bootstrap click handler
+            if(event.target.classList[0].includes('prev'))
+            {
+                slide(elIndexes.getEli()[elIndexes.currentImageIndex - 2]);
+            }
+            else
+            {
+                slide(elIndexes.getEli()[elIndexes.currentImageIndex]);
+            }
+            setIndicators();
+        }
+
+        
+        document.querySelector('span.carousel-control-prev-icon').addEventListener('click', manualMove, true)
+        document.querySelector('span.carousel-control-next-icon').addEventListener('click', manualMove, true)
+
         function slidListener(e) {
+            setIndicators();
             carousel.pause();
             var nextImgInd = elIter.next()
             if(nextImgInd.done)
             {
-                elIter = elInds._nextELIndex();
+                elIter = elIndexes._nextELIndex();
                 nextImgInd = elIter.next()
             }
             var nextImg = imgElements[nextImgInd.value]
@@ -303,7 +368,7 @@ $(window).on('load', function() {
                 if(tohandle)
                 {
                    clearTimeout(tohandle);
-                   tohandle = setTimeout(slide, imgPause, elInds._eli[elInds.currentImage]);
+                   tohandle = setTimeout(slide, imgPause, elIndexes._eli[elIndexes.currentImageIndex]);
                 }
                 else
                 {
@@ -313,28 +378,24 @@ $(window).on('load', function() {
         };
 
         carouselEl.addEventListener('slid.bs.carousel', slidListener);
-        // try
-        // {
-            firstActiveImg = imgElements[firstImgInd.value];
-            if(offset)
-            {
-                firstActiveImg.src = firstActiveImg.dataset.imageSrc;
-            }
-            firstActiveImg.classList.add('active');
-            nextIndicator.setAttribute('data-bs-slide-to', elInds.next());
-            //document.querySelector('.carousel-item-next').classList.remove('carousel-item-next')
-            imgElements[elInds.next()].parentElement.classList.add('carousel-item-next');
-            console.log(imgElements[elInds.next()]);
-            prevIndicator.setAttribute('data-bs-slide-to', elInds.prev());
-            //document.querySelector('.carousel-item-prev').classList.remove('carousel-item-prev')
-            imgElements[elInds.prev()].parentElement.classList.add('carousel-item-prev');
-            carousel.pause();
-        // }
-        // catch (err)
-        // {
-        //     carouselEl.removeEventListener('slid.bs.carousel', slidListener);
-        //     return;
-        // }
+  
+        firstActiveImg = imgElements[firstImgInd.value];
+        if(firstActiveImg)
+        {
+            firstActiveImg.parentElement.classList.add('active');
+        }
+        else
+        {
+            firstActiveImg = imgElements[elIndexes.currIndex()];
+            firstActiveImg.parentElement.classList.add('active');
+        }
+        if(offset)
+        {
+            firstActiveImg.src = firstActiveImg.dataset.imageSrc;
+        }
+        carousel.pause();
+        
+        setIndicators();
 
         if (IsImageOk(firstActiveImg, loadingImage))
         {
@@ -359,7 +420,7 @@ $(document).ready(function () {
         const useCache = dataEl.dataset.useCache == 'False' ? false : true;
         const randomizeImages = dataEl.dataset.randomizeImages == 'False' ? false : true;
         // if randomizeImages - turn off touch swiping.
-        const elInds = Singleton.getInstance(randomizeImages, ieLength, imgElements);
+        const elIndexes = Singleton.getInstance(randomizeImages, ieLength, imgElements);
         const imagesPerRequest = parseInt(dataEl.dataset.imagesPerRequest);
         const imageSizeLarge = dataEl.dataset.imageSizeLarge;
         const imageSizeSmall = dataEl.dataset.imageSizeSmall;
@@ -385,7 +446,7 @@ $(document).ready(function () {
                 if(useCache)
                 {
                     pks = [];
-                    elis = elInds.getEli().slice(start, finish);
+                    elis = elIndexes.getEli().slice(start, finish);
                     for(i of elis)
                     {
                         pks.push(parseInt(imgElements[i].id));
@@ -405,7 +466,7 @@ $(document).ready(function () {
                 else
                 {
                     let urls = [];
-                    for (i of elInds.getEli().slice(start, finish))
+                    for (i of elIndexes.getEli().slice(start, finish))
                     {
                         urls.push({'id': i, 'url': imgElements[i].dataset.imageSrc});
                     }
