@@ -4,7 +4,7 @@
 {% block extra_css %}
   {% stylesheet 'carousel_styles' %}
 {% endblock extra_css %}
-    <div id="carousel-large-background" class="carousel slide carousel-fade" data-bs-interval="false" data-bs-ride="carousel" data-bs-pause="true">
+    <div id="carousel-large-background" class="carousel carousel-fade" data-bs-interval="6500" data-bs-ride="carousel" data-bs-pause="true">
       <input type="hidden" name="csrfmiddlewaretoken" value="{{csrftoken}}">
       <input type="hidden" id="hidden-data" data-images-per-request="{{images_per_request}}" data-use-cache="{{use_cache}}" data-randomize-images="{{randomize_images}}" data-loading-image="{% static loading_image %}" data-image-size-large="{{image_size_large}}" data-image-size-small="{{image_size_small}}" data-img-pause="{{image_pause}}" data-offset="{{offset}}">
       <div class="carousel-inner">
@@ -22,14 +22,14 @@
         {% endfor %}
       </div>
       {% if images.exists %}
-        <a class="carousel-control-prev" href="#carousel-large-background" role="button">
+        <button class="carousel-control-prev" href="#carousel-large-background" type="button" data-bs-slide="prev">
           <span class="carousel-control-prev-icon" aria-hidden="true"></span>
           <span class="visually-hidden">Previous</span>
-        </a>
-        <a class="carousel-control-next" href="#carousel-large-background" role="button">
+        </button>
+        <button class="carousel-control-next" href="#carousel-large-background" type="button" data-bs-slide="next">
           <span class="carousel-control-next-icon" aria-hidden="true"></span>
           <span class="visually-hidden">Next</span>
-        </a>
+        </button>
       {% endif %}
     </div>
     {% block body_js %}

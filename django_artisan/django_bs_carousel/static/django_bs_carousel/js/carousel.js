@@ -154,68 +154,23 @@ function IsImageOk(img, loadingImage) {
     return false;
 }
 
-function fisherYatesShuffle(arr){
-    for(var i =arr.length-1 ; i>0 ;i--){
-        var j = Math.floor( Math.random() * (i + 1) ); //random index
-        [arr[i],arr[j]]=[arr[j],arr[i]]; // swap
-    }
-}
-
 var Singleton = (function(){
-    function Singleton(rand, ieLength) {
-        this._eli = [];
-        if(ieLength)
+    function Singleton(rand) {
+        var list = document.querySelector('.carousel-inner'), i;
+        if(rand)
         {
-            for (var i=0;i<ieLength;++i) this._eli[i]=i;
-            if(rand)    
-            {
-                fisherYatesShuffle(this._eli); 
+            for (i = list.children.length; i >= 0; i--) {
+                list.appendChild(list.children[Math.random() * i | 0]);
             }
         }
+        this.nodeList = list.children;
     }
-    Singleton.prototype.getEli = function()
-    {
-        return this._eli;
-    }
-    Singleton.prototype._eli = [];
-    Singleton.prototype.currentImageIndex = 0;
-    Singleton.prototype._nextELIndex = function* () 
-    { 
-        this.currentImageIndex = 0; 
-        while (this.currentImageIndex < this._eli.length)
-        {
-            yield this._eli[this.currentImageIndex];
-            this.currentImageIndex++;
-        }
-    }
-    Singleton.prototype.prevIndex = function () {
-        if(this.currentImageIndex == 0)
-        {
-            return this._eli[this._eli.length - 1];
-        }
-        else
-        {
-            return this._eli[this.currentImageIndex - 1];
-        }
-    }
-    Singleton.prototype.nextIndex = function () {
-        if(this.currentImageIndex == this._eli.length - 1)
-        {
-            return this._eli[0];
-        }
-        else
-        {
-            return this._eli[this.currentImageIndex + 1];
-        }
-    }
-    Singleton.prototype.currIndex = function() {
-        return this._eli[this.currentImageIndex];
-    }
+    Singleton.prototype.nodeList = {};
     var instance;
     return {
-        getInstance: function(rand, ieLength){
+        getInstance: function(rand){
             if (null == instance) {
-                instance = new Singleton(rand, ieLength);               
+                instance = new Singleton(rand);               
                 instance.constructor = null; // Note how the constructor is hidden to prevent instantiation
             }
             return instance; //return the singleton instance
@@ -237,18 +192,7 @@ $(window).on('load', function() {
         const loadingImage = location.protocol + "//" + location.host + dataEl.dataset.loadingImage;
         var carouselEl = document.querySelector('#carousel-large-background');
         let carousel = bootstrap.Carousel.getInstance(carouselEl);
-        var elIndexes = Singleton.getInstance(randomizeImages, ieLength, imgElements);
-        var elIter = elIndexes._nextELIndex(); 
-        var firstImgInd = elIter.next();
-        var firstActiveImg;
-        var tohandle = 0;
-
-        function slide(i) {
-            clearTimeout(tohandle);
-            tohandle=undefined;
-            carousel.to(i);
-            carousel.pause();
-        }
+        var nodes = Singleton.getInstance(randomizeImages).nodeList;
 
         // handles first image.
         const callback = function(changes, observer)
@@ -265,143 +209,30 @@ $(window).on('load', function() {
                     }
                     else
                     {
-                        var nextImgInd = elIter.next();
-                        if(nextImgInd.done)
-                        {
-                            elIter = elIndexes._nextELIndex();
-                            nextImgInd = elIter.next();
-                        }
-                        tohandle = setTimeout(slide, imgPause, nextImgInd.value);
+                        carousel.cycle();
                     }
                 }
             });
         };
         const observer = new MutationObserver(callback)
 
-        // const callback2 = function(changes, observer)
-        // { 
-        //     changes.forEach(change => { 
-        //         if(change.attributeName == 'class')
-        //         {
-        //             if(manualMove)
-        //             {
-        //                 if(change.target.classList.contains('active'))
-        //                 {
-        //                     if(change.target.classList.contains('carousel-item-next') || change.target.classList.contains('carousel-item-prev') || imgElements[elIndexes.curr()].parentElement != change.target)
-        //                     {
-        //                         clearTimeout(tohandle);
-        //                         change.target.classList.remove('active');
-        //                         imgElements[elIndexes.curr()].parentElement.classList.add('active');
-        //                         setIndicators();
-        //                     }
-        //                 }
-        //                 manualMove = false;
-        //             }
-        //         }
-        //     });
-        // };
-        // const observer2 = new MutationObserver(callback2);
-        // const root = document.querySelector('.carousel-inner');
-        // observer2.observe(root, {
-        //     subtree: true,
-        //     attributes: true
-        // }); 
-        function setIndicators()
-        {
-            nextIndicator.setAttribute('data-bs-slide-to', elIndexes.nextIndex());
-            var cn = document.querySelector('.carousel-item-next');
-            if (cn)
-            {
-                cn.classList.remove('carousel-item-next');
-            }
-            imgElements[elIndexes.nextIndex()].parentElement.classList.add('carousel-item-next');
-            prevIndicator.setAttribute('data-bs-slide-to', elIndexes.prevIndex());
-            var cp = document.querySelector('.carousel-item-prev');
-            if(cp)
-            {
-                cp.classList.remove('carousel-item-prev');
-            }
-            imgElements[elIndexes.prevIndex()].parentElement.classList.add('carousel-item-prev');
-        }
-
-        function manualMove(e) 
-        { 
-            console.log(tohandle);
-            clearTimeout(tohandle);
-            tohandle = undefined;
-            e.preventDefault();
-            e.stopPropagation();
-            // have to move twice to take care of the unremoveable bootstrap click handler
-            if(event.target.classList[0].includes('prev'))
-            {
-                slide(elIndexes.getEli()[elIndexes.currentImageIndex - 2]);
-            }
-            else
-            {
-                slide(elIndexes.getEli()[elIndexes.currentImageIndex]);
-            }
-            setIndicators();
-        }
-
-        
-        document.querySelector('span.carousel-control-prev-icon').addEventListener('click', manualMove, true)
-        document.querySelector('span.carousel-control-next-icon').addEventListener('click', manualMove, true)
-
-        function slidListener(e) {
-            setIndicators();
-            carousel.pause();
-            var nextImgInd = elIter.next()
-            if(nextImgInd.done)
-            {
-                elIter = elIndexes._nextELIndex();
-                nextImgInd = elIter.next()
-            }
-            var nextImg = imgElements[nextImgInd.value]
-            if (nextImg.src == loadingImage)
-            {
-                config = { attributes: true }
-                observer.disconnect()
-                observer.observe(nextImg, config );
-            }
-            else
-            {
-                if(tohandle)
-                {
-                   clearTimeout(tohandle);
-                   tohandle = setTimeout(slide, imgPause, elIndexes._eli[elIndexes.currentImageIndex]);
-                }
-                else
-                {
-                    tohandle = setTimeout(slide, imgPause, nextImgInd.value);
-                }
-            }
-        };
-
-        carouselEl.addEventListener('slid.bs.carousel', slidListener);
-  
-        firstActiveImg = imgElements[firstImgInd.value];
+        carousel._items = nodes;
+        firstActiveImg = carousel._items[0].children[0];
         if(firstActiveImg)
         {
             firstActiveImg.parentElement.classList.add('active');
         }
-        else
-        {
-            firstActiveImg = imgElements[elIndexes.currIndex()];
-            firstActiveImg.parentElement.classList.add('active');
-        }
+
         if(offset)
         {
             firstActiveImg.src = firstActiveImg.dataset.imageSrc;
         }
+
         carousel.pause();
-        
-        setIndicators();
 
         if (IsImageOk(firstActiveImg, loadingImage))
         {
-            //doesn't get here for the moment
-            var nextImgInd = elIter.next();
-            tohandle = setTimeout(slide, imgPause, nextImgInd.value);
+            carousel.cycle();
         }
         else
         {   
@@ -412,15 +243,12 @@ $(window).on('load', function() {
 });
 
 $(document).ready(function () {
-    const imgElements = document.querySelectorAll('.carousel-image');
-    const ieLength = imgElements.length;
-    if(ieLength)
+    const dataEl = document.getElementById('hidden-data');
+    const randomizeImages = dataEl.dataset.randomizeImages == 'False' ? false : true;
+    const nodes = Singleton.getInstance(randomizeImages).nodeList;
+    if(nodes.length)
     {
-        const dataEl = document.getElementById('hidden-data');
         const useCache = dataEl.dataset.useCache == 'False' ? false : true;
-        const randomizeImages = dataEl.dataset.randomizeImages == 'False' ? false : true;
-        // if randomizeImages - turn off touch swiping.
-        const elIndexes = Singleton.getInstance(randomizeImages, ieLength, imgElements);
         const imagesPerRequest = parseInt(dataEl.dataset.imagesPerRequest);
         const imageSizeLarge = dataEl.dataset.imageSizeLarge;
         const imageSizeSmall = dataEl.dataset.imageSizeSmall;
@@ -439,22 +267,25 @@ $(document).ready(function () {
         window.onbeforeunload = closingCode;
         
         function pm() {
-            if (!closing && ieLength > 0)
+            if (!closing)
             {
                 let start = iteration * imagesPerRequest;
                 let finish = iteration * imagesPerRequest + imagesPerRequest;
                 if(useCache)
                 {
                     pks = [];
-                    elis = elIndexes.getEli().slice(start, finish);
-                    for(i of elis)
+                    indexes = [];
+                    idx = 0;
+                    for(i of Array.prototype.slice.call(nodes, start, finish))
                     {
-                        pks.push(parseInt(imgElements[i].id));
+                        indexes.push(start + idx)
+                        pks.push(parseInt(i.children[0].id));
+                        idx++;
                     }
                     ImageLoaderWorker.postMessage({
                         'pks': pks,
                         'iteration': iteration,
-                        'indexes': elis,
+                        'indexes': indexes,
                         'useCache': useCache,
                         'webpSupport': webpSupport,
                         'screenSize': screenSize,
@@ -465,10 +296,13 @@ $(document).ready(function () {
                 }
                 else
                 {
+
                     let urls = [];
-                    for (i of elIndexes.getEli().slice(start, finish))
+                    var index = start;
+                    for (i of Array.prototype.slice.call(nodes, start, finish))
                     {
-                        urls.push({'id': i, 'url': imgElements[i].dataset.imageSrc});
+                        urls.push({'id': index, 'url': i.children[0].dataset.imageSrc});
+                        index++;
                     }
                     ImageLoaderWorker.postMessage({
                        'urls': urls,
@@ -487,11 +321,12 @@ $(document).ready(function () {
             const imageData = event.data;
             const ids = imageData.ids;
             const abs = imageData.abs;
+            console.log(ids);
             ids.forEach((id,idx) =>{
                 var mimestring = useCache && webpSupport ? "image/webp" : "image/jpeg";
                 var blob = new Blob([abs[idx]], { type: mimestring });
                 
-                var imageElement = imgElements[id];
+                var imageElement = nodes[id].children[0];
                 var objectURL = URL.createObjectURL(blob);
 
                 // Once the image is loaded, we'll want to do some extra cleanup
@@ -504,8 +339,8 @@ $(document).ready(function () {
                   imageElement.setAttribute('size', screenSize);
                   imageElement.setAttribute('src', objectURL);
                 }
-            }) 
-            if(iteration < imgElements.length / imagesPerRequest)
+            })
+            if(iteration < nodes.length / imagesPerRequest)
             { 
                 if(!document.hidden && window.location.pathname == '/')
                 {
