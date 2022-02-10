@@ -47,7 +47,7 @@ class FileExtensionValidator(object):
         if self.allowed_extensions is not None and extension not in self.allowed_extensions:
             raise exceptions.ValidationError(
                 self.message,
-                error_code=self.error_code,
+                code=self.error_code,
                 params={
                     'extension': extension,
                     'allowed_extensions': ', '.join(
@@ -76,16 +76,13 @@ class FileContentTypeValidator(object):
 
         # TODO:  Update below code to match imagefile.
         detected_content_type = utils.detect_content_type(file)
+        mimetypes.add_type('image/webp', '.webp', strict=True)
         if getattr(file, 'content_type', None) is not None:
             is_valid_content_type = bool(
                 (
                     ext in mimetypes.guess_all_extensions(
                         detected_content_type)
                     and ext in mimetypes.guess_all_extensions(file.content_type)
-                ) or (
-                    detected_content_type == 'application/CDFV2-unknown'
-                    and file.content_type == mimetypes.guess_type('.doc')
-                    and ext == "doc"
                 )
             )
             params = {
@@ -112,7 +109,7 @@ class FileContentTypeValidator(object):
         if not is_valid_content_type:
             raise exceptions.ValidationError(
                 self.message,
-                error_code=self.error_code,
+                code=self.error_code,
                 params=params
             )
 
@@ -131,11 +128,10 @@ class AntiVirusValidator(object):
 
     def __call__(self, file):
         status, virus_name = clamav.scan_file(file)
-
         if status != 'OK':
             raise exceptions.ValidationError(
                 self.message,
-                self.error_code,
+                code=self.error_code,
                 params={
                     'virus': virus_name
                 }
@@ -167,7 +163,7 @@ class MediaIntegrityValidator(object):
             except Exception as e:
                 logger.error("PIL CHECK ERROR : {0}".format(e))
                 raise exceptions.ValidationError(
-                    self.message, self.error_code, params={'error': str(e)})
+                    self.message, code=self.error_code, params={'error': str(e)})
 
 
 class MaxSizeValidator(object):
@@ -188,7 +184,7 @@ class MaxSizeValidator(object):
     def __call__(self, file):
         if file.size > self.max_size:
             raise exceptions.ValidationError(
-                self.message, self.error_code, params={
+                self.message, code=self.error_code, params={
                     'max_size': str(
                         utils.convert_size(
                             self.max_size))})

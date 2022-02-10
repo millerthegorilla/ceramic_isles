@@ -145,12 +145,10 @@ def auto_delete_image_file_on_delete(sender: ArtisanForumProfile, instance: Arti
 
 
 # TODO: validate image_shop_link properly
-# TODO: set a default of
+
 class UserProductImage(models.Model):
     class Meta:
         permissions = [('approve_image', 'Approve Image')]
-
-    
     file: safe_image_models.SafeImageField = safe_image_models.SafeImageField(upload_to=user_directory_path, max_length=250)
     text: models.CharField = models.CharField(max_length=400, default='', blank=True)
     caption: models.CharField = models.CharField(max_length=400, default='', blank=True)
@@ -163,6 +161,7 @@ class UserProductImage(models.Model):
         ArtisanForumProfile,
         on_delete=models.CASCADE,
         related_name="forum_images")
+    del_id: models.UUIDField = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
 
 @receiver(signals.post_delete, sender=UserProductImage)
 def auto_delete_file_on_delete(sender: UserProductImage, instance: UserProductImage, **kwargs):

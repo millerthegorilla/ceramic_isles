@@ -69,7 +69,7 @@ urlpatterns = [
          artisan_views.ArtisanForumProfile.as_view(), name='profile_update_view'),
     path('users/accounts/profile/images/update/',
          artisan_views.UserProductImageUpload.as_view(), name='image_update'),
-    path('users/accounts/profile/images/update/<slug:unique_id>/',
+    path('users/accounts/profile/images/update/<str:del_id>/',
          artisan_views.UserProductImageDelete.as_view(), name='remove_images'),
     path('forum/create_post/', artisan_views.PostCreate.as_view(), 
                                name='post_create_view'),

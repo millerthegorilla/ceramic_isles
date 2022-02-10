@@ -12,7 +12,6 @@ def detect_content_type(f) -> str:
     f.seek(0)
     return magic.from_buffer(sample, mime=True)
 
-
 def ffmpeg_check(filename, error_detect='default', threads=0) -> None:
     try:
         if error_detect == 'default':

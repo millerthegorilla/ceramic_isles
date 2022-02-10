@@ -12,7 +12,7 @@
     {% for image in images %}
     <div class="container-fluid">
         <div id="image-card" class="card image-card w-100 mb-4 p-3">
-            <form action="{% url 'django_artisan:remove_images' image.image_id|stringformat:'s' %}" method="post" class="mb-3">
+            <form action="{% url 'django_artisan:remove_images' image.del_id|stringformat:'s' %}" method="post" class="mb-3">
                 {% csrf_token %}
                 <div>
                 {% thumbnail image.file "80x80" as im %}

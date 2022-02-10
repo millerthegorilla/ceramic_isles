@@ -54,7 +54,7 @@ class Post(forum_forms.Post):
 
 
 class ArtisanForumProfile(forum_forms.ForumProfile):
-    image_file = safe_image_forms.SafeImageField(allowed_extensions=('jpg', 'png'),
+    image_file = safe_image_forms.SafeImageField(allowed_extensions=('jpg', 'png', 'webp'),
                                                  check_content_type=True,
                                                  scan_viruses=True,
                                                  media_integrity=True,
@@ -116,7 +116,7 @@ MAX_NUMBER_OF_IMAGES = settings.MAX_USER_IMAGES
 
 
 class UserProductImage(forms.ModelForm):
-    file = safe_image_forms.SafeImageField(allowed_extensions=('jpg', 'png'),
+    file = safe_image_forms.SafeImageField(allowed_extensions=('jpg', 'png', 'webp'),
                                                  check_content_type=True,
                                                  scan_viruses=True,
                                                  media_integrity=True,
@@ -130,13 +130,13 @@ class UserProductImage(forms.ModelForm):
     def __init__(self, instance: 'UserProductImage' = None, user: User = None, *args, **kwargs) -> None:
         self.user = user
         super().__init__(*args, **kwargs)
-        self.fields['image_file'].validators.append(self.restrict_amount)
+        self.fields['file'].validators.append(self.restrict_amount)
         self.helper = helper.FormHelper()
         self.helper.form_tag = False
         self.helper.layout = layout.Layout(
             layout.Fieldset(
                             '',
-                            artisan_fields.FileInput('file', name="image_file"),
+                            artisan_fields.FileInput('file'),
                             bootstrap5.FloatingField('title'),
                             bootstrap5.FloatingField('text'),
                             bootstrap5.FloatingField('shop_link'),

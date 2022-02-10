@@ -277,19 +277,22 @@ class UserProductImageUpload(mixins.LoginRequiredMixin, generic.edit.FormView):
         obj = form.save(commit=False)
         obj.user_profile: artisan_forms.ArtisanForumProfile = self.request.user.profile
         obj.save()
-        img = Image.open(obj.image_file.path)
-        img = img.resize((1024,768))
+        img = Image.open(obj.file.path)
+        basewidth = 768
+        wpercent = (basewidth/float(img.size[0]))
+        hsize = int((float(img.size[1])*float(wpercent)))
+        img = img.resize((basewidth,hsize), Image.ANTIALIAS)
         img = ImageOps.expand(img, border=10, fill='white')
-        img.save(obj.image_file.path)
-        get_thumbnail(img.image_file, "1024x768", 
+        img.save(obj.file.path)
+        get_thumbnail(obj.file, conf.settings.IMAGE_SIZE_LARGE, 
                                     format="WEBP", crop='center', quality=70)
-        get_thumbnail(img.image_file, "500x700", 
+        get_thumbnail(obj.file, conf.settings.IMAGE_SIZE_SMALL, 
                                     format="WEBP", crop='center', quality=70)
         return redirect('django_artisan:image_update')
 
     def form_invalid(self, form: forms.ModelForm) -> http.HttpResponse:
         error_msg = str(form.errors)
-        if len(form.errors['image_file']) > 1:
+        if len(form.errors['file']) > 1:
             message = 'The form is not valid. Fix the following errors...'
         else:
             message = 'The form is not valid. Fix the following error...'
@@ -309,20 +312,20 @@ class UserProductImageUpload(mixins.LoginRequiredMixin, generic.edit.FormView):
 class UserProductImageDelete(mixins.LoginRequiredMixin, generic.edit.UpdateView):
     http_method_names = ['post']
     model = artisan_models.UserProductImage
-    slug_url_kwarg = 'unique_id'
+    slug_url_kwarg = 'del_id'
     slug_field = 'slug'
     success_url = urls.reverse_lazy('django_artisan:image_update')  
     template_name = 'django_artisan/profile/images/image_list.html'                  
 
     def post(self, request: http.HttpRequest, *args, **kwargs) -> http.HttpResponseRedirect:
-        artisan_models.UserProductImage.objects.get(image_id=self.kwargs['unique_id']).delete()
+        artisan_models.UserProductImage.objects.get(del_id=self.kwargs['del_id']).delete()
         return redirect(self.success_url)
 
     def get_object(self, queryset=None, *args, **kwargs) -> typing.Union[artisan_models.UserProductImage, 
                                                                          http.HttpResponseRedirect,
                                                                          http.HttpResponsePermanentRedirect]:
         try:
-            image = artisan_models.UserProductImage.objects.get(id=self.kwargs['unique_id'])
+            image = artisan_models.UserProductImage.objects.get(del_id=self.kwargs['del_id'])
         except artisan_models.UserProductImage.DoesNotExist as e:
             logger.error("Unable to get UserProductImage when deleting : {0}".format(e))
             image = None
