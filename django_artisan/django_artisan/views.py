@@ -203,7 +203,7 @@ class LandingPage(generic.base.TemplateView):
                                        .select_related('user_profile')
                                        .filter(active=True))
         context['randomize_images'] = conf.settings.CAROUSEL_RANDOMIZE_IMAGES
-        context['use_cache'] = conf.settings.CAROUSEL_USE_CACHE
+       # context['use_cache'] = conf.settings.CAROUSEL_USE_CACHE
         context['offset'] = conf.settings.CAROUSEL_OFFSET
         context['loading_image'] = 'django_bs_carousel/images/spinning-circles.svg'
         context['image_size_large'] = conf.settings.IMAGE_SIZE_LARGE

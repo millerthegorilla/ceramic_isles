@@ -186,9 +186,8 @@ $(window).on('load', function() {
         const nextIndicator = document.querySelector('.carousel-control-next');
         const prevIndicator = document.querySelector('.carousel-control-prev');
         const dataEl = document.getElementById('hidden-data');
-        const imgPause = parseInt(dataEl.dataset.imgPause);
         const offset = dataEl.dataset.offset == 'False' ? false : true;
-        const randomizeImages = dataEl.dataset.randomizeImages == 'False' ? false : true;
+        const randomizeImages = dataEl.dataset.randomizeImages == 'True' ? true : false;
         const loadingImage = location.protocol + "//" + location.host + dataEl.dataset.loadingImage;
         var carouselEl = document.querySelector('#carousel-large-background');
         let carousel = bootstrap.Carousel.getInstance(carouselEl);
@@ -244,11 +243,11 @@ $(window).on('load', function() {
 
 $(document).ready(function () {
     const dataEl = document.getElementById('hidden-data');
-    const randomizeImages = dataEl.dataset.randomizeImages == 'False' ? false : true;
+    const randomizeImages = dataEl.dataset.randomizeImages == 'True' ? true : false;
     const nodes = Singleton.getInstance(randomizeImages).nodeList;
     if(nodes.length)
     {
-        const useCache = dataEl.dataset.useCache == 'False' ? false : true;
+        const useCache = dataEl.dataset.useCache == 'True' ? true : false;
         const imagesPerRequest = parseInt(dataEl.dataset.imagesPerRequest);
         const imageSizeLarge = dataEl.dataset.imageSizeLarge;
         const imageSizeSmall = dataEl.dataset.imageSizeSmall;
@@ -321,7 +320,6 @@ $(document).ready(function () {
             const imageData = event.data;
             const ids = imageData.ids;
             const abs = imageData.abs;
-            console.log(ids);
             ids.forEach((id,idx) =>{
                 var mimestring = useCache && webpSupport ? "image/webp" : "image/jpeg";
                 var blob = new Blob([abs[idx]], { type: mimestring });
