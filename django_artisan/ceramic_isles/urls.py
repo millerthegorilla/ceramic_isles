@@ -21,16 +21,17 @@ from django_artisan import views as artisan_views
 from django_artisan import models as artisan_models
 from django_artisan import forms as artisan_forms
 from django_forum.views import CustomRegister
+# from django_forum import forms_custom_registration as forum_forms_custom_reg    # added
 
 logger = logging.getLogger('django_artisan')
 
-sitemaps = {'main': StaticView,
+sitemaps = {'main': StaticView,                   
             'personalpage': PersonalPage}
 
 urlpatterns = [
     path('__debug__/', include(debug_toolbar.urls)),
     path('users/accounts/register/', 
-           CustomRegister.as_view(form_class=artisan_forms.CustomRegistrationForm), 
+           CustomRegister.as_view(form_class=artisan_forms.CustomRegistrationForm), # added - was artisan_forms
          name='register'),
     path('', include(artisan_urls)),
     path('', include(carousel_urls)),
@@ -40,8 +41,8 @@ urlpatterns = [
     path('email/', include(mail_urls)),
     path('admin/', admin.site.urls),
     path('tinymce/', include('tinymce.urls')),
-    path('sitemap.xml', sitemap, {'sitemaps': sitemaps},
-         name='django.contrib.sitemaps.views.sitemap'),
+    path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, 
+          name='django.contrib.sitemaps.views.sitemap'),
 ]
 
 try:

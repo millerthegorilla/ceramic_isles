@@ -10,7 +10,7 @@ from . import models as forum_models
 
 logger = logging.getLogger('django_artisan')
 
-def send_susbcribed_email(post_model: Type[forum_models.Post],
+def send_subscribed_email(post_model: Type[forum_models.Post],
                           comment_model: Type[forum_models.Comment],
                           post_id: int = None, 
                           comment_id: int = None, 

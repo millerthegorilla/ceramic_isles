@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load crispy_forms_tags %}
 {% block title %}{{ siteName }} - Forum Posts{% endblock title %}
 {% block content %}
     {% if not page_obj.object_list.exists and is_a_search is False %}

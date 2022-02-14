@@ -35,7 +35,8 @@ class PostList(forum_views.PostList):
     paginate_by = 5
 
     def get(self, request: http.HttpRequest) -> typing.Union[tuple, http.HttpResponse]:
-        site = site_models.Site.objects.get_current()
+        #  site_models is really slow. so I use settings object instead
+        #  site = site_models.Site.objects.get_current()
         search = 0
         p_c = None
         is_a_search = False
@@ -57,18 +58,24 @@ class PostList(forum_views.PostList):
             time_range = eval('form.' + form['published'].value())  #### TODO !!! eval is evil.  
             search = len(queryset)
             if search and time_range:
-                queryset = queryset.filter(created_at__lt=time_range[0], created_at__gt=time_range[1])
+                queryset = (queryset.filter(created_at__lt=time_range[0], created_at__gt=time_range[1])
+                                    .order_by('-pinned')
+                                    .select_related('author')
+                                    .select_related('author__profile')
+                                    .select_related('author__profile__avatar'))
                 search = len(queryset)
             if not search:
                 queryset = (artisan_models.Post.objects
                             .select_related('author')
                             .select_related('author__profile')
+                            .select_related('author__profile__avatar')
                             .order_by('-pinned'))
         else:
             form.errors.clear()
             queryset = (artisan_models.Post.objects
                             .select_related('author')
                             .select_related('author__profile')
+                            .select_related('author__profile__avatar')
                             .order_by('-pinned'))
          
         paginator = pagination.Paginator(queryset, self.paginate_by)
@@ -80,7 +87,7 @@ class PostList(forum_views.PostList):
             'page_obj': page_obj,
             'search': search,
             'is_a_search': is_a_search,
-            'site_url': (request.scheme or 'https') + '://' + site.domain}
+            'site_url': (request.scheme or 'https') + '://' + conf.settings.SITE_DOMAIN}
         return shortcuts.render(request, self.template_name, context)
 
 
@@ -203,7 +210,7 @@ class LandingPage(generic.base.TemplateView):
                                        .select_related('user_profile')
                                        .filter(active=True))
         context['randomize_images'] = conf.settings.CAROUSEL_RANDOMIZE_IMAGES
-       # context['use_cache'] = conf.settings.CAROUSEL_USE_CACHE
+        context['use_cache'] = conf.settings.CAROUSEL_USE_CACHE
         context['offset'] = conf.settings.CAROUSEL_OFFSET
         context['loading_image'] = 'django_bs_carousel/images/spinning-circles.svg'
         context['image_size_large'] = conf.settings.IMAGE_SIZE_LARGE

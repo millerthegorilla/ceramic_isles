@@ -103,10 +103,8 @@ $(document).ready(function () {
   var commentModal = document.getElementById('commentModal')
   if (commentModal != null)
   {
-    console.assert(commentModal)
     commentModal.addEventListener('show.bs.modal', function (event) {
       var button = event.relatedTarget
-      console.log(button)
       var comment_slug_value = button.getAttribute('data-bs-comment-slug')
       var comment_id_value = button.getAttribute('data-bs-comment-id')
       $('#rem-comment-slug').attr('value', comment_slug_value)
@@ -114,12 +112,12 @@ $(document).ready(function () {
     })
   }
   $('#subscribed_cb').change(function() {
-    parts = $(location).attr('href').split('/');
-    var lastSegment = parts.pop() || parts.pop();
+    parts = $(location).attr('pathname').split('/');
+    var slugSegment = parts[3];
     $.ajax({
       type: 'POST',
       url: "/forum/subscribe/",
-      data: { 'slug': lastSegment, 'data': this.checked, 'csrfmiddlewaretoken': getCookie('csrftoken') },
+      data: { 'slug': slugSegment, 'data': this.checked, 'csrfmiddlewaretoken': getCookie('csrftoken') },
       success: function (response) {
         text=$("label[for='subscribed_cb']").text();
         if(text=='Subscribe to this thread') {

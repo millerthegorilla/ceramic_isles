@@ -1,59 +1,76 @@
-<div id='post_text' class="col-12 col-sm-11 col-md-10 col-lg-8 mx-auto my-auto">
-			<div class="row justify-content-end">
-			    <div class="col-auto"><input type='checkbox' id='subscribed_cb' {{ post.subscribed.exists }}><label for="subscribed_cb" class="ps-2">Subscribe to this thread</label></div>
-			</div>
-			<div class="row align-items-end tinfo">
+		{% load thumbnail %}
+		{% load static %}
+		<div id='post_text' class="col-12 col-sm-11 col-md-12 col-lg-9 mx-auto my-auto">
+			<!--<div class="row justify-content-end"> TODO delete me!
+			</div>-->
+			<div class="row align-items-end tinfo post-headline mb-2">
 				<div class="col-auto">
-				        <h3><span id="post_title">{{ post.title|safe }}</span><span class="text-dark ps-2">by</span></h3>
+				    <h1><span id="post_title">{{ post.title|safe }}</span></h1> 
 			    </div>
 			    <div class="col-auto">
-			    	<h4>{{ post.author }}<span class="text-dark ps-3">on</span></h4>
+			    	<h1><span class="text-dark ps-2">by</span></h1>
 			    </div>
 			    <div class="col-auto">
-			    	<h6>{{ post.created_at }}</h6>
+			    	<h3>{{ post.author.profile.display_name }}</h3>
+			    </div>
+			    <div class="col-auto">
+			    	<h3><span class="text-dark ps-3">on</span></h3>
+			    </div>
+			    <div class="col-auto">
+			    	<h4>{{ post.created_at }}</h4>
 			    </div>
 			</div>
-			<div class="row ms-auto">
-				{% if not post.moderation_date %}
-			    <div id="textarea" class="col-auto">{{ post.text|safe }}</div>
-			    {% else %}
-			    <div>This post has been reported and is awaiting moderation_date.</div>
-			    {% endif %}
-			    {% if post.author.profile.display_name == user.profile.display_name %}
-				    <div class="ms-auto">
-		    		    <form method="post" action="update-post">
-		    		    	{% csrf_token %}
-		    		    	<div id="post-edit-div">
-		    		    		<input type="textarea" name="update-post" class="update-form-text"></input>
-				    		    <div class="mt-3">
-				                    <button id="editor-cancel-btn" type="button" class="ms-auto col-auto btn btn-secondary me-2">Cancel</button>
-				                    <button id="editor-submit-btn" type="submit" class="me-auto col-auto btn btn-primary">
-				                    Save Post</button>
+			<div class='ps-4'>
+				<div class="tinfo row justify-content-start mb-2">
+				    <div class="col-auto"><input type='checkbox' id='subscribed_cb' {% if subscribed %}checked{% endif %}><label for="subscribed_cb" class="ps-2">{% if subscribed %}Subscribed{% else %}Subscribe{% endif %} to this thread</label></div>
+				</div>
+				<div class="row ms-auto mb-2">
+					{% if not post.moderation_date %}
+				    <div id="textarea" class="col-auto">{{ post.text|safe }}</div>
+				    {% else %}
+				    <div>This post has been reported and is awaiting moderation.  Comments are locked until the post has been validated.</div>
+				    {% endif %}
+				    {% if post.author == user %}
+					    <div class="ms-auto">
+			    		    <form method="post" action="{% url 'django_forum:post_update' post.pk post.slug %}">
+			    		    	{% csrf_token %}
+			    		    	<div id="post-edit-div">
+			    		    		<input type="textarea" name="update-post" class="update-form-text"></input>
+					    		    <input type="hidden" name="type" value="update">
+					    		    <div class="mt-3">
+					                    <button id="editor-cancel-btn" type="button" class="ms-auto col-auto btn btn-secondary me-2">Cancel</button>
+					                    <button id="editor-submit-btn" type="submit" class="me-auto col-auto btn btn-primary">
+					                    Save Post</button>
+					                </div>
 				                </div>
-			                </div>
-		                </form>
-		            </div>
-                {% else %}
-	                {% if not post.moderation_date and post.author.profile.display_name != user.profile.display_name %}
-	                <div class="ms-auto">
-	                    <form method="post" action="{% url 'django_forum:post_report' %}" id="form-report-post">
-	                    	{% csrf_token %}
-	                    	<div class="tinfo">
-	                            <a class="report-post text-warning" href="#">Report Post for Moderation</a>
-	                    	</div>
-	                    </form>
-	                </div>
+			                </form>
+			            </div>
+	                {% else %}
+		                {% if not post.moderation_date and post.author != user %}
+		                <div class="ms-auto">
+		                    <form method="post" action="{% url 'django_forum:post_report' %}" id="form-report-post">
+		                    	{% csrf_token %}
+		                        <input id="post-id" type="hidden" name="post-id" value="{{ post.id }}">
+    							<input id="post-slug" type="hidden" name="post-slug" value="{{ post.slug }}">
+		                    	<div class="tinfo">
+		                            <a class="report-post text-warning" href="#">Report Post for Moderation</a>
+		                    	</div>
+		                    </form>
+		                </div>
+		                {% endif %}
 	                {% endif %}
-                {% endif %}
-		    </div>
-		    <div class="row justify-content-end">
-	    		{% if post.author.profile.display_name == user.profile.display_name %}
-	    		    <div id="modify-post-btns">
-			    		<button id="delete-btn" type="button" class="btn btn-secondary col-auto me-2" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">Delete Post</button>
-		    		    <button id="editor-btn" class="me-auto col-auto btn btn-primary">Edit Post</button>
-	    		    </div>
-	    		{% endif %}
-		    </div>
+			    </div>
+			    <div class="row justify-content-end mb-3">
+		    		{% if not post.moderation_date and post.author == user %}
+		    		    <div id="modify-post-btns">
+		    		    	<div class="d-flex justify-content-end">
+				    			<button id="delete-btn" type="button" class="btn btn-secondary col-auto me-2" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">Delete Post</button>
+			    		    	<button id="editor-btn" class="col-auto btn btn-primary">Edit Post</button><!--edit handled by ajax in forum app-->
+		    		    	</div>
+		    		    </div>
+		    		{% endif %}
+			    </div>
+			</div>
 		    <!-- Confirm Delete Post Modal -->
 		    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
 		      <div class="modal-dialog">
@@ -67,7 +84,7 @@
 		          </div>
 		          <div class="modal-footer">
 		            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-		            <form method="post">
+		            <form action="{% url 'django_forum:post_delete' post.id post.slug %}" method="post">
 		            {% csrf_token %}
 		            <input type="hidden" name="type" value="post">
 		            <button type="submit" class="btn btn-primary">Delete Post</button>
@@ -76,4 +93,9 @@
 		        </div>
 		      </div>
 		    </div>
+		    {% if comment_edit %}
+		        {% block body_js %}
+		            <script src="{% static 'django_artisan/js/anchor.js' %}" type="application/javascript" referrerpolicy="origin"></script>
+		        {% endblock body_js %}
+			{% endif %}
 		</div>

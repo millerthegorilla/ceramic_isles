@@ -1,9 +1,8 @@
 {% extends 'base.html' %}
 {% load static %}
-{% load pipeline %}
 {% block title %}{{ siteName }} - Post{% endblock title %}
-{% block extra_js %}
-{% endblock extra_js %}
+{% block extra_css %}
+{% endblock extra_css %}
 {% block form_media %}
 <script src="{% static 'tinymce/tinymce.min.js' %}" type="application/javascript" referrerpolicy="origin"></script>
 <script src="{% static 'tinymce/jquery.tinymce.min.js' %}" type="application/javascript" referrerpolicy="origin"></script>
@@ -17,6 +16,5 @@
 </div>
 {% endblock %}
 {% block body_js %}
-  {% javascript 'django_forum' %}
-  <!-- <script src="{% static 'django_forum/js/forum_post_detail.js' %}" type="application/javascript" referrerpolicy="origin" defer></script> -->
+  <script src="{% static 'django_forum/js/forum_post_detail.js' %}" type="application/javascript" referrerpolicy="origin" defer></script>
 {% endblock body_js %}

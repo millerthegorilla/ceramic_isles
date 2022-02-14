@@ -54,7 +54,8 @@ class PostView(messages_views.MessageView):
     def get(self, request: http.HttpRequest, pk:int, slug:str) -> http.HttpResponse:
         self.object = self.get_object(queryset=self.model.objects
                                      .select_related('author')
-                                     .select_related('author__profile'))
+                                     .select_related('author__profile')
+                                     .select_related('author__profile__avatar'))
         context = self.get_context_data()
         return shortcuts.render(request,
                       self.template_name,
@@ -62,11 +63,13 @@ class PostView(messages_views.MessageView):
 
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
-        site = site_models.Site.objects.get_current()
-        context_data['site_url'] = (self.request.scheme or 'https') + '://' + site.domain
+        # takes to long ... site = site_models.Site.objects.get_current()
+        context_data['site_url'] = (self.request.scheme or 'https') + '://' + conf.settings.SITE_DOMAIN
         context_data['comment_form'] = self.comment_form_class() # type: ignore
         context_data['subscribed'] = self.object.subscribed_users.filter(username=self.request.user.username).count()
-        context_data['comments'] = self.object.comments.all()
+        context_data['comments'] = (self.object.comments.all().select_related('author')
+                                                              .select_related('author__profile')
+                                                              .select_related('author__profile__avatar'))
         return context_data
 
 
@@ -146,7 +149,7 @@ class CreateComment(auth.mixins.LoginRequiredMixin, views.View):
                 new_comment.post_fk = post
                 new_comment.save()
                 sname: str = "subscribe_timeout" + str(uuid.uuid4())
-                tasks.schedule('django_forum.tasks.send_susbcribed_email',
+                tasks.schedule('django_forum.tasks.send_subscribed_email',
                              post_model=self.post_model,
                              comment_model=self.comment_model,
                              name=sname,
@@ -219,6 +222,7 @@ class ReportComment(auth.mixins.LoginRequiredMixin, views.View):
     a_name = 'django_forum'
     
     def post(self, request:http.HttpRequest) -> http.HttpResponseRedirect:
+        breakpoint()
         comment = self.comment_model.objects.get(id=request.POST['comment-id'],
                                                  slug=request.POST['comment-slug'])
         post = self.post_model.objects.get(id=request.POST['post-id'], 

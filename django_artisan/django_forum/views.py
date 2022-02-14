@@ -31,7 +31,7 @@ class PostCreate(mixins.LoginRequiredMixin, messages_views.MessageCreate):
     template_name = "django_forum/posts_and_comments/forum_post_create_form.html"
     form_class = forum_forms.Post
 
-    def form_valid(self, form: forum_forms.Post, post: forum_models.Post) -> http.HttpResponseRedirect:
+    def form_valid(self, form: forum_forms.Post, post: forum_models.Post = None) -> http.HttpResponseRedirect:
         if post is None:
             post = form.save(commit=False)
         post = super().form_valid(form, post)
@@ -55,7 +55,6 @@ class PostList(mixins.LoginRequiredMixin, messages_views.MessageList):
        is not particularly good, at least not in my experience.  The following searches posts and
        comments.  The search indexes are defined in documents.py.
     """
-
     def get(self, request: http.HttpRequest) -> typing.Union[tuple, http.HttpResponse]:
         '''
             I had a function that tested for the existence of a search slug
@@ -65,48 +64,56 @@ class PostList(mixins.LoginRequiredMixin, messages_views.MessageList):
             So, TODO profile this method vs the original from commit id
             1d5cbccde9f7b183e4d886d7e644712b79db60cd 
         '''
-        def get(self, request: http.HttpRequest) -> typing.Union[tuple, http.HttpResponse]:
-            site = site_models.Site.objects.get_current()
-            search = 0
-            p_c = None
-            is_a_search = False
-            form = artisan_forms.PostListSearch(request.GET)
-            if form.is_valid():
-                is_a_search = True
-                terms = form.cleaned_data['q'].split(' ')
-                if len(terms) > 1:
-                    t = 'terms'
-                else:
-                    t = 'match'
-                    terms = terms[0]
-                queryset = forum_documents.Post.search().query(
-                    elasticsearch_dsl.Q(t, text=terms) |
-                    elasticsearch_dsl.Q(t, author=terms) |
-                    elasticsearch_dsl.Q(t, title=terms) |
-                    elasticsearch_dsl.Q(t, category=terms) |
-                    elasticsearch_dsl.Q(t, location=terms)).to_queryset()
-                time_range = eval('form.' + form['published'].value())  #### TODO !!! eval is evil.  
-                search = len(queryset)
-                if search and time_range:
-                    queryset = queryset.filter(created_at__lt=time_range[0], created_at__gt=time_range[1])
-                    search = len(queryset)
-                if not search:
-                    queryset = forum_models.Post.objects.order_by('-pinned')
+        #site = site_models.Site.objects.get_current()
+        search = 0
+        p_c = None
+        is_a_search = False
+        form = forum_forms.PostListSearch(request.GET)
+        if form.is_valid():
+            is_a_search = True
+            terms = form.cleaned_data['q'].split(' ')
+            if len(terms) > 1:
+                t = 'terms'
             else:
-                form.errors.clear()
-                queryset = forum_models.Post.objects.order_by('-pinned')
-             
-            paginator = pagination.Paginator(queryset, self.paginate_by)
-             
-            page_number = request.GET.get('page')
-            page_obj = paginator.get_page(page_number)
-            context = {
-                'form': form,
-                'page_obj': page_obj,
-                'search': search,
-                'is_a_search': is_a_search,
-                'site_url': (request.scheme or 'https') + '://' + site.domain}
-            return shortcuts.render(request, self.template_name, context)
+                t = 'match'
+                terms = terms[0]
+            queryset = forum_documents.Post.search().query(
+                elasticsearch_dsl.Q(t, text=terms) |
+                elasticsearch_dsl.Q(t, author=terms) |
+                elasticsearch_dsl.Q(t, title=terms) |
+                elasticsearch_dsl.Q(t, category=terms) |
+                elasticsearch_dsl.Q(t, location=terms)).to_queryset()
+            time_range = eval('form.' + form['published'].value())  #### TODO !!! eval is evil.  
+            search = len(queryset)
+            if search and time_range:
+                queryset = (queryset.filter(created_at__lt=time_range[0], created_at__gt=time_range[1])
+                                   .order_by('-pinned')
+                                   .select_related('author')
+                                   .select_related('author__profile')
+                                   .select_related('author__profile__avatar'))
+                search = len(queryset)
+            if not search:
+                queryset = (forum_models.Post.objects.order_by('-pinned')
+                                                    .select_related('author')
+                                                    .select_related('author__profile')
+                                                    .select_related('author__profile__avatar'))
+        else:
+            form.errors.clear()
+            queryset = (forum_models.Post.objects.order_by('-pinned')
+                                                .select_related('author')
+                                                .select_related('author__profile')
+                                                .select_related('author__profile__avatar'))        
+        paginator = pagination.Paginator(queryset, self.paginate_by)
+         
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        context = {
+            'form': form,
+            'page_obj': page_obj,
+            'search': search,
+            'is_a_search': is_a_search,
+            'site_url': (request.scheme or 'https') + '://' + '127.0.0.1'} #site.domain}
+        return shortcuts.render(request, self.template_name, context)
 
 ## autocomplete now removed to reduce number of requests
 # def autocomplete(request):

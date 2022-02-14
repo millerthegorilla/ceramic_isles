@@ -10,7 +10,7 @@ postview_patterns = [
                 name='post_view'),
     urls.path('update_post/<int:pk>/<slug:slug>/', forum_post_views.PostUpdate.as_view(),
                 name='post_update'),
-    urls.path('delete_post/<int:pk>/', forum_post_views.DeletePost.as_view(),
+    urls.path('delete_post/<int:pk>/<slug:slug>/', forum_post_views.DeletePost.as_view(),
                 name="post_delete"),
     urls.path('report_post/', forum_post_views.ReportPost.as_view(),
                 name='post_report'),

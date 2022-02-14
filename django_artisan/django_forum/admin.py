@@ -31,10 +31,10 @@ if not abs_comment:
         search_fields = ('author', 'text')
 
         def post_str(self, obj: forum_models.Comment) -> str:
-            link = urls.reverse("admin:django_forum_forumpost_change",
-                           args=[obj.post.id])
+            link = urls.reverse("admin:django_forum_post_change",
+                           args=[obj.post_fk.id])
             return utils.safestring.mark_safe(
-                f'<a href="{link}">{utils.html.escape(obj.post.__str__())}</a>')
+                f'<a href="{link}">{utils.html.escape(obj.post_fk.__str__())}</a>')
 
         post_str.short_description = 'Post' # type: ignore
         # make row sortable
