@@ -76,15 +76,20 @@ class PostView(messages_views.MessageView):
 #ajax function for subscribe checkbox
 def subscribe(request) -> http.JsonResponse:
     # request should be ajax and method should be POST.
+    breakpoint()
+    if conf.settings.ABSTRACTPOST:
+        post_model = apps.get_model(*conf.settings.POST_MODEL.split('.'))
+    else:
+        post_model = forum_models.Post
     if request.is_ajax and request.method == "POST":
         try:
-            fp = forum_models.Post.objects.get(slug=request.POST['slug'])
+            fp = post_model.objects.get(slug=request.POST['slug'])
             if request.POST['data'] == 'true':
                 fp.subscribed_users.add(request.user)
             else:
                 fp.subscribed_users.remove(request.user)
             return http.JsonResponse({}, status=200)
-        except forum_models.Post.DoesNotExist as e:
+        except post_model.DoesNotExist as e:
             logger.error('There is no post with that slug : {0}'.format(e))
             return http.JsonResponse(
                 {"error": "no post with that slug"}, 
@@ -222,7 +227,6 @@ class ReportComment(auth.mixins.LoginRequiredMixin, views.View):
     a_name = 'django_forum'
     
     def post(self, request:http.HttpRequest) -> http.HttpResponseRedirect:
-        breakpoint()
         comment = self.comment_model.objects.get(id=request.POST['comment-id'],
                                                  slug=request.POST['comment-slug'])
         post = self.post_model.objects.get(id=request.POST['post-id'], 

@@ -8,6 +8,7 @@ from sorl import thumbnail
 from safe_imagefield import models as safe_image_models
 
 from django import urls, conf, dispatch, utils
+from django.apps import apps
 from django.core import exceptions
 from django.db import models as db_models, DEFAULT_DB_ALIAS
 from django.db.models import signals, deletion
@@ -190,7 +191,7 @@ class Post(messages_models.Message):
 # ABSTRACTPOST is True.
 import importlib
 try:
-    post_model = eval('conf.settings.POST_MODEL')
+    post_model = apps.get_model(*conf.settings.POST_MODEL.split('.'))
 except AttributeError:
     post_model = Post
 class Comment(messages_models.Message):
