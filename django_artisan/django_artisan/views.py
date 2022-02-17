@@ -235,13 +235,15 @@ class PersonalPage(generic.detail.DetailView):
         context['images'] = (artisan_models.UserProductImage.objects
                                        .select_related('user_profile')
                                        .filter(user_profile=self.object)
-                                       .filter(active=True).order_by('?'))
-        self.request.session['images'] = serializers.serialize("json", context['images'])
+                                       .filter(active=True))
+        context['randomize_images'] = conf.settings.CAROUSEL_RANDOMIZE_IMAGES
+        context['use_cache'] = conf.settings.CAROUSEL_USE_CACHE
+        context['offset'] = conf.settings.CAROUSEL_OFFSET
         context['loading_image'] = 'django_bs_carousel/images/spinning-circles.svg'
-        context['image_size'] = "1024x768"
+        context['image_size_large'] = conf.settings.IMAGE_SIZE_LARGE
+        context['image_size_small'] = conf.settings.IMAGE_SIZE_SMALL
         context['images_per_request'] = conf.settings.NUM_IMAGES_PER_REQUEST
-        context['lazyload_offset'] = conf.settings.LAZYLOAD_OFFSET
-        #context['username'] = self.request.user.username # type: ignore
+        context['image_pause'] = conf.settings.CAROUSEL_IMG_PAUSE
         context['csrftoken'] = csrf.get_token(self.request)
         u_p = self.get_queryset().first()
         context['profile_image_file'] = u_p.image_file

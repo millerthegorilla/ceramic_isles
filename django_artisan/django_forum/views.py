@@ -154,7 +154,7 @@ class ForumProfile(profile_views.ProfileUpdate):
                 form.save()
             return super().form_valid(form)  # process other form in django_profile app
         elif self.request.POST['type'] == 'update-avatar':
-            fp = forum_models.ForumProfile.objects.get(profile_user=self.request.user)
+            fp = self.model.objects.get(profile_user=self.request.user)
             fp.avatar.image_file.save(
                 self.request.FILES['avatar'].name,
                 self.request.FILES['avatar'])

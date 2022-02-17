@@ -3,6 +3,7 @@ import bleach, html, logging, uuid
 from django_q import tasks
 
 from django import http, shortcuts, urls, views, utils, conf
+from django.apps import apps
 from django.core import mail
 from django.contrib import auth
 from django.template import defaultfilters
