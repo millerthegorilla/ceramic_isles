@@ -8,3 +8,4 @@ django_artisan/media/**/*
 /**/__pycache__/**/*
 django_artisan/ceramic_isles/wsgi.py
 django_artisan/manage.py
+django_artisan/django_bs_carousel_shadow

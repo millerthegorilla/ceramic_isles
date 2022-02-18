@@ -44,12 +44,12 @@
                     <ul class="list-unstyled">
                       <li><a href="{% url 'django_artisan:about_view' %}" class="text-purple">About {{siteName}}</a></li>
                       {% if user.is_authenticated and '/email/' not in request.path %}
-                        <li><a href="{% url 'django_artisan:post_list_view' %}" class="text-primary">Forum Posts</a></li>
-                        <li><a href="{% url 'django_artisan:post_create_view' %}" class="text-white">Create Post</a></li>
-                        <li><a href="{% url 'django_artisan:profile_update_view' %}" class="text-success">Profile</a></li>
                         {% if user.profile.display_name %}
                           <li><a href="{% url 'django_artisan:personal_page_view' user.profile.display_name %}" class="text-muted">Personal Page</a></li>
                         {% endif %}
+                        <li><a href="{% url 'django_artisan:post_list_view' %}" class="text-primary">Forum Posts</a></li>
+                        <li><a href="{% url 'django_artisan:post_create_view' %}" class="text-white">Create Post</a></li>
+                        <li><a href="{% url 'django_artisan:profile_update_view' %}" class="text-success">Profile</a></li>
                         <li><a href="{% url 'logout' %}" class="text-danger">Logout</a></li>
                       {% else %}
                         <li><a href="{% url 'login' %}" class="text-success">Login</a></li>
