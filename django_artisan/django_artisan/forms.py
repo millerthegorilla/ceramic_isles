@@ -72,6 +72,7 @@ class ArtisanForumProfile(forum_forms.ForumProfile):
         ]
 
     def __init__(self, *args, **kwargs) -> None:
+        breakpoint()
         super().__init__(*args, **kwargs)
         self.fields['image_file'].widget.is_required = False
         self.fields['image_file'].required = False
@@ -90,6 +91,8 @@ class ArtisanForumProfile(forum_forms.ForumProfile):
             label='Outlets that sell your wares',
             help_text='<span class="tinfo">A comma separated list of outlets that sell your stuff, for your personal page.</span>',
             required=False)
+        self.fields['city'] = forms.fields.CharField(label='Parish')
+        self.fields['country'] = forms.fields.CharField(label='Island')
         # add to the super class fields
         self.helper.layout.fields = self.helper.layout.fields + [
             artisan_fields.FileClearInput(

@@ -120,18 +120,18 @@ class ArtisanForumProfile(admin.ModelAdmin):
         'image_file', 'shop_web_address',
         'outlets', 'listed_member',
         'display_personal_page', 'address_line_1',
-        'address_line_2', 'parish',
+        'address_line_2', 'city', 'country',
         'postcode', 'avatar',
         'rules_agreed'
     ]
     list_filter = [
-        'display_name', 'parish',
+        'display_name', 'city', 'country',
         'rules_agreed', 'shop_web_address',
         'listed_member', 'display_personal_page'
     ]
     search_fields = [
         'display_name', 'address_line_1',
-        'parish', 'bio'
+        'city', 'country', 'bio'
     ]
 
     def get_queryset(self, request: http.HttpRequest) -> models.QuerySet:

@@ -10,10 +10,9 @@ from django_users import urls as users_app_urls
 from django_forum import urls as forum_urls
 from django_bs_carousel import urls as carousel_urls
 from django_artisan import urls as artisan_urls
-from django_messages import urls as messages_urls
+#from django_messages import urls as messages_urls
 from django.conf import settings
 from django.conf.urls.static import static
-from django.urls import re_path, URLResolver
 from django.contrib.staticfiles import views
 from django.contrib.sitemaps.views import sitemap
 from django_artisan.sitemaps import StaticView, PersonalPage
@@ -21,7 +20,8 @@ from django_artisan import views as artisan_views
 from django_artisan import models as artisan_models
 from django_artisan import forms as artisan_forms
 from django_forum.views import CustomRegister
-# from django_forum import forms_custom_registration as forum_forms_custom_reg    # added
+from django_forum import forms_custom_registration as forum_forms_custom_reg    # added
+#from django_profile import urls as profile_urls
 
 logger = logging.getLogger('django_artisan')
 
@@ -33,10 +33,9 @@ urlpatterns = [
     path('users/accounts/register/', 
            CustomRegister.as_view(form_class=artisan_forms.CustomRegistrationForm), # added - was artisan_forms
          name='register'),
-    path('', include(artisan_urls)),
-    path('', include(carousel_urls)),
-    path('forum/', include(forum_urls)),
-    path('messages/', include(messages_urls)),
+   path('', include(artisan_urls)),
+   path('', include(carousel_urls)),
+   path('forum/', include(forum_urls)),
     path('users/', include(users_app_urls)),
     path('email/', include(mail_urls)),
     path('admin/', admin.site.urls),

@@ -149,7 +149,14 @@ def auto_delete_image_file_on_delete(sender: ArtisanForumProfile, instance: Arti
 class UserProductImage(models.Model):
     class Meta:
         permissions = [('approve_image', 'Approve Image')]
-    file: safe_image_models.SafeImageField = safe_image_models.SafeImageField(upload_to=user_directory_path, max_length=250)
+    file: safe_image_models.SafeImageField = safe_image_models.SafeImageField(
+                                                            upload_to=user_directory_path,
+                                                            max_length=250,
+                                                            allowed_extensions=('jpg', 'png', 'webp'),
+                                                            check_content_type=True,
+                                                            scan_viruses=True,
+                                                            media_integrity=True,
+                                                            max_size_limit=2621440)
     text: models.CharField = models.CharField(max_length=400, default='', blank=True)
     caption: models.CharField = models.CharField(max_length=400, default='', blank=True)
     title: models.CharField = models.CharField(max_length=30, default='', blank=True)

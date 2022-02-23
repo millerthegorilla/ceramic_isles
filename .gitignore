@@ -9,3 +9,9 @@ django_artisan/media/**/*
 django_artisan/ceramic_isles/wsgi.py
 django_artisan/manage.py
 django_artisan/django_bs_carousel_shadow
+django_artisan/django_forum_src
+django_artisan/django_messages_src
+django_artisan/django_profile_src
+django_artisan/django_users_src
+django_artisan/safe_imagefield_src
+old_apps

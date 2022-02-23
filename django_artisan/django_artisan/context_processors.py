@@ -9,3 +9,6 @@ def navbarSpiel(request: http.HttpRequest) -> Dict[str, Any]:
 
 def siteLogo(request: http.HttpRequest) -> Dict[str, Any]:
     return {'siteLogo': conf.settings.SITE_LOGO}
+
+def base_html(request):
+    return {'BASE_HTML': conf.settings.BASE_HTML}
