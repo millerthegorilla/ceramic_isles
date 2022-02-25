@@ -72,7 +72,6 @@ class ArtisanForumProfile(forum_forms.ForumProfile):
         ]
 
     def __init__(self, *args, **kwargs) -> None:
-        breakpoint()
         super().__init__(*args, **kwargs)
         self.fields['image_file'].widget.is_required = False
         self.fields['image_file'].required = False
@@ -91,12 +90,12 @@ class ArtisanForumProfile(forum_forms.ForumProfile):
             label='Outlets that sell your wares',
             help_text='<span class="tinfo">A comma separated list of outlets that sell your stuff, for your personal page.</span>',
             required=False)
-        self.fields['city'] = forms.fields.CharField(label='Parish')
-        self.fields['country'] = forms.fields.CharField(label='Island')
+        self.fields['city'] = forms.fields.CharField(label='Parish', required=False)
+        self.fields['country'] = forms.fields.CharField(label='Island', required=False)
         # add to the super class fields
         self.helper.layout.fields = self.helper.layout.fields + [
             artisan_fields.FileClearInput(
-                'image_file', css_class="tinfo form-control form-control-lg"),
+                'image_file', css_class="form-control form-control-lg"),
             bootstrap5.FloatingField('bio'),
             bootstrap5.FloatingField('shop_web_address'),
             bootstrap5.FloatingField('outlets'),
@@ -106,6 +105,7 @@ class ArtisanForumProfile(forum_forms.ForumProfile):
         self.helper.form_id = 'id-profile-form'
         self.helper.form_method = 'post'
         self.helper.form_class = 'col-auto tinfo'
+        self.helper.form_tag = False
 
 
 class CustomRegistrationForm(forum_custom_reg_forms.CustomUserCreation):

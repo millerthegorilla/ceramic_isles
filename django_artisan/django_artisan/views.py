@@ -127,8 +127,6 @@ class ArtisanForumProfile(forum_views.ForumProfile):
     success_url = urls.reverse_lazy('django_artisan:profile_update_view')
     template_name = 'django_artisan/profile/forum_profile_update_form.html'
 
-    ## TODO type form to correct type of Form - probably artisan_forms.ArtisanForumProfile
-    ##  and do the same in superclasses
     def form_valid(self, form: forms.ModelForm, **kwargs) -> typing.Union[http.HttpResponse, http.HttpResponseRedirect]: # type: ignore
         if self.request.POST['type'] == 'update-profile':
             if form.has_changed():
