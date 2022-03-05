@@ -112,8 +112,8 @@ class CustomRegistrationForm(forum_custom_reg_forms.CustomUserCreation):
     model = artisan_models.ArtisanForumProfile
 
 
-class ArtisanForumProfileUser(forum_forms.ForumProfileUser):
-    model = artisan_models.ArtisanForumProfile
+##class ArtisanForumProfileUser(forum_forms.ForumProfileUser):
+  #  model = artisan_models.ArtisanForumProfile
 
 MAX_NUMBER_OF_IMAGES = settings.MAX_USER_IMAGES
 

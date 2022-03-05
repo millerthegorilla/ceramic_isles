@@ -123,51 +123,101 @@ class ArtisanForumProfile(forum_views.ForumProfile):
     model = artisan_models.ArtisanForumProfile
     post_model = artisan_models.Post 
     form_class = artisan_forms.ArtisanForumProfile
-    user_form_class = artisan_forms.ArtisanForumProfileUser
+    user_form_class = forum_forms.ForumProfileUser
     success_url = urls.reverse_lazy('django_artisan:profile_update_view')
     template_name = 'django_artisan/profile/forum_profile_update_form.html'
 
-    def form_valid(self, form: forms.ModelForm, **kwargs) -> typing.Union[http.HttpResponse, http.HttpResponseRedirect]: # type: ignore
-        if self.request.POST['type'] == 'update-profile':
-            if form.has_changed():
-                if ('display_personal_page' in form.changed_data or
-                   'listed_member' in form.changed_data):
-                    try:
-                        if not conf.settings.DEBUG:
-                            tasks.async_task(ping_google_func)
-                    except:
-                        tasks.async_task(ping_google_func)
-                obj = form.save()
-                if obj.image_file:
-                    img = Image.open(obj.image_file.path)
-                    img = ImageOps.expand(img, border=10, fill='white')
-                    img.save(obj.image_file.path)
-            return super().form_valid(form)
-        elif self.request.POST['type'] == 'update-avatar':
-            super().form_valid(form)
-            return redirect(self.success_url)
+    def populate_initial(self, user):
+        super_dic = super().populate_initial(user)
+        dic = { 
+                    'bio': user.profile.bio,
+                    'image_file': user.profile.image_file,
+                    'shop_web_address': user.profile.shop_web_address,
+                    'outlets': user.profile.outlets,
+                    'listed_member': user.profile.listed_member,
+                    'display_personal_page': user.profile.display_personal_page
+                }
+        dic.update(super_dic)
+        return dic
 
-    def get_context_data(self, **kwargs) -> dict:
-        context = super().get_context_data(**kwargs)
+    def post(self, request:http.HttpRequest) -> typing.Union[http.HttpResponse, http.HttpResponseRedirect]: # type: ignore
+            form = self.form_class(request.POST)
+            user_form = self.user_form_class(request.POST)
+            f_valid = False
+            u_valid = False
+            context = {}
+
+            if form.is_valid():
+                self.f_valid = True
+                form.initial = self.populate_initial(request.user)
+                if form.has_changed():
+                    if ('display_personal_page' in form.changed_data or
+                       'listed_member' in form.changed_data):
+                        try:
+                            if not conf.settings.DEBUG:
+                                tasks.async_task(ping_google_func)
+                        except:
+                            tasks.async_task(ping_google_func)
+                    profile = self.model.objects.get(profile_user=request.user)
+
+                    #obj = form.save(commit=False)
+                    #obj.profile_user = request.user
+                    #obj.save()
+                    breakpoint()
+                    for change in form.changed_data:
+                        if change == 'image_file':
+                            img = Image.open(form['image_file'].value().path)
+                            img = ImageOps.expand(img, border=10, fill='white')
+                            img.save(form['image_file'].value().path)
+                        setattr(profile,change,form[change].value())
+                    profile.save(update_fields=form.changed_data)
+            else:
+                self.f_valid = False
+
+            user_form.is_valid()
+            try:
+                user_form.errors.pop('username')
+            except KeyError:
+                pass
+            if len(user_form.errors):
+                self.u_valid = False
+            else:
+                self.u_valid = True
+                user = auth.get_user_model().objects.get(username=user_form['username'].value())
+                for change in user_form.changed_data:
+                    setattr(user,change,user_form[change].value())
+                user.save(update_fields=user_form.changed_data)
+            breakpoint()
+            if not self.f_valid or not self.u_valid:  
+                return shortcuts.render(request, self.template_name, self.get_context_data())
+            else:
+                return super().post(request)
+
+    def get_context_data(self, *args, **kwargs) -> dict:
+        context = super().get_context_data(*args, **kwargs)
         #context = {}
         site = site_models.Site.objects.get_current()
-        # context['form'].initial.update(
-        #             {'bio':self.request.user.profile.bio,
-        #              'image_file':self.request.user.profile.image_file,
-        #              'shop_web_address':self.request.user.profile.shop_web_address,
-        #              'outlets':self.request.user.profile.outlets,
-        #              'listed_member':self.request.user.profile.listed_member})
-        # context['avatar'] = (artisan_models.ArtisanForumProfile.objects
-        #                        .get(profile_user=self.request.user).avatar)
-        # queryset = (artisan_models.Post.objects
-        #                        .select_related('author')
-        #                        .select_related('author__profile')
-        #                        .filter(author=self.request.user))
-        # paginator = pagination.Paginator(queryset, 6)
-        # page_number = self.request.GET.get('page')
-        # page_obj = paginator.get_page(page_number)
-        # context['page_obj'] = page_obj
-        context ['site_url'] = (self.request.scheme or 'https') + '://' + site.domain
+        context['form'].initial = {
+                'bio': self.request.user.profile.bio,
+                'image_file': self.request.user.profile.image_file,
+                'shop_web_address': self.request.user.profile.shop_web_address,
+                'outlets': self.request.user.profile.outlets,
+                'listed_member': self.request.user.profile.listed_member,
+                'display_personal_page': self.request.user.profile.display_personal_page
+        }
+        context['avatar'] = (artisan_models.ArtisanForumProfile.objects
+                               .get(profile_user=self.request.user).avatar)
+        queryset = (artisan_models.Post.objects
+                               .select_related('author')
+                               .select_related('author__profile')
+                               .filter(author=self.request.user))
+        paginator = pagination.Paginator(queryset, 6)
+        page_number = self.request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        context['page_obj'] = page_obj
+        context ['site_url'] = (('https' if self.request.is_secure else 'http')
+                                + '://'
+                                + conf.settings.SITE_DOMAIN)
         return context
 
 

@@ -10,9 +10,9 @@
     {% block content %}
         <div class="row my-auto ms-3">
             <div class="col-auto">
-                <form method="post" class="avatarform mb-3" id="avatarform" action="{% url 'django_artisan:profile_update_view' %}" enctype="multipart/form-data">
+                <form method="post" class="avatarform mb-3" id="avatarform" action="{% url 'django_forum:update_avatar' %}" enctype="multipart/form-data">
                     {% csrf_token %}
-                    <input type="hidden" name="type" value="update-avatar">
+                    <!-- <input type="hidden" name="type" value="update-avatar"> -->
                     {% thumbnail avatar.image_file "80x80" crop="center" as im %}
                         <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}" class="btTxt img-thumbnail" role="button" id="avatarImage" title="Click me to change avatar!" />
                     {% endthumbnail %}
