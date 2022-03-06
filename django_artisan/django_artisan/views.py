@@ -7,7 +7,7 @@ from django_q import tasks
 from django import conf, http, forms, shortcuts, urls, utils
 from django.core import paginator as pagination
 from django.core import serializers
-from django.contrib.auth import mixins
+from django.contrib import auth
 from django.contrib import sitemaps
 from django.contrib.sites import models as site_models
 from django.db import models as db_models
@@ -127,8 +127,8 @@ class ArtisanForumProfile(forum_views.ForumProfile):
     success_url = urls.reverse_lazy('django_artisan:profile_update_view')
     template_name = 'django_artisan/profile/forum_profile_update_form.html'
 
-    def populate_initial(self, user):
-        super_dic = super().populate_initial(user)
+    def populate_initial_form(self, user):
+        super_dic = super().populate_initial_form(user)
         dic = { 
                     'bio': user.profile.bio,
                     'image_file': user.profile.image_file,
@@ -146,10 +146,10 @@ class ArtisanForumProfile(forum_views.ForumProfile):
             f_valid = False
             u_valid = False
             context = {}
-
+            profile = self.model.objects.get(profile_user=request.user)
             if form.is_valid():
                 self.f_valid = True
-                form.initial = self.populate_initial(request.user)
+                form.initial = self.populate_initial_form(request.user)
                 if form.has_changed():
                     if ('display_personal_page' in form.changed_data or
                        'listed_member' in form.changed_data):
@@ -158,12 +158,6 @@ class ArtisanForumProfile(forum_views.ForumProfile):
                                 tasks.async_task(ping_google_func)
                         except:
                             tasks.async_task(ping_google_func)
-                    profile = self.model.objects.get(profile_user=request.user)
-
-                    #obj = form.save(commit=False)
-                    #obj.profile_user = request.user
-                    #obj.save()
-                    breakpoint()
                     for change in form.changed_data:
                         if change == 'image_file':
                             img = Image.open(form['image_file'].value().path)
@@ -183,20 +177,25 @@ class ArtisanForumProfile(forum_views.ForumProfile):
                 self.u_valid = False
             else:
                 self.u_valid = True
-                user = auth.get_user_model().objects.get(username=user_form['username'].value())
+                user_form.initial.update(self.populate_initial_user_form(request.user))          
                 for change in user_form.changed_data:
-                    setattr(user,change,user_form[change].value())
-                user.save(update_fields=user_form.changed_data)
-            breakpoint()
-            if not self.f_valid or not self.u_valid:  
-                return shortcuts.render(request, self.template_name, self.get_context_data())
+                    if change == 'display_name':
+                        profile.display_name = user_form[change].value()
+                        profile.save(update_fields=['display_name'])
+                        user_form.changed_data.pop(user_form.changed_data.index('display_name'))
+                    else:
+                        setattr(request.user,change,user_form[change].value())
+                request.user.save(update_fields=user_form.changed_data)
+            if not self.f_valid or not self.u_valid:
+                context = self.get_context_data()
+                context['form'] = form
+                context['user_form'] = user_form
+                return shortcuts.render(request, self.template_name, context)
             else:
                 return super().post(request)
 
     def get_context_data(self, *args, **kwargs) -> dict:
         context = super().get_context_data(*args, **kwargs)
-        #context = {}
-        site = site_models.Site.objects.get_current()
         context['form'].initial = {
                 'bio': self.request.user.profile.bio,
                 'image_file': self.request.user.profile.image_file,
@@ -215,7 +214,7 @@ class ArtisanForumProfile(forum_views.ForumProfile):
         page_number = self.request.GET.get('page')
         page_obj = paginator.get_page(page_number)
         context['page_obj'] = page_obj
-        context ['site_url'] = (('https' if self.request.is_secure else 'http')
+        context ['site_url'] = (('https' if self.request.is_secure() else 'http')
                                 + '://'
                                 + conf.settings.SITE_DOMAIN)
         return context
@@ -226,10 +225,9 @@ class AboutPage(generic.list.ListView):
     template_name = 'django_artisan/about.html'
     
     def get_context_data(self, **kwargs) -> dict:
-        site = site_models.Site.objects.get_current()
         data = super().get_context_data(**kwargs)
         data['about_text'] = conf.settings.ABOUT_US_SPIEL
-        data['site_url'] = (self.request.scheme or 'https') + '://' + site.domain
+        data['site_url'] = 'https' if self.request.is_secure() else 'http' + '://' + conf.settings.SITE_DOMAIN
         qs = artisan_models.ArtisanForumProfile.objects.all().exclude(profile_user__is_superuser=True).exclude(listed_member=False) \
                                        .values_list('display_name', 'avatar__image_file')
         if qs.exists():
@@ -316,7 +314,7 @@ class PersonalPage(generic.detail.DetailView):
             return redirect(self.request.META.get('HTTP_REFERER'))
 
 
-class UserProductImageUpload(mixins.LoginRequiredMixin, generic.edit.FormView):
+class UserProductImageUpload(auth.mixins.LoginRequiredMixin, generic.edit.FormView):
     model = artisan_models.UserProductImage
     form_class = artisan_forms.UserProductImage
     template_name = 'django_artisan/profile/images/image_update.html'
@@ -366,7 +364,7 @@ class UserProductImageUpload(mixins.LoginRequiredMixin, generic.edit.FormView):
         return kwarg_dict
 
 
-class UserProductImageDelete(mixins.LoginRequiredMixin, generic.edit.UpdateView):
+class UserProductImageDelete(auth.mixins.LoginRequiredMixin, generic.edit.UpdateView):
     http_method_names = ['post']
     model = artisan_models.UserProductImage
     slug_url_kwarg = 'del_id'

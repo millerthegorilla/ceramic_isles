@@ -13,7 +13,6 @@ class DjangoArtisan(apps.AppConfig):
     name = 'django_artisan'
 
     def ready(self) -> None:
-        #breakpoint()
         models.signals.post_migrate.connect(callback, sender=self)
         try:
             settings.DEBUG
