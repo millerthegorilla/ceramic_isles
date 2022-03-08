@@ -57,7 +57,8 @@ class PostList(forum_views.PostList):
                 elasticsearch_dsl.Q(t, category=terms) |
                 elasticsearch_dsl.Q(t, location=terms)).to_queryset()
             queryset_comments = forum_documents.Comment.search().query(
-                elasticsearch_dsl.Q(t, text=terms)).to_queryset()
+                elasticsearch_dsl.Q(t, text=terms) |
+                elasticsearch_dsl.Q(t, author=terms)).to_queryset()
             for sr in queryset_comments:
                 queryset = queryset | artisan_models.Post.objects.filter(id=sr.post_fk.id)
             time_range = eval('form.' + form['published'].value())  #### TODO !!! eval is evil.  

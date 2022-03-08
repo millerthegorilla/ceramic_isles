@@ -63,7 +63,7 @@ html_strip = elasticsearch_dsl.analyzer(
 @registry.register_document
 class Post(django_elasticsearch_dsl.Document):
 
-    author_name = django_elasticsearch_dsl.fields.TextField(attr="get_author_name")
+    author = django_elasticsearch_dsl.fields.TextField(attr="get_author_name")
 
     text = django_elasticsearch_dsl.fields.TextField(
         attr='text',
