@@ -7,8 +7,8 @@
                             <th scope="Author">Author</th>
                             <th scope="Title">Title (try clicking one)</th>
                             <th scope="PostLeader">Post Leader</th>
-                            <th scope="Category">Category</th>
-                            <th scope="Location">Location</th>
+                            {% if CATEGORY_VISIBLE %}<th scope="Category">Category</th>{% endif %}
+                            {% if LOCATION_VISIBLE %}<th scope="Location">Location</th>{% endif %}
                             <th scope="#comments" class="text-center"># Comments</th>
                             <th scope="Date">Date</th>
                         </tr>
@@ -37,12 +37,12 @@
                                              Post is awaiting moderation
                                         {% endif %}
                                     </td>
-                                    <td data-label="Category">
+           {% if CATEGORY_VISIBLE %}<td data-label="Category">
                                         {{ post.get_category_display|safe }}
-                                    </td>
-                                    <td data-label="Location">
+                                    </td>{% endif %}
+           {% if LOCATION_VISIBLE %}<td data-label="Location">
                                         {{ post.get_location_display|safe }}
-                                    </td>
+                                    </td>{% endif %}
                                     <td data-label="#comments" class="num-comments">
                                         {{ post.comments.count }}
                                     </td>

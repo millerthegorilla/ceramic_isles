@@ -2,6 +2,9 @@ import elasticsearch_dsl
 import django_elasticsearch_dsl
 from django_elasticsearch_dsl.registries import registry
 
+from django_forum import models as forum_models
+from django_forum import documents as forum_documents
+
 from . import models as artisan_models
 
 

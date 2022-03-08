@@ -20,6 +20,7 @@ from django.views.decorators import cache
 from django_forum import forms as forum_forms
 from django_forum import views as forum_views
 from django_forum import models as forum_models
+from django_forum import documents as forum_documents
 
 from . import models as artisan_models
 from . import forms as artisan_forms
@@ -55,6 +56,10 @@ class PostList(forum_views.PostList):
                 elasticsearch_dsl.Q(t, title=terms) |
                 elasticsearch_dsl.Q(t, category=terms) |
                 elasticsearch_dsl.Q(t, location=terms)).to_queryset()
+            queryset_comments = forum_documents.Comment.search().query(
+                elasticsearch_dsl.Q(t, text=terms)).to_queryset()
+            for sr in queryset_comments:
+                queryset = queryset | artisan_models.Post.objects.filter(id=sr.post_fk.id)
             time_range = eval('form.' + form['published'].value())  #### TODO !!! eval is evil.  
             search = len(queryset)
             if search and time_range:

@@ -22,12 +22,12 @@
 			</div>
 			<div class='ps-4'>
 				<div class="tinfo row justify-content-start mb-2">
-					 <div class="col-auto">
+					{% if CATEGORY_VISIBLE %}<div class="col-auto">
 				    	<h6>Category : {{ post.get_category_display }}</h6>
-				    </div>
-				    <div class="col-auto flex-grow-1">
+				    </div>{% endif %}
+				    {% if LOCATION_VISIBLE %}<div class="col-auto flex-grow-1">
 				    	<h6>Location : {{ post.get_location_display }}</h6>
-				    </div>
+				    </div>{% endif %}
 				    <div class="col-auto"><input type='checkbox' id='subscribed_cb' {% if subscribed %}checked{% endif %}><label for="subscribed_cb" class="ps-2">{% if subscribed %}Subscribed{% else %}Subscribe{% endif %} to this thread</label></div>
 				</div>
 				<div class="row ms-auto mb-2">
@@ -43,8 +43,8 @@
 			    		    	<div id="post-edit-div">
 			    		    		<input type="textarea" name="update-post" class="update-form-text"></input>
 			    		    		<div id="opt-selects" class="col-10 col-sm-4 col-md-4 col-lg-3">
-			    		    			<span class="tinfo">Category : </span><select name="category" class="col-auto select form-select" id="id_category">{{category_opts|safe}}</select>
-			    		    			<span class="tinfo">Location : </span><select name="location" class="col-auto select form-select" id="id_location">{{location_opts|safe}}</select>
+			    		    			{% if CATEGORY_VISIBLE %}<span class="tinfo">Category : </span><select name="category" class="col-auto select form-select" id="id_category">{{category_opts|safe}}</select>{% endif %}
+			    		    			{% if LOCATION_VISIBLE %}<span class="tinfo">Location : </span><select name="location" class="col-auto select form-select" id="id_location">{{location_opts|safe}}</select>{% endif %}
 			    		    		</div>
 					    		    <input type="hidden" name="type" value="update">
 					    		    <div class="mt-3">

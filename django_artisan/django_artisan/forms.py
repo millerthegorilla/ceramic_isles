@@ -6,9 +6,7 @@ from crispy_forms import layout
 from crispy_forms import helper
 from crispy_bootstrap5 import bootstrap5
 
-from django.core import exceptions
-from django.conf import settings
-from django import forms
+from django import conf, core, forms
 from django.utils.translation import ugettext as _
 from django.contrib.auth.models import User
 
@@ -44,8 +42,11 @@ class Post(forum_forms.Post):
                 bootstrap5.FloatingField('title'),
                 layout.Field('text', css_class="mb-3 post-create-form-text"),
                 layout.HTML("<div class='font-italic mb-3 tinfo'>Maximum of 2000 characters.  Click on word count to see how many characters you have used...</div>"),
-                layout.Div(layout.Field('category', css_class="col-auto"), layout.Field('location',
-                    css_class="col-auto"), css_class="col-8 col-sm-4 col-md-4 col-lg-3 tinfo"),
+                layout.Div(
+                    layout.Field('category', css_class="col-auto") if conf.settings.SHOW_CATEGORY else layout.Div(),
+                    layout.Field('location', css_class="col-auto") if conf.settings.SHOW_LOCATION else layout.Div(),
+                    css_class="col-8 col-sm-4 col-md-4 col-lg-3 tinfo"
+                ),
                 layout.HTML(checkbox_string),
                 layout.Submit('save', 'Publish Post', css_class="col-auto mt-3 mb-3"),
             )
@@ -115,7 +116,7 @@ class CustomRegistrationForm(forum_custom_reg_forms.CustomUserCreation):
 ##class ArtisanForumProfileUser(forum_forms.ForumProfileUser):
   #  model = artisan_models.ArtisanForumProfile
 
-MAX_NUMBER_OF_IMAGES = settings.MAX_USER_IMAGES
+MAX_NUMBER_OF_IMAGES = conf.settings.MAX_USER_IMAGES
 
 
 class UserProductImage(forms.ModelForm):
@@ -153,7 +154,7 @@ class UserProductImage(forms.ModelForm):
         if artisan_models.UserProductImage.objects.exists() and self.user is not None:
             if artisan_models.UserProductImage.objects.filter(
                     user_profile=self.user.profile).count() >= MAX_NUMBER_OF_IMAGES:
-                raise exceptions.ValidationError(
+                raise core.exceptions.ValidationError(
                     'User already has {} images'.format(MAX_NUMBER_OF_IMAGES))
 
 

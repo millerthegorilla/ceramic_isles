@@ -56,7 +56,13 @@ class PostUpdate(forum_post_views.PostUpdate):
             post = self.model.objects.get(id=pk)
         except self.model.DoesNotExist:
             logger.error('post does not exist when updating post.')
-        post.category = self.request.POST['category']
-        post.location = self.request.POST['location']
-        post.save(update_fields=['category', 'location'])
+        bob = []
+        if conf.settings.SHOW_CATEGORY:
+            post.category = self.request.POST['category']
+            bob.append('category')
+        if conf.settings.SHOW_LOCATION:
+            post.location = self.request.POST['location']
+            bob.append('location')
+        if len(bob):
+            post.save(update_fields=bob)
         return super().post(request, pk, slug, post, updatefields=['category', 'location'])
