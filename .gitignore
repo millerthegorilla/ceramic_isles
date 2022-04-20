@@ -8,7 +8,8 @@ ceramic_isles/media/**/*
 /**/__pycache__/**/*
 ceramic_isles/ceramic_isles/wsgi.py
 ceramic_isles/manage.py
-ceramic_isles/django_bs_carousel_shadow
+ceramic_isles/django_bs_carousel_src
+ceramic_isles/django_artisan_src
 ceramic_isles/django_forum_src
 ceramic_isles/django_messages_src
 ceramic_isles/django_profile_src
