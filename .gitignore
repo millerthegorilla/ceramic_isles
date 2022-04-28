@@ -1,10 +1,10 @@
 ceramic_isles/static/**/*
-!ceramic_isles/static/favicon.ico
-!ceramic_isles/static/robots.txt
-!ceramic_isles/static/sitemap.xml
+!./ceramic_isles/static/favicon.ico
+!./ceramic_isles/static/robots.txt
+!./ceramic_isles/static/sitemap.xml
 ceramic_isles/media/**/*
-!ceramic_isles/media/default_avatars
-!ceramic_isles/media/default_avatars/**/*
+!./ceramic_isles/media/default_avatars
+!./ceramic_isles/media/default_avatars/**/*
 /**/__pycache__/**/*
 ceramic_isles/ceramic_isles/wsgi.py
 ceramic_isles/manage.py
