@@ -38,7 +38,7 @@ urlpatterns = [
    path('forum/', include(forum_urls)),
     path('users/', include(users_app_urls)),
     path('email/', include(mail_urls)),
-    path('admin/', admin.site.urls),
+    path('ceramicisles_admin/', admin.site.urls),
     path('tinymce/', include('tinymce.urls')),
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, 
           name='django.contrib.sitemaps.views.sitemap'),
